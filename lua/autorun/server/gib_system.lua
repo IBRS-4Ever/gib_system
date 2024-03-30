@@ -120,6 +120,7 @@ CreateConVar( "gibsystem_head_mass", 20 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECU
 CreateConVar( "gibsystem_gib_group", "default" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Gib Group.")
 CreateConVar( "gibsystem_gib_name", "default" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Gib Name.")
 CreateConVar( "gibsystem_experiment", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Experimental Features.")
+CreateConVar( "gibsystem_deathanimation", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable death animations.")
 
 local last_dmgpos = {}
 local timers = {}
@@ -227,7 +228,22 @@ local anims_table = {
 	"DIE_Shotgun_FLeft_02",
 	"DIE_Shotgun_FLeft_03",
 	"DIE_Shotgun_FFront_01",
-	"DAZE_01"
+	"DAZE_01",
+	"SHOTFOOT_01",
+	"SHOTFOOT_02",
+	"SHOTFOOT_03",
+	"SHOVE_Backward_01",
+	"SHOVE_Backward_02",
+	"SHOVE_Backward_03",
+	"SHOVE_Backward_04",
+	"SHOVE_Backward_05",
+	"SHOVE_Backward_06",
+	"SHOVE_Forward_01",
+	"SHOVE_Leftward_01",
+	"SHOVE_Rightward_01",
+	"SHOTHAND_01",
+	"SHOTHAND_02",
+	"SHOTHAND_03"
 }
 			
 local function RemoveTimers()
@@ -284,7 +300,7 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			
 		SafeRemoveEntity(npc)
 		npc:EmitSound( "Gib_System.Headshot_Fleshy" )
-		if !GetConVar( "gibsystem_experiment" ):GetBool() then
+		if !GetConVar( "gibsystem_experiment" ):GetBool() or !GetConVar( "gibsystem_deathanimation" ):GetBool() then
 			CreateGibs(npc)
 		else
 			
@@ -364,6 +380,20 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			RandomBodyGroup(DM)
 			BloodEffect(DM,"1","ValveBiped.Bip01_Head1")
 			]]--
+			-- print( DM:GetSequenceMovement( DM:LookupSequence( anim ) ) )
+			
+			--[[
+			local timerDuration = DM:SequenceDuration()
+			local timerInterval = 0.1 -- 定时器间隔时间（秒）
+			local timerCount = timerDuration / timerInterval -- 重复次数
+			local timerBodyName = "DMMoveTimer".. DM:EntIndex()
+			local value, vector, angle = DM:GetSequenceMovement( DM:LookupSequence( anim ) )
+			local speed = DM:GetSequenceGroundSpeed( DM:LookupSequence( anim ) )
+			table.insert(timers, timerBodyName)
+			timer.Create(timerBodyName, timerInterval, timerCount, function()
+				DM:SetPos( DM:GetPos()- (vector/timerDuration) )
+			end)
+			]]--
 			
 			timer.Simple(DM:SequenceDuration(), function()
 				local ent = DM
@@ -404,7 +434,6 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 				SafeRemoveEntity(DM)
 				ragdoll:CallOnRemove("RemoveHeadTimer",function(ragdoll) timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() ) end)
 			end)
-			table.insert(GibsCreated,DM)
 			DM:CallOnRemove("RemoveHeadTimer",function(DM) timer.Remove( "BloodImpactTimer"..DM:EntIndex() ) end)
 			
 		end
@@ -414,7 +443,7 @@ end)
 hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_player" ):GetBool() then
 		player:EmitSound( "Gib_System.Headshot_Fleshy" )
-		if !GetConVar( "gibsystem_experiment" ):GetBool() then
+		if !GetConVar( "gibsystem_experiment" ):GetBool() or !GetConVar( "gibsystem_deathanimation" ):GetBool() then
 			CreateGibs(player)
 		else
 			local anim = anims_table[math.random(1,#anims_table)]
@@ -534,13 +563,12 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 			
 			ragdoll:CallOnRemove("RemoveHeadTimer",function(ragdoll) timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() ) end)
 			end)
-		table.insert(GibsCreated,DM)
 		DM:CallOnRemove("RemoveHeadTimer",function(DM) timer.Remove( "BloodImpactTimer"..DM:EntIndex() ) end)
 		
 		end
 		
 		SafeRemoveEntity(player:GetRagdollEntity())
-		if GetConVar( "gibsystem_deathcam_enable" ):GetBool() and !GetConVar( "gibsystem_experiment" ):GetBool() then		
+		if GetConVar( "gibsystem_deathcam_enable" ):GetBool() and (!GetConVar( "gibsystem_experiment" ):GetBool() or !GetConVar( "gibsystem_deathanimation" ):GetBool()) then		
 			player:Spectate(5)
 			player:SetObserverMode(OBS_MODE_CHASE)
 			if GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 0 then
@@ -1047,90 +1075,58 @@ function CreateGibs(ent)
 		FingerRotation(Gib)
 		
 		if Bodypart == "head" then
-			if GetConVar("gibsystem_experiment"):GetBool() then
-				for i = 0, Gib:GetPhysicsObjectCount() - 1 do
-					local bone = Gib:GetPhysicsObjectNum( i )
-					if ( IsValid( bone ) ) then
-						local pos, ang = ent:GetBonePosition( Gib:TranslatePhysBoneToBone( i ) )
-						if ( pos ) then bone:SetPos( pos ) end
-						if ( ang ) then bone:SetAngles( ang ) end
-
-						bone:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
-						
-						if GetConVar("gibsystem_head_mass"):GetInt() > 0 then
-							bone:SetMass( GetConVar("gibsystem_head_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
-						end
-					
-					end
-				end
-			else
-				local velocity = nil
-				local phys = Gib:GetPhysicsObject()
+			local velocity = nil
+			local phys = Gib:GetPhysicsObject()
 				
-				if Gib.Owner:IsPlayer() then
-					velocity = Gib.Owner:GetVelocity() * GetConVar( "phys_pushscale" ):GetInt()
-					
-					if table.HasValue(RagHead,mdl) then
-						velocity = Gib.Owner:GetVelocity() * GetConVar( "phys_pushscale" ):GetInt() * GetConVar( "phys_pushscale" ):GetInt()
-					else
-						velocity = Gib.Owner:GetVelocity() * GetConVar( "phys_pushscale" ):GetInt() * 50 * GetConVar( "phys_pushscale" ):GetInt()
-					end
-					
-				elseif Gib.Owner:IsNPC() then
-					velocity = VectorRand() * 50 * GetConVar( "phys_pushscale" ):GetInt() + ent:GetMoveVelocity() + ent:GetGroundSpeedVelocity()
-				end
+			if Gib.Owner:IsPlayer() then
+				velocity = Gib.Owner:GetVelocity() * GetConVar( "phys_pushscale" ):GetInt()
 				
-				for i = 0, Gib:GetPhysicsObjectCount() - 1 do
-					local phys = Gib:GetPhysicsObjectNum( i )
-					
-					if GetConVar("gibsystem_head_mass"):GetInt() > 0 then
-						phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() )
-					end
-					
-					phys:ApplyForceCenter( velocity )
+				if table.HasValue(RagHead,mdl) then
+					velocity = Gib.Owner:GetVelocity() * GetConVar( "phys_pushscale" ):GetInt() * GetConVar( "phys_pushscale" ):GetInt()
+				else
+					velocity = Gib.Owner:GetVelocity() * GetConVar( "phys_pushscale" ):GetInt() * 50 * GetConVar( "phys_pushscale" ):GetInt()
 				end
+					
+			elseif Gib.Owner:IsNPC() then
+				velocity = VectorRand() * 50 * GetConVar( "phys_pushscale" ):GetInt() + ent:GetMoveVelocity() + ent:GetGroundSpeedVelocity()
+			end
+				
+			for i = 0, Gib:GetPhysicsObjectCount() - 1 do
+				local phys = Gib:GetPhysicsObjectNum( i )
+				
+				if GetConVar("gibsystem_head_mass"):GetInt() > 0 then
+					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() )
+				end
+					
+				phys:ApplyForceCenter( velocity )
 			end
 
 			head = Entity(Gib:EntIndex())
 			
 		elseif Bodypart == "body" then
-			if GetConVar("gibsystem_experiment"):GetBool() then
-				for k,v in ipairs(PhysicsBones) do
-					local phys = Gib:GetPhysicsObjectNum( Gib:TranslateBoneToPhysBone( Gib:LookupBone( v ) ) )
-						
-					if ( IsValid( phys ) ) then
-						local pos, ang = ent:GetBonePosition( ( ent:LookupBone( v ) ) )
-						if ( pos ) then phys:SetPos( pos ) end
-						if ( ang ) then phys:SetAngles( ang ) end
-						print( v )
-					end
-				end
-			else
-				local velocity = nil
+
+			local velocity = nil
 			
-				if Gib.Owner:IsPlayer() then
-					velocity = Gib.Owner:GetVelocity() * GetConVar( "phys_pushscale" ):GetInt() * 5
+			if Gib.Owner:IsPlayer() then
+				velocity = Gib.Owner:GetVelocity() * GetConVar( "phys_pushscale" ):GetInt() * 5
 					
-				elseif Gib.Owner:IsNPC() then
-					-- velocity = velocity + VectorRand() * 1000 * GetConVar( "phys_pushscale" ):GetInt()
-					if dmgpos != nil then
-						velocity = dmgpos * GetConVar( "phys_pushscale" ):GetInt()
-					else
-						velocity = VectorRand() * 1000 * GetConVar( "phys_pushscale" ):GetInt() + ent:GetMoveVelocity() + ent:GetGroundSpeedVelocity()
-					end
-					
+			elseif Gib.Owner:IsNPC() then
+				-- velocity = velocity + VectorRand() * 1000 * GetConVar( "phys_pushscale" ):GetInt()
+				if dmgpos != nil then
+					velocity = dmgpos * GetConVar( "phys_pushscale" ):GetInt()
+				else
+					velocity = VectorRand() * 1000 * GetConVar( "phys_pushscale" ):GetInt() + ent:GetMoveVelocity() + ent:GetGroundSpeedVelocity()
 				end
-				
-				for i = 0, Gib:GetPhysicsObjectCount() - 1 do
-					local phys = Gib:GetPhysicsObjectNum( i )
 					
-					if GetConVar("gibsystem_body_mass"):GetInt() > 0 then
-						phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() )
-					end
-					phys:ApplyForceCenter( velocity )
-				end
+			end
 				
-				body = Entity(Gib:EntIndex())
+			for i = 0, Gib:GetPhysicsObjectCount() - 1 do
+				local phys = Gib:GetPhysicsObjectNum( i )
+					
+				if GetConVar("gibsystem_body_mass"):GetInt() > 0 then
+					phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() )
+				end
+				phys:ApplyForceCenter( velocity )
 			end
 			--[[
 			for i = 0, Gib:GetPhysicsObjectCount() - 1 do
