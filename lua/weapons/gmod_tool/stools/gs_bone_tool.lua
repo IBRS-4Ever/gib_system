@@ -89,53 +89,43 @@ function TOOL:Click( tr )
 			end
 			
 			if GetConVar("gs_bone_tool_toes"):GetBool() then
-				if Gib:GetBoneName(bonename)=='ValveBiped.Bip01_L_Toe0' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='ValveBiped.Bip01_R_Toe0' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
+				local Toes_Bones = { 
+					["ValveBiped.Bip01_L_Toe0"] = true,
+					["ValveBiped.Bip01_R_Toe0"] = true
+				}
+				for bonename = 0 , Gib:GetBoneCount() do 
+					if Toes_Bones[ Gib:GetBoneName(bonename) ] then
+						Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
+					end
 				end
 			end
 			if GetConVar("gs_bone_tool_gf2_toes"):GetBool() then
-				if Gib:GetBoneName(bonename)=='BigToe1_L' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='BigToe2_L' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='BigToe1_R' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='BigToe2_R' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='LongToe1_L' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='LongToe2_L' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='LongToe1_R' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='LongToe2_R' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='MiddleToe1_L' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='MiddleToe2_L' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='MiddleToe1_R' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='MiddleToe2_R' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='RingToe1_L' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='RingToe2_L' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='RingToe1_R' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='RingToe2_R' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='PinkyToe1_L' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='PinkyToe2_L' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='PinkyToe1_R' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-				elseif Gib:GetBoneName(bonename)=='PinkyToe2_R' then
-				   Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
+				local GF2_Toes_Bones = { 
+					["BigToe1_L"] = true,
+					["BigToe2_L"] = true,
+					["BigToe1_R"] = true,
+					["BigToe2_R"] = true,
+					["LongToe1_L"] = true,
+					["LongToe2_L"] = true,
+					["LongToe1_R"] = true,
+					["LongToe2_R"] = true,
+					["MiddleToe1_L"] = true,
+					["MiddleToe2_L"] = true,
+					["MiddleToe1_R"] = true,
+					["MiddleToe2_R"] = true,
+					["RingToe1_L"] = true,
+					["RingToe2_L"] = true,
+					["RingToe1_R"] = true,
+					["RingToe2_R"] = true,
+					["PinkyToe1_L"] = true,
+					["PinkyToe2_L"] = true,
+					["PinkyToe1_R"] = true,
+					["PinkyToe2_R"] = true
+				}
+				for bonename = 0 , Gib:GetBoneCount() do 
+					if GF2_Toes_Bones[ Gib:GetBoneName(bonename) ] then
+						Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
+					end
 				end
 			end
 		end

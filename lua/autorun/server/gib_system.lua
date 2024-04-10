@@ -130,7 +130,7 @@ local RagHead = { "platinum", "skadi" }
 local UnfinishedModels = { "ifrit", "centaureissi" }
 local CompletedModels = { "provence", "sora", "vigna", "platinum", "chen" }
 local GibModelGroup = { "provence", "sora", "vigna", "platinum", "chen", "ifrit", "centaureissi" }
-local LegsAndTorso = { "chen", "platinum", "ifrit", "provence", "skadi", "sora", "vigna", "lapluma", "angelina", "amiya", "centaureissi" }
+local LegsAndTorso = { "chen", "platinum", "ifrit", "provence", "skadi", "sora", "vigna", "lapluma", "angelina", "amiya", "centaureissi", "charolic" }
 
 local PhysicsBones = {
 	"ValveBiped.Bip01_Pelvis",
@@ -255,9 +255,20 @@ end
 local DamageForce = nil
 local DamagePosition = nil
 
+hook.Add( "ScaleNPCDamage", "DamageInfoNPC", function( npc, hitgroup, dmginfo )
+	DamageForce = dmginfo:GetDamageForce()
+	DamagePosition = dmginfo:GetDamagePosition()
+end )
+
+hook.Add( "ScaleNPCDamage", "DamageInfoPlayer", function( plr, hitgroup, dmginfo )
+	DamageForce = dmginfo:GetDamageForce()
+	DamagePosition = dmginfo:GetDamagePosition()
+end )
+
 hook.Add("EntityTakeDamage", "gibsystem", function(ent, dmginfo)
 	if GetConVar( "gibsystem_enabled" ):GetBool() then
 
+		--[[
 		if ent:IsPlayer() then
 			DamageForce = dmginfo:GetDamageForce()
 			DamagePosition = dmginfo:GetDamagePosition()
@@ -265,6 +276,8 @@ hook.Add("EntityTakeDamage", "gibsystem", function(ent, dmginfo)
 			DamageForce = dmginfo:GetDamageForce()
 			DamagePosition = dmginfo:GetDamagePosition()
 		end
+		]]--
+		
 		if (!ent:IsNPC() or dmginfo:GetDamage() < ent:Health()) then return end
 
 		last_dmgpos[ent] = dmginfo:GetDamagePosition()
@@ -331,6 +344,7 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			head:Activate()
 			GibFacePose(head)
 			RandomBodyGroup(head)
+			RandomSkin(head)
 			table.insert(GibsCreated,head)
 			
 			for i = 0, head:GetPhysicsObjectCount() - 1 do
@@ -362,6 +376,7 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			DM:ResetSequenceInfo()
 			DM:SetCycle(1) -- Was 0, Set to 1 to make ragdoll looks good.
 			RandomBodyGroup(DM)
+			RandomSkin(DM)
 			BloodEffect(DM,"1","ValveBiped.Bip01_Head1")
 			
 			--[[
@@ -475,6 +490,7 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 			head:Activate()
 			GibFacePose(head)
 			RandomBodyGroup(head)
+			RandomSkin(head)
 			table.insert(GibsCreated,head)
 			
 			for i = 0, head:GetPhysicsObjectCount() - 1 do
@@ -505,6 +521,7 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 			DM:SetCycle(1) -- Was 0, Set to 1 to make ragdoll looks good.
 			
 			RandomBodyGroup(DM)
+			RandomSkin(DM)
 			
 			BloodEffect(DM,1,"ValveBiped.Bip01_Head1")
 			
@@ -596,187 +613,117 @@ end
 function GibFacePose(ent)
 	if GetConVar( "gibsystem_death_express" ):GetBool() then
 		local mdl = ent:GetModel()
+		local Exp = {}
 		local num_expressions = ent:GetFlexNum() -- 获取模型的表情数量
 		if mdl == "models/gib_system/platinum_head.mdl" then
 			local flex = math.random(1,2)
-			for i = 0, num_expressions - 1 do
-				local name = ent:GetFlexName(i) -- 获取表情的名称
-				if flex == 1 then
-					if name == "blink" then
-						ent:SetFlexWeight(i, 1) -- 将blink表情的权重设置为1
-					elseif name == "mouthdisgust" then
-						ent:SetFlexWeight(i, 1)
-					elseif name == "browssad" then
-						ent:SetFlexWeight(i, 1)
-					end
-				elseif flex == 2 then
-					if name == "eyelookup" then
-						ent:SetFlexWeight(i, 0.75) -- 将blink表情的权重设置为1
-					elseif name == "mouthdisgust" then
-						ent:SetFlexWeight(i, 1)
-					elseif name == "browssad" then
-						ent:SetFlexWeight(i, 1)
-					elseif name == "eyesshock" then
-						ent:SetFlexWeight(i, math.Rand(0.25,0.75))
-					end
-				end
+			if flex == 1 then
+				Exp = {
+					["blink"] = math.Rand(0.5,1),
+					["mouthdisgust"] = 1,
+					["browssad"] = 1
+				}
+			else
+				Exp = {
+					["eyelookup"] = 0.75,
+					["mouthdisgust"] = 1,
+					["browssad"] = 1,
+					["eyesshock"] = math.Rand(0,0.5)
+				}
 			end
+			
 		elseif mdl == "models/gib_system/skadi_head.mdl" then
 			local flex = math.random(1,2)
-			for i = 0, num_expressions - 1 do
-				local name = string.lower(ent:GetFlexName(i)) -- 获取表情的名称
-				if flex == 1 then
-					if name == "blink" then
-						ent:SetFlexWeight(i, 1) -- 将blink表情的权重设置为1
-					elseif name == "mouthdisgust" then
-						ent:SetFlexWeight(i, 1)
-					elseif name == "browssad" then
-						ent:SetFlexWeight(i, 1)
-					end
-				elseif flex == 2 then
-				
-					if name == "eyelookup" then
-						ent:SetFlexWeight(i, 0.75) -- 将blink表情的权重设置为1
-					elseif name == "mouthsadopen" then
-						ent:SetFlexWeight(i, 1)
-					elseif name == "browssad" then
-						ent:SetFlexWeight(i, 1)
-					elseif name == "eyesshocked" then
-						ent:SetFlexWeight(i, math.Rand(0.25,0.75))
-					end
-				end
+			if flex == 1 then
+				Exp = {
+					["blink"] = math.Rand(0.5,1),
+					["mouthdisgust"] = 1,
+					["browssad"] = 1
+				}
+			else
+				Exp = {
+					["eyelookup"] = 0.75,
+					["mouthsadopen"] = 1,
+					["browssad"] = 1,
+					["eyesshock"] = math.Rand(0.25,0.75)
+				}
 			end
 		elseif mdl == "models/gib_system/skadi_alter_head.mdl" then
-			for i = 0, num_expressions - 1 do
-				local name = string.lower(ent:GetFlexName(i)) -- 获取表情的名称
-				if name == "eyeslookup" then
-					ent:SetFlexWeight(i, 1)
-				end
-			end
+			Exp = { ["eyeslookup"] = 1 }
 		elseif mdl == "models/gib_system/provence_head.mdl" then
 			local flex = math.random(1,3)
-			for i = 0, num_expressions - 1 do
-				local name = string.lower(ent:GetFlexName(i)) -- 获取表情的名称
-				if flex == 1 then
-					if name == "blink" then
-						ent:SetFlexWeight(i, 1)
-					elseif name == "mouth corner lower" then
-						ent:SetFlexWeight(i, 1)
-					elseif name == "mouth corner upper" then
-						ent:SetFlexWeight(i, -1)
-					elseif name == "mouth smile" then
-						ent:SetFlexWeight(i, -1)
-					elseif name == "brow sadl" then
-						ent:SetFlexWeight(i, 1)
-					elseif name == "brow sadr" then
-						ent:SetFlexWeight(i, 1)
-					end
-				elseif flex == 2 then
-					if name == "eye scalel" then
-						ent:SetFlexWeight(i, 0.5)
-					elseif name == "eye scaler" then
-						ent:SetFlexWeight(i, 0.5)
-					elseif name == "eye upl" then
-						ent:SetFlexWeight(i, 0.25)
-					elseif name == "eye upr" then
-						ent:SetFlexWeight(i, 0.25)
-					elseif name == "mouth o" then
-						ent:SetFlexWeight(i, 1)
-					end
-				elseif flex == 3 then
-					if name == "mouth a" then
-						ent:SetFlexWeight(i, 0.3)
-					elseif name == "brow sadr" then
-						ent:SetFlexWeight(i, 1)
-					elseif name == "brow sadl" then
-						ent:SetFlexWeight(i, 1)
-					elseif name == "blink" then
-						ent:SetFlexWeight(i, 0.6)
-					elseif name == "mouth corner lower" then
-						ent:SetFlexWeight(i, 1)
-					elseif name == "eye upl" then
-						ent:SetFlexWeight(i, 0.3)
-					elseif name == "eye upr" then
-						ent:SetFlexWeight(i, 0.3)
-					end
-				end
+			local Exp_Value = {}
+			if flex == 1 then
+				Exp = {
+					["blink"] = 1,
+					["mouth corner lower"] = 1,
+					["mouth corner upper"] = -1,
+					["mouth smile"] = -1,
+					["brow sadl"] = 1,
+					["brow sadr"] = 1
+				}
+			elseif flex == 2 then
+				Exp = {
+					["eye scalel"] = 0.5,
+					["eye scaler"] = 0.5,
+					["eye upl"] = 0.25,
+					["eye upr"] = 0.25,
+					["mouth o"] = 1
+				}
+			else
+				Exp = {
+					["mouth a"] = math.Rand(0.3,0.7),
+					["brow sadr"] = 1,
+					["brow sadl"] = 1,
+					["blink"] = math.Rand(0.5,1),
+					["mouth corner lower"] = 1,
+					["eye upl"] = 0.3,
+					["eye upr"] = 0.3
+				}
 			end
 		elseif mdl == "models/gib_system/sora_head.mdl" then
-			for i = 0, num_expressions - 1 do
-				local name = string.lower(ent:GetFlexName(i)) -- 获取表情的名称
-				if name == "blink" then
-					ent:SetFlexWeight(i, 1) -- 将blink表情的权重设置为1
-				elseif name == "mouth sad" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "mouth aah" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "teeth up" then
-					ent:SetFlexWeight(i, 0.1)
-				elseif name == "teeth down" then
-					ent:SetFlexWeight(i, 0.1)
-				end
-			end
+			Exp = {
+				["blink"] = math.Rand(0.5,1),
+				["mouth sad"] = 1,
+				["mouth aah"] = 1,
+				["teeth up"] = 0.1,
+				["teeth down"] = 0.1
+			}
 		elseif mdl == "models/gib_system/rosmontis_head.mdl" then
-			for i = 0, num_expressions - 1 do
-				local name = string.lower(ent:GetFlexName(i))
-				if name == "eyescryingop" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "mouthshockedop" then
-					ent:SetFlexWeight(i, 0.3)
-				elseif name == "eyebrowsshockedcl" then
-					ent:SetFlexWeight(i, 1)
-				end
-			end
+			Exp = {
+				["eyescryingop"] = 1,
+				["mouthshockedop"] = 0.3,
+				["eyebrowsshockedcl"] = 1
+			}
 		elseif mdl == "models/gib_system/schwarz_head.mdl" then
-			for i = 0, num_expressions - 1 do
-				local name = string.lower(ent:GetFlexName(i)) -- 获取表情的名称
-				if name == "blink" then
-					ent:SetFlexWeight(i, 0.7) -- 将blink表情的权重设置为1
-				end
-			end
+			Exp = { ["blink"] = 0.7 }
 		elseif mdl == "models/gib_system/chen_head.mdl" then
-			for i = 0, num_expressions - 1 do
-				local name = string.lower(ent:GetFlexName(i))
-				if name == "blink" then
-					ent:SetFlexWeight(i, math.Rand(0,1))
-				elseif name == "hmm" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "sad" then
-					ent:SetFlexWeight(i, 1)
-				end
-			end
+			Exp = {
+				["blink"] = math.Rand(0,1),
+				["hmm"] = 1,
+				["sad"] = 1
+			}
 		elseif mdl == "models/gib_system/lapluma_head.mdl" then
-			for i = 0, num_expressions - 1 do
-				local name = string.lower(ent:GetFlexName(i))
-				if name == "right_inner_raiser" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "left_inner_raiser" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "right_upper_raiser" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "left_upper_raiser" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "right_part" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "left_part" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "right_corner_puller" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "left_corner_puller" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "right_corner_depressor" then
-					ent:SetFlexWeight(i, 1)
-				elseif name == "left_corner_depressor" then
-					ent:SetFlexWeight(i, 1)
-				end
-			end
+			Exp = {
+				["right_inner_raiser"] = 1,
+				["left_inner_raiser"] = 1,
+				["right_upper_raiser"] = 1,
+				["left_upper_raiser"] = 1,
+				["right_part"] = 1,
+				["left_part"] = 1,
+				["right_corner_puller"] = 1,
+				["left_corner_puller"] = 1,
+				["right_corner_depressor"] = 1,
+				["left_corner_depressor"] = 1
+			}
 		else
-			local num_expressions = ent:GetFlexNum() -- 获取模型的表情数量
-			for i = 0, num_expressions - 1 do
-				local name = ent:GetFlexName(i) -- 获取表情的名称
-				if name == "blink" then
-					ent:SetFlexWeight(i, 1) -- 将blink表情的权重设置为1
-				end
+			Exp = { ["blink"] = math.Rand(0,1) }
+		end
+
+		for i = 0, num_expressions - 1 do
+			local name = ent:GetFlexName(i)
+			if Exp[name] != nil then
+				ent:SetFlexWeight(i, Exp[name])
 			end
 		end
 	end
@@ -788,28 +735,7 @@ function BloodEffect(ent,Type,AttachmentPoint,BonusTime)
 		if BonusTime == nil then
 			BonusTime = 0
 		end
-		if Type == 1 then
-			-- 在 5 秒内重复播放 BloodImpact 粒子效果
-			local timerDuration = GetConVar( "gibsystem_blood_time" ):GetInt()+BonusTime -- 定时器持续时间（秒）
-			local timerInterval = 0.1 -- 定时器间隔时间（秒）
-			local timerCount = timerDuration / timerInterval -- 重复次数
-			local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
-			
-			table.insert(timers, timerBodyName)
-			if AttachmentPoint != nil then
-				timer.Create(timerBodyName, timerInterval, timerCount, function()
-					local boneIndex = ent:LookupBone( AttachmentPoint )
-					local bonePos = ent:GetBonePosition(boneIndex or 0)
-					local effectData = EffectData()
-					
-					effectData:SetOrigin(bonePos)
-					effectData:SetMagnitude(1)
-					effectData:SetScale(1)
-					effectData:SetRadius(1)
-					util.Effect("BloodImpact", effectData)
-				end)
-			end
-		elseif Type == 2 and AP != nil then
+		if Type == 2 and AP != nil then
 			local ParticleBody = { "blood_advisor_pierce_spray", "blood_advisor_pierce_spray_b", "blood_advisor_pierce_spray_c" }
 			local ParticleBodyIndex = ParticleBody[math.random(1, #ParticleBody)]
 			local timerDuration = GetConVar( "gibsystem_blood_time_body" ):GetInt()+BonusTime -- 定时器持续时间（秒）
@@ -847,8 +773,9 @@ end
 
 function FingerRotation(ent)
 	if GetConVar( "gibsystem_random_finger_rotating" ):GetBool() then
+		local Bones = {}
 		for bonename = 0 , ent:GetBoneCount() do 
-				
+				table.insert(Bones, ent:GetBoneName(bonename))
 			if ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger1' then
 				ent:ManipulateBoneAngles(bonename,Angle(math.Rand(-5,5),-25-math.Rand(0,4),0))   
 			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger11' then
@@ -903,7 +830,7 @@ function FingerRotation(ent)
 				ent:ManipulateBoneAngles(bonename,Angle(0,10-math.Rand(0,2),0)) 
 			end
 
-			if string.find( ent:GetModel():lower(), "ifrit" ) or string.find( ent:GetModel():lower(), "skyfire" ) or string.find( ent:GetModel():lower(), "schwarz_l4d2" ) or string.find( ent:GetModel():lower(), "lapluma" ) or string.find( ent:GetModel():lower(), "rym" ) or string.find( ent:GetModel():lower(), "gavial" ) or string.find( ent:GetModel():lower(), "kiana_sos" ) then
+			if string.find( ent:GetModel():lower(), "ifrit" ) or string.find( ent:GetModel():lower(), "skyfire" ) or string.find( ent:GetModel():lower(), "schwarz_l4d2" ) or string.find( ent:GetModel():lower(), "lapluma" ) or string.find( ent:GetModel():lower(), "gummy" ) or string.find( ent:GetModel():lower(), "gavial" ) or string.find( ent:GetModel():lower(), "kiana_sos" ) then
 				if ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger01' then
 			ent:ManipulateBoneAngles(bonename,Angle(0,-20-math.Rand(0,2),0))    
 				elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger02' then
@@ -928,56 +855,42 @@ function FingerRotation(ent)
 	end
 
 	if GetConVar("gibsystem_random_toe_rotating"):GetBool() then
+		local Toes_Bones = { 
+			["ValveBiped.Bip01_L_Toe0"] = true,
+			["ValveBiped.Bip01_R_Toe0"] = true
+		}
 		for bonename = 0 , ent:GetBoneCount() do 
-			if ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Toe0' then
+			if Toes_Bones[ ent:GetBoneName(bonename) ] then
 				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Toe0' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))	
 			end
 		end
 	end
 
 	if GetConVar("gibsystem_random_gf2_toe_rotating"):GetBool() then
+		local GF2_Toes_Bones = { 
+			["BigToe1_L"] = true,
+			["BigToe2_L"] = true,
+			["BigToe1_R"] = true,
+			["BigToe2_R"] = true,
+			["LongToe1_L"] = true,
+			["LongToe2_L"] = true,
+			["LongToe1_R"] = true,
+			["LongToe2_R"] = true,
+			["MiddleToe1_L"] = true,
+			["MiddleToe2_L"] = true,
+			["MiddleToe1_R"] = true,
+			["MiddleToe2_R"] = true,
+			["RingToe1_L"] = true,
+			["RingToe2_L"] = true,
+			["RingToe1_R"] = true,
+			["RingToe2_R"] = true,
+			["PinkyToe1_L"] = true,
+			["PinkyToe2_L"] = true,
+			["PinkyToe1_R"] = true,
+			["PinkyToe2_R"] = true
+		}
 		for bonename = 0 , ent:GetBoneCount() do 
-			if ent:GetBoneName(bonename)=='BigToe1_L' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='BigToe2_L' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='BigToe1_R' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='BigToe2_R' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='LongToe1_L' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='LongToe2_L' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='LongToe1_R' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='LongToe2_R' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='MiddleToe1_L' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='MiddleToe2_L' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='MiddleToe1_R' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='MiddleToe2_R' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='RingToe1_L' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='RingToe2_L' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='RingToe1_R' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='RingToe2_R' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='PinkyToe1_L' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='PinkyToe2_L' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='PinkyToe1_R' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			elseif ent:GetBoneName(bonename)=='PinkyToe2_R' then
+			if GF2_Toes_Bones[ ent:GetBoneName(bonename) ] then
 				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
 			end
 		end
@@ -1005,6 +918,14 @@ function RandomBodyGroup(ent)
 	end
 end
 
+function RandomSkin(ent)
+	if GetConVar( "gibsystem_random_skin" ):GetBool() then
+		local num_skins = ent:SkinCount()
+		local choice = math.random(0, num_skins - 1)
+		ent:SetSkin(choice)
+	end
+end
+	
 function GibConvulsion(ent)
 	if GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 1 then
 		ent:Input( "StartRagdollBoogie", ent, ent, "" )
@@ -1073,23 +994,10 @@ function CreateGibs(ent)
 		end
 		
 		FingerRotation(Gib)
+		RandomBodyGroup(Gib)
+		RandomSkin(Gib)
 		
 		if Bodypart == "head" then
-			local velocity = nil
-			local phys = Gib:GetPhysicsObject()
-				
-			if Gib.Owner:IsPlayer() then
-				velocity = Gib.Owner:GetVelocity() * GetConVar( "phys_pushscale" ):GetInt()
-				
-				if table.HasValue(RagHead,mdl) then
-					velocity = Gib.Owner:GetVelocity() * GetConVar( "phys_pushscale" ):GetInt() * GetConVar( "phys_pushscale" ):GetInt()
-				else
-					velocity = Gib.Owner:GetVelocity() * GetConVar( "phys_pushscale" ):GetInt() * 50 * GetConVar( "phys_pushscale" ):GetInt()
-				end
-					
-			elseif Gib.Owner:IsNPC() then
-				velocity = VectorRand() * 50 * GetConVar( "phys_pushscale" ):GetInt() + ent:GetMoveVelocity() + ent:GetGroundSpeedVelocity()
-			end
 				
 			for i = 0, Gib:GetPhysicsObjectCount() - 1 do
 				local phys = Gib:GetPhysicsObjectNum( i )
@@ -1098,61 +1006,23 @@ function CreateGibs(ent)
 					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() )
 				end
 					
-				phys:ApplyForceCenter( velocity )
+				phys:ApplyForceOffset( (DamageForce or Vector(0,0,0) ) / Gib:GetPhysicsObjectCount(), DamagePosition or Vector(0,0,0) )
 			end
 
 			head = Entity(Gib:EntIndex())
 			
 		elseif Bodypart == "body" then
 
-			local velocity = nil
-			
-			if Gib.Owner:IsPlayer() then
-				velocity = Gib.Owner:GetVelocity() * GetConVar( "phys_pushscale" ):GetInt() * 5
-					
-			elseif Gib.Owner:IsNPC() then
-				-- velocity = velocity + VectorRand() * 1000 * GetConVar( "phys_pushscale" ):GetInt()
-				if dmgpos != nil then
-					velocity = dmgpos * GetConVar( "phys_pushscale" ):GetInt()
-				else
-					velocity = VectorRand() * 1000 * GetConVar( "phys_pushscale" ):GetInt() + ent:GetMoveVelocity() + ent:GetGroundSpeedVelocity()
-				end
-					
-			end
-				
 			for i = 0, Gib:GetPhysicsObjectCount() - 1 do
 				local phys = Gib:GetPhysicsObjectNum( i )
 					
 				if GetConVar("gibsystem_body_mass"):GetInt() > 0 then
 					phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() )
 				end
-				phys:ApplyForceCenter( velocity )
+				phys:ApplyForceOffset( ( DamageForce or Vector(0,0,0) ) / Gib:GetPhysicsObjectCount(), DamagePosition or Vector(0,0,0) )
 			end
-			--[[
-			for i = 0, Gib:GetPhysicsObjectCount() - 1 do
-				local bone = Gib:GetPhysicsObjectNum( i )
-				if ( IsValid( bone ) ) then
-					local pos, ang = ent:GetBonePosition( Gib:TranslatePhysBoneToBone( i ) )
-					if ( pos ) then bone:SetPos( pos ) end
-					if ( ang ) then bone:SetAngles( ang ) end
-
-					bone:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
-					
-					if GetConVar("gibsystem_body_mass"):GetInt() > 0 then
-						bone:SetMass( GetConVar("gibsystem_body_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
-					end
-				end
-			end
-			]]--
 			
 			body = Entity(Gib:EntIndex())
-		end
-		
-		if GetConVar( "gibsystem_random_skin" ):GetBool() then
-			local num_skins = Gib:SkinCount()
-			local choice = math.random(0, num_skins - 1)
-			
-			Gib:SetSkin(choice)
 		end
 		
 		if GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt() > -1 then
@@ -1463,8 +1333,6 @@ function CreateGibs(ent)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..LegsGib.." | 碎尸组合：上/下半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..LegsGib.." | Gib Group : "..ConditionGib)
-	
-		--CreateRope(torso_full, legs, 0, 0, Vector(0,0,0), Vector(0,0,0))
 	end
 end
 
