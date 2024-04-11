@@ -245,36 +245,29 @@ local function RemoveTimers()
     end
 end
 
-local DamageForce = nil
-local DamagePosition = nil
+local DamageForce = Vector(0,0,0)
+local DamagePosition = Vector(0,0,0)
 
-hook.Add( "ScaleNPCDamage", "DamageInfoNPC", function( npc, hitgroup, dmginfo )
+--[[
+hook.Add( "ScaleNPCDamage", "GSDamageInfoNPC", function( npc, hitgroup, dmginfo )
 	DamageForce = dmginfo:GetDamageForce()
 	DamagePosition = dmginfo:GetDamagePosition()
+	last_dmgpos[npc] = dmginfo:GetDamagePosition()
+	
 end )
 
-hook.Add( "ScaleNPCDamage", "DamageInfoPlayer", function( plr, hitgroup, dmginfo )
+hook.Add( "ScaleNPCDamage", "GSDamageInfoPlayer", function( plr, hitgroup, dmginfo )
 	DamageForce = dmginfo:GetDamageForce()
 	DamagePosition = dmginfo:GetDamagePosition()
+	last_dmgpos[plr] = dmginfo:GetDamagePosition()
+	print(DamageForce)
 end )
+]]--
 
 hook.Add("EntityTakeDamage", "gibsystem", function(ent, dmginfo)
-	if GetConVar( "gibsystem_enabled" ):GetBool() then
-
-		--[[
-		if ent:IsPlayer() then
-			DamageForce = dmginfo:GetDamageForce()
-			DamagePosition = dmginfo:GetDamagePosition()
-		else
-			DamageForce = dmginfo:GetDamageForce()
-			DamagePosition = dmginfo:GetDamagePosition()
-		end
-		]]--
-		
-		if (!ent:IsNPC() or dmginfo:GetDamage() < ent:Health()) then return end
-
-		last_dmgpos[ent] = dmginfo:GetDamagePosition()
-	end
+	DamageForce = dmginfo:GetDamageForce()
+	DamagePosition = dmginfo:GetDamagePosition()
+	last_dmgpos[ent] = dmginfo:GetDamagePosition()
 end)
 
 local anims = nil
@@ -951,7 +944,7 @@ function CreateGibs(ent)
 					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() )
 				end
 					
-				phys:ApplyForceOffset( (DamageForce or Vector(0,0,0) ) / Gib:GetPhysicsObjectCount(), DamagePosition or Vector(0,0,0) )
+				phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
 			end
 
 			head = Entity(Gib:EntIndex())
@@ -964,7 +957,7 @@ function CreateGibs(ent)
 				if GetConVar("gibsystem_body_mass"):GetInt() > 0 then
 					phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() )
 				end
-				phys:ApplyForceOffset( ( DamageForce or Vector(0,0,0) ) / Gib:GetPhysicsObjectCount(), DamagePosition or Vector(0,0,0) )
+				phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
 			end
 			
 			body = Entity(Gib:EntIndex())
@@ -990,6 +983,7 @@ function CreateGibs(ent)
 		undo.AddEntity( head )
 		undo.SetPlayer( Gib.Owner )
 		undo.Finish()
+		
 	end
 	
 	if table.HasValue( GibModelGroup, GetConVar("gibsystem_gib_name"):GetString() ) then
@@ -1280,8 +1274,8 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..LegsGib.." | 碎尸组合：上/下半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..LegsGib.." | Gib Group : "..ConditionGib)
 	end
-	DamageForce = nil
-	DamagePosition = nil
+	-- DamageForce = nil
+	-- DamagePosition = nil
 end
 
 local function CleanGibs()
