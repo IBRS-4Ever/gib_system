@@ -22,9 +22,7 @@ cvars.AddChangeCallback( "gmod_language", GSLanguageChanged, "GSLanguageChanged"
 
 local function GibSystem_Initialize()
 	local files, folders = file.Find(Model_Path.."*","LUA")
-	
 	for k, v in pairs(files) do
-
 		if SERVER then
 			include(Model_Path..v)
 			AddCSLuaFile(Model_Path..v)
@@ -114,7 +112,6 @@ CreateConVar( "gibsystem_random_bodygroup", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN
 CreateConVar( "gibsystem_random_skin", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Random Skin.")
 CreateConVar( "gibsystem_rope", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Rope.")
 CreateConVar( "gibsystem_rope_strength", 1000 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Rope Strength.")
-CreateConVar( "gibsystem_gib_allnpcs", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Gib Manhack/Headcrabs/Antlions.")
 CreateConVar( "gibsystem_body_mass", 10 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Body Mass.")
 CreateConVar( "gibsystem_head_mass", 20 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Head Mass.")
 CreateConVar( "gibsystem_gib_group", "default" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Gib Group.")
@@ -153,28 +150,24 @@ local PhysicsBones = {
 	"ValveBiped.Bip01_Head1"
 }
 
-local BlackListedNPC = { 
-	"npc_headcrab",
-	"npc_headcrab_black",
-	"npc_headcrab_fast",
-	"npc_headcrab_poison",
-	"npc_manhack",
-	"npc_rollermine",
-	"npc_sniper",
-	"npc_clawscanner",
-	"npc_cscanner",
-	"npc_turret_floor",
-	"npc_antlion",
-	"npc_antlion_grub",
-	"npc_antlion_worker",
-	"npc_antlionguard",
-	"npc_pigeon",
-	"npc_seagull",
-	"npc_crow",
-	"npc_barnacle",
-	"npc_strider",
-	"npc_hunter",
-	"npc_zombie_torso"
+local DefaultNPCs = { 
+	["npc_alyx"] = true,
+	["npc_barney"] = true,
+	["npc_breen"] = true,
+	["npc_citizen"] = true,
+	["npc_combine_s"] = true,
+	["npc_eli"] = true,
+	["npc_fisherman"] = true,
+	["npc_gman"] = true,
+	["npc_kleiner"] = true,
+	["npc_magnusson"] = true,
+	["npc_metropolice"] = true,
+	["npc_monk"] = true,
+	["npc_mossman"] = true,
+	["npc_poisonzombie"] = true,
+	["npc_zombie"] = true,
+	["npc_zombine"] = true,
+	["npc_fastzombie"] = true
 }
 
 local anims_table = {
@@ -287,7 +280,7 @@ end)
 local anims = nil
 
 hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
-/*
+--[[
 	local model = Model_Table[math.random(1,#Model_Table)]
 	local name = model.name
 	MsgN(name)
@@ -305,11 +298,9 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			end
 		end
 	end
-*/
+]]--
 
-	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() then
-		if !GetConVar( "gibsystem_gib_allnpcs" ):GetBool() and table.HasValue( BlackListedNPC, npc:GetClass() ) then return end
-		if (npc:GetClass() == "npc_bullseye" or npc:GetClass() == "npc_portal_turret_floor") then return end
+	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and DefaultNPCs[npc:GetClass()] then
 			
 		SafeRemoveEntity(npc)
 		npc:EmitSound( "Gib_System.Headshot_Fleshy" )
@@ -655,7 +646,7 @@ function GibFacePose(ent)
 			local Exp_Value = {}
 			if flex == 1 then
 				Exp = {
-					["blink"] = 1,
+					["blink"] = math.Rand(0.5,1),
 					["mouth corner lower"] = 1,
 					["mouth corner upper"] = -1,
 					["mouth smile"] = -1,
@@ -699,7 +690,7 @@ function GibFacePose(ent)
 			Exp = { ["blink"] = 0.7 }
 		elseif mdl == "models/gib_system/chen_head.mdl" then
 			Exp = {
-				["blink"] = math.Rand(0,1),
+				["blink"] = math.Rand(0.5,1),
 				["hmm"] = 1,
 				["sad"] = 1
 			}
@@ -717,11 +708,11 @@ function GibFacePose(ent)
 				["left_corner_depressor"] = 1
 			}
 		else
-			Exp = { ["blink"] = math.Rand(0,1) }
+			Exp = { ["blink"] = math.Rand(0.5,1) }
 		end
 
 		for i = 0, num_expressions - 1 do
-			local name = ent:GetFlexName(i)
+			local name = string.lower(ent:GetFlexName(i))
 			if Exp[name] != nil then
 				ent:SetFlexWeight(i, Exp[name])
 			end
@@ -773,83 +764,41 @@ end
 
 function FingerRotation(ent)
 	if GetConVar( "gibsystem_random_finger_rotating" ):GetBool() then
-		local Bones = {}
+		local Fingers = {
+			["ValveBiped.Bip01_L_Finger1"] = Angle(math.Rand(-5,5),-25-math.Rand(0,4),0),
+			["ValveBiped.Bip01_L_Finger11"] = Angle(0,-35-math.Rand(0,4),0),
+			["ValveBiped.Bip01_L_Finger12"] = Angle(0,-25-math.Rand(0,4),0),
+			["ValveBiped.Bip01_L_Finger2"] = Angle(math.Rand(-5,5),-26-math.Rand(0,4),0),
+			["ValveBiped.Bip01_L_Finger21"] = Angle(0,-35-math.Rand(0,40),0),
+			["ValveBiped.Bip01_L_Finger22"] = Angle(0,-25-math.Rand(0,40),0),
+			["ValveBiped.Bip01_L_Finger3"] = Angle(math.Rand(-5,5),-25-math.Rand(0,4),0),
+			["ValveBiped.Bip01_L_Finger31"] = Angle(0,-35-math.Rand(0,40),0),
+			["ValveBiped.Bip01_L_Finger32"] = Angle(0,-25-math.Rand(0,40),0),
+			["ValveBiped.Bip01_L_Finger4"] = Angle(math.Rand(-5,5),-25-math.Rand(0,30),0),
+			["ValveBiped.Bip01_L_Finger41"] = Angle(0,-20-math.Rand(0,20),0),
+			["ValveBiped.Bip01_L_Finger42"] = Angle(0,-20-math.Rand(0,3),0),
+			["ValveBiped.Bip01_L_Finger0"] = Angle(0,10-math.Rand(0,2),0),
+			["ValveBiped.Bip01_L_Finger01"] = Angle(0,20-math.Rand(0,2),0),
+			["ValveBiped.Bip01_L_Finger02"] = Angle(0,25-math.Rand(0,3),0),
+			["ValveBiped.Bip01_R_Finger1"] = Angle(math.Rand(-5,5),-25-math.Rand(0,4),0),
+			["ValveBiped.Bip01_R_Finger11"] = Angle(0,-35-math.Rand(0,4),0),
+			["ValveBiped.Bip01_R_Finger12"] = Angle(0,-25-math.Rand(0,4),0),
+			["ValveBiped.Bip01_R_Finger2"] = Angle(math.Rand(-5,5),-27-math.Rand(0,4),0),
+			["ValveBiped.Bip01_R_Finger21"] = Angle(0,-35-math.Rand(0,4),0),
+			["ValveBiped.Bip01_R_Finger22"] = Angle(0,-25-math.Rand(0,4),0),
+			["ValveBiped.Bip01_R_Finger3"] = Angle(math.Rand(-5,5),-25-math.Rand(0,4),0),
+			["ValveBiped.Bip01_R_Finger31"] = Angle(0,-32-math.Rand(0,4),0),
+			["ValveBiped.Bip01_R_Finger32"] = Angle(0,-20-math.Rand(0,40),0),
+			["ValveBiped.Bip01_R_Finger4"] = Angle(math.Rand(-5,5),-25-math.Rand(0,30),0),
+			["ValveBiped.Bip01_R_Finger41"] = Angle(0,-25-math.Rand(0,20),0),
+			["ValveBiped.Bip01_R_Finger42"] = Angle(0,-25-math.Rand(0,3),0),
+			["ValveBiped.Bip01_R_Finger0"] = Angle(0,10-math.Rand(0,2),0),
+			["ValveBiped.Bip01_R_Finger01"] = Angle(0,20-math.Rand(0,2),0),
+			["ValveBiped.Bip01_R_Finger02"] = Angle(0,25-math.Rand(0,3),0)
+		}
 		for bonename = 0 , ent:GetBoneCount() do 
-				table.insert(Bones, ent:GetBoneName(bonename))
-			if ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger1' then
-				ent:ManipulateBoneAngles(bonename,Angle(math.Rand(-5,5),-25-math.Rand(0,4),0))   
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger11' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-35-math.Rand(0,4),0))    
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger12' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-25-math.Rand(0,4),0))
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger2' then
-				ent:ManipulateBoneAngles(bonename,Angle(math.Rand(-5,5),-26-math.Rand(0,4),0))   
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger21' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-35-math.Rand(0,40),0))    
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger22' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-25-math.Rand(0,40),0))  
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger3' then
-				ent:ManipulateBoneAngles(bonename,Angle(math.Rand(-5,5),-25-math.Rand(0,4),0))   
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger31' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-35-math.Rand(0,40),0))    
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger32' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-25-math.Rand(0,40),0))
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger4' then
-				ent:ManipulateBoneAngles(bonename,Angle(math.Rand(-5,5),-25-math.Rand(0,30),0))   
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger41' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-20-math.Rand(0,20),0))    
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger42' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-20-math.Rand(0,3),0))    
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger1' then
-				ent:ManipulateBoneAngles(bonename,Angle(math.Rand(-5,5),-25-math.Rand(0,4),0))   
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger11' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-35-math.Rand(0,4),0))    
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger12' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-25-math.Rand(0,4),0))
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger2' then
-				ent:ManipulateBoneAngles(bonename,Angle(math.Rand(-5,5),-27-math.Rand(0,4),0))   
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger21' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-35-math.Rand(0,4),0))    
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger22' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-25-math.Rand(0,4),0))  
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger3' then
-				ent:ManipulateBoneAngles(bonename,Angle(math.Rand(-5,5),-25-math.Rand(0,4),0))   
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger31' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-32-math.Rand(0,4),0))    
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger32' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-20-math.Rand(0,40),0))
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger4' then
-				ent:ManipulateBoneAngles(bonename,Angle(math.Rand(-5,5),-20-math.Rand(0,30),0))   
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger41' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-25-math.Rand(0,20),0))    
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger42' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,-25-math.Rand(0,3),0)) 
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger0' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,10-math.Rand(0,2),0)) 
-			elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger0' then
-				ent:ManipulateBoneAngles(bonename,Angle(0,10-math.Rand(0,2),0)) 
-			end
-
-			if string.find( ent:GetModel():lower(), "ifrit" ) or string.find( ent:GetModel():lower(), "skyfire" ) or string.find( ent:GetModel():lower(), "schwarz_l4d2" ) or string.find( ent:GetModel():lower(), "lapluma" ) or string.find( ent:GetModel():lower(), "gummy" ) or string.find( ent:GetModel():lower(), "gavial" ) or string.find( ent:GetModel():lower(), "kiana_sos" ) then
-				if ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger01' then
-			ent:ManipulateBoneAngles(bonename,Angle(0,-20-math.Rand(0,2),0))    
-				elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger02' then
-			ent:ManipulateBoneAngles(bonename,Angle(0,-25-math.Rand(0,3),0))    
-				elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger01' then
-			ent:ManipulateBoneAngles(bonename,Angle(0,-20-math.Rand(0,3),0))    
-				elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger02' then
-			ent:ManipulateBoneAngles(bonename,Angle(0,-25-math.Rand(0,3),0)) 
-				end
-			else
-				if ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger01' then
-			ent:ManipulateBoneAngles(bonename,Angle(0,20-math.Rand(0,2),0))    
-				elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_L_Finger02' then
-			ent:ManipulateBoneAngles(bonename,Angle(0,25-math.Rand(0,3),0))   
-				elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger01' then
-			ent:ManipulateBoneAngles(bonename,Angle(0,20-math.Rand(0,3),0))    
-				elseif ent:GetBoneName(bonename)=='ValveBiped.Bip01_R_Finger02' then
-			ent:ManipulateBoneAngles(bonename,Angle(0,25-math.Rand(0,3),0)) 
-				end
+			if Fingers[ent:GetBoneName(bonename)] != nil then
+				ent:ManipulateBoneAngles(bonename,Fingers[ent:GetBoneName(bonename)])
 			end
 		end
 	end
@@ -900,18 +849,14 @@ end
 function RandomBodyGroup(ent)
 	if GetConVar( "gibsystem_random_bodygroup" ):GetBool() then
 		local BodygroupBlacklist = { "tail", "ears", "horns", "horn left", "horn right" }
-		local num_bodygroups = ent:GetNumBodyGroups() -- 获取模型的bodygroup数量
-			
+		local num_bodygroups = ent:GetNumBodyGroups()
 		for i = 0, num_bodygroups - 1 do
-			local bodygroup_name = ent:GetBodygroupName(i) -- 获取当前循环的bodygroup名称
-				
+			local bodygroup_name = ent:GetBodygroupName(i)
 			if !table.HasValue( BodygroupBlacklist,string.lower(bodygroup_name) ) then
-				local num_choices = ent:GetBodygroupCount(i) -- 获取当前bodygroup下的可以选择的模型数量
-					
+				local num_choices = ent:GetBodygroupCount(i)
 				if num_choices > 1 then
-					local choice = math.random(0, num_choices - 1) -- 随机选择一种模型
-						
-					ent:SetBodygroup(i, choice) -- 设置新的bodygroup值
+					local choice = math.random(0, num_choices - 1)
+					ent:SetBodygroup(i, choice)
 				end
 			end
 		end
@@ -1010,7 +955,7 @@ function CreateGibs(ent)
 			end
 
 			head = Entity(Gib:EntIndex())
-			
+
 		elseif Bodypart == "body" then
 
 			for i = 0, Gib:GetPhysicsObjectCount() - 1 do
@@ -1023,6 +968,7 @@ function CreateGibs(ent)
 			end
 			
 			body = Entity(Gib:EntIndex())
+
 		end
 		
 		if GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt() > -1 then
@@ -1334,6 +1280,8 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..LegsGib.." | 碎尸组合：上/下半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..LegsGib.." | Gib Group : "..ConditionGib)
 	end
+	DamageForce = nil
+	DamagePosition = nil
 end
 
 local function CleanGibs()
