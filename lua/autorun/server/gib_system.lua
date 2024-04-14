@@ -405,7 +405,6 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 				ragdoll:SetSkin( ent:GetSkin() )
 				ragdoll:SetFlexScale( ent:GetFlexScale() )
 				for i = 0, ent:GetNumBodyGroups() - 1 do ragdoll:SetBodygroup( i, ent:GetBodygroup( i ) ) end
-				for i = 0, ent:GetFlexNum() - 1 do ragdoll:SetFlexWeight( i, ent:GetFlexWeight( i ) ) end
 				for i = 0, ent:GetBoneCount() do
 					ragdoll:ManipulateBoneScale( i, ent:GetManipulateBoneScale( i ) )
 					ragdoll:ManipulateBoneAngles( i, ent:GetManipulateBoneAngles( i ) )

@@ -85,6 +85,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System Addons", "#GS.Addons","","",function(pnl)
 		local WorkshopLink = "https://steamcommunity.com/sharedfiles/filedetails/?id="
 		local WorkshopID = ""
+		local X = 200 
 		
 		pnl:ClearControls()
 		
@@ -98,7 +99,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( 150, 22 )					// Set the position on the frame
+		Button:SetPos( X, 22 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
@@ -115,7 +116,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( 150, 68 )					// Set the position on the frame
+		Button:SetPos( X, 68 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
@@ -132,7 +133,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( 150, 114 )					// Set the position on the frame
+		Button:SetPos( X, 114 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
@@ -149,7 +150,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( 150, 160 )					// Set the position on the frame
+		Button:SetPos( X, 160 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
@@ -166,7 +167,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( 150, 206 )					// Set the position on the frame
+		Button:SetPos( X, 206 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
@@ -183,7 +184,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( 150, 252 )					// Set the position on the frame
+		Button:SetPos( X, 252 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
@@ -200,7 +201,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( 150, 298 )					// Set the position on the frame
+		Button:SetPos( X, 298 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
@@ -217,7 +218,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( 150, 344 )					// Set the position on the frame
+		Button:SetPos( X, 344 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
@@ -234,7 +235,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( 150, 390 )					// Set the position on the frame
+		Button:SetPos( X, 390 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
@@ -251,7 +252,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( 150, 436 )					// Set the position on the frame
+		Button:SetPos( X, 436 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
@@ -268,12 +269,47 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( 150, 482 )					// Set the position on the frame
+		Button:SetPos( X, 482 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
 		end
-		pnl:AddControl( "label", { Text = "" } )
 		
+		pnl:AddControl( "label", { Text = "" } )
+		pnl:AddControl( "label", { Text = "#gs.addon.additional" } )
+		pnl:AddControl( "label", { Text = "" } )
+		pnl:AddControl( "label", { Text = "#gs.addon.additional.gf2_combat" } )
+		
+		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
+		WorkshopID = 3220684563
+		if steamworks.IsSubscribed( WorkshopID ) then
+			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
+			Button:SetEnabled( false )
+		else
+			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
+			Button:SetEnabled( true )
+		end
+		Button:SetPos( X, 576 )					// Set the position on the frame
+		Button:SetSize( 100, 25 )					// Set the size
+		Button.DoClick = function()
+			gui.OpenURL( WorkshopLink..WorkshopID ) 
+		end
+		
+		pnl:AddControl( "label", { Text = "" } )
+		pnl:AddControl( "label", { Text = "#gs.addon.additional.gf2_outfit" } )
+		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
+		WorkshopID = 3221849153
+		if steamworks.IsSubscribed( WorkshopID ) then
+			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
+			Button:SetEnabled( false )
+		else
+			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
+			Button:SetEnabled( true )
+		end
+		Button:SetPos( X, 622 )					// Set the position on the frame
+		Button:SetSize( 100, 25 )					// Set the size
+		Button.DoClick = function()
+			gui.OpenURL( WorkshopLink..WorkshopID ) 
+		end
 	end)
 end)
