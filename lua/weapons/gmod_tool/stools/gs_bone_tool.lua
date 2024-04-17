@@ -97,13 +97,19 @@ function TOOL:LeftClick( tr )
 end
 
 function TOOL:RightClick( tr )
-	return self:Click( tr )
+	if CLIENT then return true end
+	if ( IsValid( tr.Entity ) ) then
+		Gib = tr.Entity
+		local i = 0
+		while i < Gib:GetBoneCount() do
+			Gib:ManipulateBoneAngles( i, Angle(0,0,0) )
+			i = i + 1
+		end
+	end
 end
 
 function TOOL.BuildCPanel( CPanel )
-
 	CPanel:AddControl( "Header", { Description = "#tool.gs_bone_tool.desc" } )
-	
 	CPanel:AddControl( "CheckBox", { Label = "#tool.gs_bone_tool.fingers", Command = "gs_bone_tool_fingers" } )
 	CPanel:AddControl( "CheckBox", { Label = "#tool.gs_bone_tool.toes", Command = "gs_bone_tool_toes" } )
 	CPanel:AddControl( "CheckBox", { Label = "#tool.gs_bone_tool.gf2_toes", Command = "gs_bone_tool_gf2_toes" } )

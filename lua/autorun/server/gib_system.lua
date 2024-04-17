@@ -1,6 +1,8 @@
 
 AddCSLuaFile()
 
+include("autorun/gibbing_system/defaultnpcs.lua")
+
 Model_Path = "autorun/gibbing_system/models/"
 Model_Table = {}
 
@@ -148,26 +150,6 @@ local PhysicsBones = {
 	"ValveBiped.Bip01_L_Hand",
 	"ValveBiped.Bip01_R_Hand",
 	"ValveBiped.Bip01_Head1"
-}
-
-local DefaultNPCs = { 
-	["npc_alyx"] = true,
-	["npc_barney"] = true,
-	["npc_breen"] = true,
-	["npc_citizen"] = true,
-	["npc_combine_s"] = true,
-	["npc_eli"] = true,
-	["npc_fisherman"] = true,
-	["npc_gman"] = true,
-	["npc_kleiner"] = true,
-	["npc_magnusson"] = true,
-	["npc_metropolice"] = true,
-	["npc_monk"] = true,
-	["npc_mossman"] = true,
-	["npc_poisonzombie"] = true,
-	["npc_zombie"] = true,
-	["npc_zombine"] = true,
-	["npc_fastzombie"] = true
 }
 
 local anims_table = {
@@ -405,7 +387,6 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 				ragdoll:SetSkin( ent:GetSkin() )
 				ragdoll:SetFlexScale( ent:GetFlexScale() )
 				for i = 0, ent:GetNumBodyGroups() - 1 do ragdoll:SetBodygroup( i, ent:GetBodygroup( i ) ) end
-				for i = 0, ent:GetFlexNum() - 1 do ragdoll:SetFlexWeight( i, ent:GetFlexWeight( i ) ) end
 				for i = 0, ent:GetBoneCount() do
 					ragdoll:ManipulateBoneScale( i, ent:GetManipulateBoneScale( i ) )
 					ragdoll:ManipulateBoneAngles( i, ent:GetManipulateBoneAngles( i ) )
