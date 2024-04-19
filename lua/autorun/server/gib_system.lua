@@ -2,6 +2,7 @@
 AddCSLuaFile()
 
 include("autorun/gibbing_system/defaultnpcs.lua")
+-- include("autorun/gibbing_system/gf2_models.lua")
 
 Model_Path = "autorun/gibbing_system/models/"
 Model_Table = {}
@@ -681,10 +682,19 @@ function GibFacePose(ent)
 				["right_corner_depressor"] = 1,
 				["left_corner_depressor"] = 1
 			}
+		elseif GF2Models[Model] then
+			Exp = {
+				["eye_blink_left"] = math.Rand(0,1),
+				["eye_blink_right"] = math.Rand(0,1),
+				["brows_worry"] = math.Rand(0,1),
+				["mouth_surprised"] = math.Rand(0,1),
+				["eyes_look_up"] = math.Rand(0,1)
+			}
 		else
 			Exp = { ["blink"] = math.Rand(0.5,1) }
 		end
-
+		-- print(Model,GF2Models[Model])
+		-- PrintTable(GF2Models)
 		for i = 0, num_expressions - 1 do
 			local name = string.lower(ent:GetFlexName(i))
 			if Exp[name] != nil then
@@ -922,7 +932,7 @@ function CreateGibs(ent)
 				local phys = Gib:GetPhysicsObjectNum( i )
 				
 				if GetConVar("gibsystem_head_mass"):GetInt() > 0 then
-					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() )
+					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
 				end
 					
 				phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
@@ -936,7 +946,7 @@ function CreateGibs(ent)
 				local phys = Gib:GetPhysicsObjectNum( i )
 					
 				if GetConVar("gibsystem_body_mass"):GetInt() > 0 then
-					phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() )
+					phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
 				end
 				phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
 			end
@@ -946,15 +956,18 @@ function CreateGibs(ent)
 		end
 		
 		if GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt() > -1 then
-			timer.Create( "RemoveTimerHead"..Gib:EntIndex(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
+			timer.Create( "RemoveTimer"..Gib:EntIndex(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
 				if IsValid( Gib ) then
 					Gib:Remove()
 				end
+				timer.Remove( "RemoveTimer"..Gib:EntIndex() )
+				timer.Remove( "BloodImpactTimer"..Gib:EntIndex() )
 			end)
 		end
 		
+		Gib:CallOnRemove("RemoveGibTimer",function(Gib) timer.Remove( "BloodImpactTimer"..Gib:EntIndex() ) end)
+
 		table.insert(GibsCreated,Gib)
-		Gib:CallOnRemove("RemoveHeadTimer",function(Gib) timer.Remove( "BloodImpactTimer"..Gib:EntIndex() ) end)
 		
 		if !Gib.Owner:IsPlayer() then return end
 		
