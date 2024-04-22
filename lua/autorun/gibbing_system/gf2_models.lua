@@ -17,6 +17,7 @@ GF2Models = {
 	["sharkry"] = true,
 	["tololo"] = true,
 	["vepley"] = true,
+	["sabrina"] = true,
 	
 	["groza_violet_rain"] = true,
 	["daiyan_exquisite_jade"] = true,

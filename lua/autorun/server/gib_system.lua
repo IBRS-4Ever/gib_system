@@ -2,7 +2,7 @@
 AddCSLuaFile()
 
 include("autorun/gibbing_system/defaultnpcs.lua")
--- include("autorun/gibbing_system/gf2_models.lua")
+include("autorun/gibbing_system/gf2_models.lua")
 
 Model_Path = "autorun/gibbing_system/models/"
 Model_Table = {}
@@ -410,7 +410,7 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 				end
 				
 				FingerRotation(ragdoll)
-				BloodEffect(ragdoll,"1","ValveBiped.Bip01_Head1",-DM:SequenceDuration())
+				BloodEffect(ragdoll,"1","ValveBiped.Bip01_Head1")
 				table.insert(GibsCreated,ragdoll)
 				SafeRemoveEntity(DM)
 				ragdoll:CallOnRemove("RemoveHeadTimer",function(ragdoll) timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() ) end)
@@ -578,10 +578,9 @@ end
 
 function GibFacePose(ent)
 	if GetConVar( "gibsystem_death_express" ):GetBool() then
-		local mdl = ent:GetModel()
 		local Exp = {}
 		local num_expressions = ent:GetFlexNum() -- 获取模型的表情数量
-		if mdl == "models/gib_system/platinum_head.mdl" then
+		if Model == "platinum" then
 			local flex = math.random(1,2)
 			if flex == 1 then
 				Exp = {
@@ -598,7 +597,7 @@ function GibFacePose(ent)
 				}
 			end
 			
-		elseif mdl == "models/gib_system/skadi_head.mdl" then
+		elseif Model == "skadi" then
 			local flex = math.random(1,2)
 			if flex == 1 then
 				Exp = {
@@ -614,9 +613,9 @@ function GibFacePose(ent)
 					["eyesshock"] = math.Rand(0.25,0.75)
 				}
 			end
-		elseif mdl == "models/gib_system/skadi_alter_head.mdl" then
+		elseif Model == "skadi_alter" then
 			Exp = { ["eyeslookup"] = 1 }
-		elseif mdl == "models/gib_system/provence_head.mdl" then
+		elseif Model == "provence" then
 			local flex = math.random(1,3)
 			local Exp_Value = {}
 			if flex == 1 then
@@ -647,7 +646,7 @@ function GibFacePose(ent)
 					["eye upr"] = 0.3
 				}
 			end
-		elseif mdl == "models/gib_system/sora_head.mdl" then
+		elseif Model == "sora" then
 			Exp = {
 				["blink"] = math.Rand(0.5,1),
 				["mouth sad"] = 1,
@@ -655,21 +654,21 @@ function GibFacePose(ent)
 				["teeth up"] = 0.1,
 				["teeth down"] = 0.1
 			}
-		elseif mdl == "models/gib_system/rosmontis_head.mdl" then
+		elseif Model == "rosmontis" then
 			Exp = {
 				["eyescryingop"] = 1,
 				["mouthshockedop"] = 0.3,
 				["eyebrowsshockedcl"] = 1
 			}
-		elseif mdl == "models/gib_system/schwarz_head.mdl" then
+		elseif Model == "schwarz" then
 			Exp = { ["blink"] = 0.7 }
-		elseif mdl == "models/gib_system/chen_head.mdl" then
+		elseif Model == "chen" then
 			Exp = {
 				["blink"] = math.Rand(0.5,1),
 				["hmm"] = 1,
 				["sad"] = 1
 			}
-		elseif mdl == "models/gib_system/lapluma_head.mdl" then
+		elseif Model == "lapluma" then
 			Exp = {
 				["right_inner_raiser"] = 1,
 				["left_inner_raiser"] = 1,
