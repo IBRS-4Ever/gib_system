@@ -1,4 +1,6 @@
 
+include("autorun/gibbing_system/main_function.lua")
+
 local convulsionmode = {}
 convulsionmode["#gs.convulsionmode.none"] = {gibsystem_ragdoll_convulsion = "0"}
 convulsionmode["#gs.convulsionmode.default"] = {gibsystem_ragdoll_convulsion = "1"}
@@ -38,9 +40,8 @@ gibgroup["#gs.gibgroup.legs_and_torso"] = {gibsystem_gib_group = "legs_&_torso"}
 local gibname = {}
 gibname["#gs.gibname.default"] = {gibsystem_gib_name = "default"}
 
-local files, _ = file.Find("autorun/gibbing_system/models/*.lua", "LUA")
-for _, filename in ipairs(files) do
-	gibname["#gs.model."..tostring(filename:gsub("%.lua$", ""))] = {gibsystem_gib_name = tostring(filename:gsub("%.lua$", ""))}
+for _, Models in ipairs(GibModels) do
+	gibname["#gs.model."..Models] = {gibsystem_gib_name = Models}
 end
 
 hook.Add("AddToolMenuTabs", "GIBBING_SYSTEM_ADDMENU", function()
@@ -66,6 +67,50 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		pnl:AddControl( "CheckBox", { Label = "#GS.Deathcam", Command = "gibsystem_deathcam_enable" } )
 		pnl:AddControl( "ComboBox", { Label = "#GS.Deathcam.Mode", Options = cammode } )
 		pnl:AddControl( "ComboBox", { Label = "#GS.GibGroup", Options = gibgroup } )
+		
+		
+		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
+		Button:SetText( "#GS.GibName" )					// Set the text on the button		
+		Button:SetPos( X, 22 )					// Set the position on the frame
+		Button:SetSize( 100, 25 )					// Set the size
+		Button.DoClick = function()
+			local frame = vgui.Create( "DFrame" )
+			frame:SetSize( ScrW() / 1.2, ScrH() / 1.1 )
+			frame:SetTitle( "Choose A Character..." )
+			frame:Center()
+
+			frame:MakePopup()
+
+			frame:SetDraggable( false )
+
+			function frame:Paint( w, h )
+				Derma_DrawBackgroundBlur( self, self.m_fCreateTime )
+				draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0, 200 ) )
+			end
+
+			local PropPanel = vgui.Create( "ContentContainer", frame )
+			PropPanel:SetTriggerSpawnlistChange( false )
+			PropPanel:Dock( FILL )
+
+			local Header = vgui.Create( "ContentHeader", PropPanel )
+			Header:SetText( "Gib System" )
+			PropPanel:Add( Header )
+
+			for _, Model in ipairs(GibModels) do
+
+					local icon = vgui.Create( "ContentIcon", PropPanel )
+					icon:SetMaterial( "gib_system/" .. Model .. ".png" )
+					icon:SetName( "#gs.model." .. Model )
+
+					icon.DoClick = function()
+						RunConsoleCommand( "gibsystem_gib_name", Model )
+					frame:Close()
+					end
+					PropPanel:Add( icon )
+			end
+		end
+
+		
 		pnl:AddControl( "ComboBox", { Label = "#GS.GibName", Options = gibname } )
 		pnl:AddControl( "textbox", { Label = "#GS.HeadMess", Command = "gibsystem_head_mass" } )
 		pnl:AddControl( "textbox", { Label = "#GS.BodyMess", Command = "gibsystem_body_mass" } )
@@ -344,7 +389,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.gf2.qiongjiu" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.qiongjiu" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
 		local WorkshopID = 3035525647
 		if steamworks.IsSubscribed( WorkshopID ) then

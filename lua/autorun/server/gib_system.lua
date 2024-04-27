@@ -3,25 +3,7 @@ AddCSLuaFile()
 
 include("autorun/gibbing_system/defaultnpcs.lua")
 include("autorun/gibbing_system/gf2_models.lua")
-
-Model_Path = "autorun/gibbing_system/models/"
-Model_Table = {}
-
-Expressions_Table = {}
-
-local GmodLanguage = string.lower(GetConVar("gmod_language"):GetString())
-
-function LocalizedText(lang,text)
-	local DefaultLang = "en-us"
-	if GmodLanguage == lang then
-		MsgN(text)
-	end
-end
-
-function GSLanguageChanged()
-	GmodLanguage = string.lower(GetConVar("gmod_language"):GetString())
-end
-cvars.AddChangeCallback( "gmod_language", GSLanguageChanged, "GSLanguageChanged" )
+include("autorun/gibbing_system/main_function.lua")
 
 local function GibSystem_Initialize()
 	local files, folders = file.Find(Model_Path.."*","LUA")
@@ -37,64 +19,6 @@ end
 
 GibSystem_Initialize()
 hook.Add("InitPostEntity","GibSystem_Initialize",GibSystem_Initialize)
-
--- PrintTable(Model_Table)
-
-LocalizedText("zh-cn","[碎尸系统] 正在加载文件...")
-LocalizedText("en","[Gibbing System] Loading Files...")
-
-if file.Exists( "fedhoria/modules.lua", "LUA" ) then
-	include("fedhoria/modules.lua")
-	LocalizedText("zh-cn","[碎尸系统] 已检测到 Fedhoria 并已加载。")
-	LocalizedText("en","[Gibbing System] Fedhoria detected and loaded.")
-else
-	LocalizedText("zh-cn","[碎尸系统] 未发现 Fedhoria。")
-	LocalizedText("en","[Gibbing System] Can't find Fedhoria.")
-end
-
-concommand.Add( "GibsystemReload", function( ply, cmd, args )
-	Model_Table = {}
-	GibSystem_Initialize()
-end )
-
-local GibModels = {}
-
-local files, _ = file.Find("autorun/gibbing_system/models/*.lua", "LUA")
-
-for _, filename in ipairs(files) do
-	AddCSLuaFile("autorun/gibbing_system/models/" .. filename)
-	include("autorun/gibbing_system/models/" .. filename)
-	LocalizedText("zh-cn","[碎尸系统] 已加载文件 "..filename:gsub("%.lua$", ""))
-	LocalizedText("en","[Gibbing System] Loaded file "..filename:gsub("%.lua$", ""))
-	util.PrecacheModel("models/gib_system/"..filename:gsub("%.lua$", "").."_headless.mdl")
-	util.PrecacheModel("models/gib_system/"..filename:gsub("%.lua$", "").."_head.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/left_leg.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/right_leg.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/left_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/right_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/torso.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_legs.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_arms.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_right_leg_left_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_left_leg_right_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_left_leg.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_right_leg.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_left_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_arms.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_right_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_right.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_left.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_right_no_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_left_no_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_right_no_leg.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_left_no_leg.mdl")
-	util.PrecacheModel("models/gib_system/"..filename:gsub("%.lua$", "").."_legs.mdl")
-	util.PrecacheModel("models/gib_system/"..filename:gsub("%.lua$", "").."_torso.mdl")
-	table.insert(GibModels, tostring(filename:gsub("%.lua$", "")))
-end
-
-LocalizedText("zh-cn","[碎尸系统] 加载完成。\n")
-LocalizedText("en","[Gibbing System] Loading Complete.\n")
 
 CreateConVar( "gibsystem_enabled", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Gib System.")
 CreateConVar( "gibsystem_gibbing_player", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Gib System for Players.")
@@ -934,6 +858,7 @@ function CreateGibs(ent)
 					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
 				end
 					
+				-- phys:ApplyForceOffset( (DamageForce / Gib:GetPhysicsObjectCount()) + Vector(0,0,2500), DamagePosition)
 				phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
 			end
 
