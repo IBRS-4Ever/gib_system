@@ -344,7 +344,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.gf2.qiongjiu" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.qiongjiu" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
 		local WorkshopID = 3035525647
 		if steamworks.IsSubscribed( WorkshopID ) then

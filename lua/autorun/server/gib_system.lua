@@ -934,6 +934,7 @@ function CreateGibs(ent)
 					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
 				end
 					
+				-- phys:ApplyForceOffset( (DamageForce / Gib:GetPhysicsObjectCount()) + Vector(0,0,2500), DamagePosition)
 				phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
 			end
 
