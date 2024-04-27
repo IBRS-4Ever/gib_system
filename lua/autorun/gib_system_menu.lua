@@ -89,9 +89,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		
 		pnl:ClearControls()
 		
-		pnl:AddControl( "label", { Text = "#gs.model.groza" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.groza" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3047654683
+		local WorkshopID = 3047654683
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -106,9 +106,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.centaureissi" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.centaureissi" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3146928471
+		local WorkshopID = 3146928471
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -123,9 +123,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.cheeta" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.cheeta" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3037079098
+		local WorkshopID = 3037079098
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -140,9 +140,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.colphne" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.colphne" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3033157638
+		local WorkshopID = 3033157638
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -157,9 +157,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.daiyan" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.daiyan" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3133391818
+		local WorkshopID = 3133391818
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -174,9 +174,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.nagant" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.nagant" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3045162669
+		local WorkshopID = 3045162669
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -191,9 +191,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.sharkry" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.sharkry" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3029152157
+		local WorkshopID = 3029152157
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -208,9 +208,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.vepley" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.vepley" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3026550750
+		local WorkshopID = 3026550750
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -225,9 +225,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.lenna" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.lenna" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3167885628
+		local WorkshopID = 3167885628
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -242,9 +242,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.charolic" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.charolic" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3036390025
+		local WorkshopID = 3036390025
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -259,9 +259,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.jiangyu" } )
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.jiangyu" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3131048843
+		local WorkshopID = 3131048843
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -274,14 +274,11 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
 		end
-		
 		pnl:AddControl( "label", { Text = "" } )
-		pnl:AddControl( "label", { Text = "#gs.addon.additional" } )
-		pnl:AddControl( "label", { Text = "" } )
-		pnl:AddControl( "label", { Text = "#gs.addon.additional.gf2_combat" } )
 		
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.tololo" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3220684563
+		local WorkshopID = 3039937937
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -289,7 +286,95 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( X, 576 )					// Set the position on the frame
+		Button:SetPos( X, 528 )					// Set the position on the frame
+		Button:SetSize( 100, 25 )					// Set the size
+		Button.DoClick = function()
+			gui.OpenURL( WorkshopLink..WorkshopID ) 
+		end
+		pnl:AddControl( "label", { Text = "" } )
+		
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.nemesis" } )
+		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
+		local WorkshopID = 3043985506
+		if steamworks.IsSubscribed( WorkshopID ) then
+			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
+			Button:SetEnabled( false )
+		else
+			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
+			Button:SetEnabled( true )
+		end
+		Button:SetPos( X, 574 )					// Set the position on the frame
+		Button:SetSize( 100, 25 )					// Set the size
+		Button.DoClick = function()
+			gui.OpenURL( WorkshopLink..WorkshopID ) 
+		end
+		pnl:AddControl( "label", { Text = "" } )
+		
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.peritya" } )
+		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
+		local WorkshopID = 3038490564
+		if steamworks.IsSubscribed( WorkshopID ) then
+			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
+			Button:SetEnabled( false )
+		else
+			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
+			Button:SetEnabled( true )
+		end
+		Button:SetPos( X, 620 )					// Set the position on the frame
+		Button:SetSize( 100, 25 )					// Set the size
+		Button.DoClick = function()
+			gui.OpenURL( WorkshopLink..WorkshopID ) 
+		end
+		pnl:AddControl( "label", { Text = "" } )
+		
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.sabrina" } )
+		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
+		local WorkshopID = 3042014691
+		if steamworks.IsSubscribed( WorkshopID ) then
+			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
+			Button:SetEnabled( false )
+		else
+			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
+			Button:SetEnabled( true )
+		end
+		Button:SetPos( X, 666 )					// Set the position on the frame
+		Button:SetSize( 100, 25 )					// Set the size
+		Button.DoClick = function()
+			gui.OpenURL( WorkshopLink..WorkshopID ) 
+		end
+		pnl:AddControl( "label", { Text = "" } )
+		
+		pnl:AddControl( "label", { Text = "#gs.model.gf2.gf2.qiongjiu" } )
+		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
+		local WorkshopID = 3035525647
+		if steamworks.IsSubscribed( WorkshopID ) then
+			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
+			Button:SetEnabled( false )
+		else
+			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
+			Button:SetEnabled( true )
+		end
+		Button:SetPos( X, 712 )					// Set the position on the frame
+		Button:SetSize( 100, 25 )					// Set the size
+		Button.DoClick = function()
+			gui.OpenURL( WorkshopLink..WorkshopID ) 
+		end
+		
+		pnl:AddControl( "label", { Text = "" } )
+		pnl:AddControl( "label", { Text = "#gs.addon.additional" } )
+		pnl:AddControl( "label", { Text = "" } )
+		pnl:AddControl( "label", { Text = "#gs.addon.additional.gf2_combat" } )
+		
+		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
+		local WorkshopID = 3220684563
+		if steamworks.IsSubscribed( WorkshopID ) then
+			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
+			Button:SetEnabled( false )
+		else
+			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
+			Button:SetEnabled( true )
+		end
+		Button:SetPos( X, 806 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
@@ -298,7 +383,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		pnl:AddControl( "label", { Text = "" } )
 		pnl:AddControl( "label", { Text = "#gs.addon.additional.gf2_outfit" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3221849153
+		local WorkshopID = 3221849153
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -306,7 +391,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( X, 622 )					// Set the position on the frame
+		Button:SetPos( X, 852 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
@@ -315,7 +400,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		pnl:AddControl( "label", { Text = "" } )
 		pnl:AddControl( "label", { Text = "#gs.addon.additional.gf2_dorm" } )
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		WorkshopID = 3224747672
+		local WorkshopID = 3224747672
 		if steamworks.IsSubscribed( WorkshopID ) then
 			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
 			Button:SetEnabled( false )
@@ -323,7 +408,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
 			Button:SetEnabled( true )
 		end
-		Button:SetPos( X, 668 )					// Set the position on the frame
+		Button:SetPos( X, 898 )					// Set the position on the frame
 		Button:SetSize( 100, 25 )					// Set the size
 		Button.DoClick = function()
 			gui.OpenURL( WorkshopLink..WorkshopID ) 
