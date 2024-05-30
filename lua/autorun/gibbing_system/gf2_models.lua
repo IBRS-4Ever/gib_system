@@ -18,12 +18,14 @@ GF2Models = {
 	["tololo"] = true,
 	["vepley"] = true,
 	["sabrina"] = true,
+	["macqiato"] = true,
 	
 	["groza_violet_rain"] = true,
 	["daiyan_exquisite_jade"] = true,
 	["charolic_leaping_rabbit"] = true,
 	["lenna_energetic_magic"] = true,
 	["vepley_sparkling_wish"] = true,
+	["macqiato_ballroom"] = true,
 	
 	["centaureissi_combat"] = true,
 	["charolic_combat"] = true,

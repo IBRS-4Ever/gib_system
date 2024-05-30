@@ -1,5 +1,4 @@
 
--- Pistol (EZ2 Chapter 0)
 sound.Add(
 {
 	name = "Gib_System.Headshot_Fleshy",

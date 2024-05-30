@@ -1,4 +1,6 @@
 
+include("autorun/gibbing_system/models.lua")
+
 local convulsionmode = {}
 convulsionmode["#gs.convulsionmode.none"] = {gibsystem_ragdoll_convulsion = "0"}
 convulsionmode["#gs.convulsionmode.default"] = {gibsystem_ragdoll_convulsion = "1"}
@@ -16,9 +18,10 @@ cammode["#gs.cammode.body"] = {gibsystem_deathcam_mode = "1"}
 //cammode["#gs.cammode.legs"] = {gibsystem_deathcam_mode = "2"}
 
 local gibgroup = {}
-gibgroup["#gs.gibgroup.random"] = {gibsystem_gib_group = "default"}
+-- gibgroup["#gs.gibgroup.random"] = {gibsystem_gib_group = "default"}
 gibgroup["#gs.gibgroup.headless"] = {gibsystem_gib_group = "headless"}
 gibgroup["#gs.gibgroup.limbs"] = {gibsystem_gib_group = "limbs"}
+--[[
 gibgroup["#gs.gibgroup.no_legs"] = {gibsystem_gib_group = "no_legs"}
 gibgroup["#gs.gibgroup.no_arms"] = {gibsystem_gib_group = "no_arms"}
 gibgroup["#gs.gibgroup.no_right_leg_left_arm"] = {gibsystem_gib_group = "no_right_leg_left_arm"}
@@ -33,6 +36,7 @@ gibgroup["#gs.gibgroup.no_right_no_arm"] = {gibsystem_gib_group = "no_right_no_a
 gibgroup["#gs.gibgroup.no_left_no_arm"] = {gibsystem_gib_group = "no_left_no_arm"}
 gibgroup["#gs.gibgroup.no_right_no_leg"] = {gibsystem_gib_group = "no_right_no_leg"}
 gibgroup["#gs.gibgroup.no_left_no_leg"] = {gibsystem_gib_group = "no_left_no_leg"}
+]]--
 gibgroup["#gs.gibgroup.legs_and_torso"] = {gibsystem_gib_group = "legs_&_torso"}
 
 local gibname = {}
@@ -81,337 +85,110 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		pnl:ClearControls()
 		pnl:AddControl( "CheckBox", { Label = "#GS.ExperimentsEnabled", Command = "gibsystem_experiment" } )
 		pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation", Command = "gibsystem_deathanimation" } )
+		
+		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
+		Button:SetText( "#GS.GibName" )					// Set the text on the button		
+		Button:SetSize( 100, 25 )					// Set the size
+		pnl:AddItem(Button)
+		Button.DoClick = function()
+			local frame = vgui.Create( "DFrame" )
+			frame:SetSize( ScrW() / 1.2, ScrH() / 1.1 )
+			frame:SetTitle( "Choose A Character..." )
+			frame:Center()
+
+			frame:MakePopup()
+
+			frame:SetDraggable( false )
+
+			function frame:Paint( w, h )
+				Derma_DrawBackgroundBlur( self, self.m_fCreateTime )
+				draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0, 200 ) )
+			end
+
+			local PropPanel = vgui.Create( "ContentContainer", frame )
+			PropPanel:SetTriggerSpawnlistChange( false )
+			PropPanel:Dock( FILL )
+
+			local Categorised = {}
+
+			-- for k, model in ipairs( GibsystemCategory ) do 
+				-- Categorised[ model.Category ] = Categorised[ model.Category ] or {}
+				-- table.insert( Categorised[ model.Category ], model )
+			-- end
+
+			-- for CategoryName, v in SortedPairs( Categorised ) do
+				local Header = vgui.Create( "ContentHeader", PropPanel )
+				Header:SetText( "Gib System" )
+				PropPanel:Add( Header )
+				
+				local icon = vgui.Create( "ContentIcon", PropPanel )
+				icon:SetMaterial( "gib_system/default.png" )
+				icon:SetName( "#gs.model.default" )
+				icon.DoClick = function()
+					RunConsoleCommand( "gibsystem_gib_name", "default" )
+				frame:Close()
+				end
+				PropPanel:Add( icon )
+				
+				for _, Model in ipairs(GibModels) do
+
+						local icon = vgui.Create( "ContentIcon", PropPanel )
+						icon:SetMaterial( "gib_system/" .. Model .. ".png" )
+						icon:SetName( "#gs.model." .. Model )
+
+						icon.DoClick = function()
+							RunConsoleCommand( "gibsystem_gib_name", Model )
+						frame:Close()
+						end
+						PropPanel:Add( icon )
+				end
+			-- end
+			
+		end
 	end)
 	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System Addons", "#GS.Addons","","",function(pnl)
+		
 		local WorkshopLink = "https://steamcommunity.com/sharedfiles/filedetails/?id="
-		local WorkshopID = ""
-		local X = 200 
 		
 		pnl:ClearControls()
+		pnl:AddControl( "label", { Text = "#gs.addon.hint" } )
+		pnl:AddControl( "label", { Text = "#gs.addon.required" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.groza" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3047654683
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
+		local AppList = vgui.Create( "DListView", pnl )
+		AppList:Dock( FILL )
+		AppList:SetSize(100, 307) -- Size
+		AppList:SetMultiSelect( false )
+		AppList:AddColumn( "#gs.addon" ):SetWidth(200)
+		AppList:AddColumn( "#gs.addon.ID" )
+
+		AppList:AddLine( "#gs.Collection.GF2", "3256248084" )
+
+		AppList.DoDoubleClick = function( lst, index, pnl )
+			gui.OpenURL( WorkshopLink..pnl:GetColumnText( 2 ) )
 		end
-		Button:SetPos( X, 22 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
 		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.centaureissi" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3146928471
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 68 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.cheeta" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3037079098
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 114 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.colphne" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3033157638
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 160 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.daiyan" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3133391818
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 206 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.nagant" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3045162669
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 252 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.sharkry" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3029152157
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 298 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.vepley" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3026550750
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 344 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.lenna" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3167885628
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 390 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.charolic" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3036390025
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 436 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.jiangyu" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3131048843
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 482 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.tololo" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3039937937
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 528 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.nemesis" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3043985506
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 574 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.peritya" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3038490564
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 620 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.sabrina" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3042014691
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 666 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		pnl:AddControl( "label", { Text = "" } )
-		
-		pnl:AddControl( "label", { Text = "#gs.model.gf2.qiongjiu" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3035525647
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 712 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
+		pnl:AddItem(AppList)
 		
 		pnl:AddControl( "label", { Text = "" } )
-		pnl:AddControl( "label", { Text = "#gs.addon.additional" } )
-		pnl:AddControl( "label", { Text = "" } )
-		pnl:AddControl( "label", { Text = "#gs.addon.additional.gf2_combat" } )
+		pnl:AddControl( "label", { Text = "#gs.addon.extension" } )
 		
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3220684563
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 806 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
-		
-		pnl:AddControl( "label", { Text = "" } )
-		pnl:AddControl( "label", { Text = "#gs.addon.additional.gf2_outfit" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3221849153
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 852 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
+		local AppListExt = vgui.Create( "DListView", pnl )
+		AppListExt:Dock( FILL )
+		AppListExt:SetSize(100, 307) -- Size
+		AppListExt:SetMultiSelect( false )
+		AppListExt:AddColumn( "#gs.addon" ):SetWidth(200)
+		AppListExt:AddColumn( "#gs.addon.ID" )
+
+		AppListExt:AddLine( "#gs.addon.extension.gf2_combat", "3220684563" )
+		AppListExt:AddLine( "#gs.addon.extension.gf2_outfit", "3221849153" )
+		AppListExt:AddLine( "#gs.addon.extension.gf2_dorm", "3224747672" )
+		AppListExt:AddLine( "#gs.addon.extension.project_snow", "3257369456" )
+
+		AppListExt.DoDoubleClick = function( lst, index, pnl )
+			gui.OpenURL( WorkshopLink..pnl:GetColumnText( 2 ) )
 		end
 		
-		pnl:AddControl( "label", { Text = "" } )
-		pnl:AddControl( "label", { Text = "#gs.addon.additional.gf2_dorm" } )
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		local WorkshopID = 3224747672
-		if steamworks.IsSubscribed( WorkshopID ) then
-			Button:SetText( "#GS.ADDON.INSTALLED" )					// Set the text on the button
-			Button:SetEnabled( false )
-		else
-			Button:SetText( "#GS.ADDON.INSTALL" )					// Set the text on the button
-			Button:SetEnabled( true )
-		end
-		Button:SetPos( X, 898 )					// Set the position on the frame
-		Button:SetSize( 100, 25 )					// Set the size
-		Button.DoClick = function()
-			gui.OpenURL( WorkshopLink..WorkshopID ) 
-		end
+		pnl:AddItem(AppListExt)
+		
 	end)
 end)

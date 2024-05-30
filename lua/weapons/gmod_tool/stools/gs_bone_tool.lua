@@ -41,16 +41,40 @@ function TOOL:Click( tr )
 			["ValveBiped.Bip01_R_Finger01"] = Angle(0,20-math.Rand(0,2),0),
 			["ValveBiped.Bip01_R_Finger02"] = Angle(0,25-math.Rand(0,3),0)
 		}
+		local Toes_Bones = { 
+			["ValveBiped.Bip01_L_Toe0"] = true,
+			["ValveBiped.Bip01_R_Toe0"] = true
+		}
+		local GF2_Toes_Bones = { 
+			["BigToe1_L"] = true,
+			["BigToe2_L"] = true,
+			["BigToe1_R"] = true,
+			["BigToe2_R"] = true,
+			["LongToe1_L"] = true,
+			["LongToe2_L"] = true,
+			["LongToe1_R"] = true,
+			["LongToe2_R"] = true,
+			["MiddleToe1_L"] = true,
+			["MiddleToe2_L"] = true,
+			["MiddleToe1_R"] = true,
+			["MiddleToe2_R"] = true,
+			["RingToe1_L"] = true,
+			["RingToe2_L"] = true,
+			["RingToe1_R"] = true,
+			["RingToe2_R"] = true,
+			["PinkyToe1_L"] = true,
+			["PinkyToe2_L"] = true,
+			["PinkyToe1_R"] = true,
+			["PinkyToe2_R"] = true
+		}
 		for bonename = 0 , Gib:GetBoneCount() do 
-			if Fingers[Gib:GetBoneName(bonename)] != nil then
-				Gib:ManipulateBoneAngles(bonename,Fingers[Gib:GetBoneName(bonename)])
+			if GetConVar("gs_bone_tool_fingers"):GetBool() then
+				if Fingers[Gib:GetBoneName(bonename)] != nil then
+					Gib:ManipulateBoneAngles(bonename,Fingers[Gib:GetBoneName(bonename)])
+				end
 			end
 
 			if GetConVar("gs_bone_tool_toes"):GetBool() then
-				local Toes_Bones = { 
-					["ValveBiped.Bip01_L_Toe0"] = true,
-					["ValveBiped.Bip01_R_Toe0"] = true
-				}
 				for bonename = 0 , Gib:GetBoneCount() do 
 					if Toes_Bones[ Gib:GetBoneName(bonename) ] then
 						Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
@@ -59,28 +83,6 @@ function TOOL:Click( tr )
 			end
 			
 			if GetConVar("gs_bone_tool_gf2_toes"):GetBool() then
-				local GF2_Toes_Bones = { 
-					["BigToe1_L"] = true,
-					["BigToe2_L"] = true,
-					["BigToe1_R"] = true,
-					["BigToe2_R"] = true,
-					["LongToe1_L"] = true,
-					["LongToe2_L"] = true,
-					["LongToe1_R"] = true,
-					["LongToe2_R"] = true,
-					["MiddleToe1_L"] = true,
-					["MiddleToe2_L"] = true,
-					["MiddleToe1_R"] = true,
-					["MiddleToe2_R"] = true,
-					["RingToe1_L"] = true,
-					["RingToe2_L"] = true,
-					["RingToe1_R"] = true,
-					["RingToe2_R"] = true,
-					["PinkyToe1_L"] = true,
-					["PinkyToe2_L"] = true,
-					["PinkyToe1_R"] = true,
-					["PinkyToe2_R"] = true
-				}
 				for bonename = 0 , Gib:GetBoneCount() do 
 					if GF2_Toes_Bones[ Gib:GetBoneName(bonename) ] then
 						Gib:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))

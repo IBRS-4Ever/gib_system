@@ -3,6 +3,7 @@ AddCSLuaFile()
 
 include("autorun/gibbing_system/defaultnpcs.lua")
 include("autorun/gibbing_system/gf2_models.lua")
+include("autorun/gibbing_system/models.lua")
 
 Model_Path = "autorun/gibbing_system/models/"
 Model_Table = {}
@@ -57,40 +58,41 @@ concommand.Add( "GibsystemReload", function( ply, cmd, args )
 	GibSystem_Initialize()
 end )
 
-local GibModels = {}
-
 local files, _ = file.Find("autorun/gibbing_system/models/*.lua", "LUA")
 
-for _, filename in ipairs(files) do
-	AddCSLuaFile("autorun/gibbing_system/models/" .. filename)
-	include("autorun/gibbing_system/models/" .. filename)
-	LocalizedText("zh-cn","[碎尸系统] 已加载文件 "..filename:gsub("%.lua$", ""))
-	LocalizedText("en","[Gibbing System] Loaded file "..filename:gsub("%.lua$", ""))
-	util.PrecacheModel("models/gib_system/"..filename:gsub("%.lua$", "").."_headless.mdl")
-	util.PrecacheModel("models/gib_system/"..filename:gsub("%.lua$", "").."_head.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/left_leg.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/right_leg.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/left_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/right_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/torso.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_legs.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_arms.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_right_leg_left_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_left_leg_right_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_left_leg.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_right_leg.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_left_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_arms.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_right_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_right.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_left.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_right_no_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_left_no_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_right_no_leg.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..filename:gsub("%.lua$", "").."/no_limb/no_left_no_leg.mdl")
-	util.PrecacheModel("models/gib_system/"..filename:gsub("%.lua$", "").."_legs.mdl")
-	util.PrecacheModel("models/gib_system/"..filename:gsub("%.lua$", "").."_torso.mdl")
-	table.insert(GibModels, tostring(filename:gsub("%.lua$", "")))
+local LegsAndTorso = {}
+local RagHead = {}
+
+for _, Model in ipairs(GibModels) do
+	LocalizedText("zh-cn","[碎尸系统] 已加载文件 "..Model)
+	LocalizedText("en","[Gibbing System] Loaded file "..Model)
+	util.PrecacheModel("models/gib_system/"..Model.."_headless.mdl")
+	util.PrecacheModel("models/gib_system/"..Model.."_head.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/left_leg.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/right_leg.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/left_arm.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/right_arm.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/torso.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_legs.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_arms.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_leg_left_arm.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_leg_right_arm.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_leg.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_leg.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_arm.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_arms.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_arm.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_no_arm.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_arm.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_no_leg.mdl")
+	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_leg.mdl")
+	util.PrecacheModel("models/gib_system/"..Model.."_legs.mdl")
+	util.PrecacheModel("models/gib_system/"..Model.."_torso.mdl")
+	if file.Exists( "models/gib_system/"..Model.."_legs.mdl", "GAME" ) and file.Exists( "models/gib_system/"..Model.."_torso.mdl", "GAME" ) then
+		table.insert(LegsAndTorso, Model)
+	end
 end
 
 LocalizedText("zh-cn","[碎尸系统] 加载完成。\n")
@@ -126,11 +128,9 @@ local last_dmgpos = {}
 local timers = {}
 local GibsCreated = {}
 
-local RagHead = { "platinum", "skadi" }
 local UnfinishedModels = { "ifrit", "centaureissi" }
 local CompletedModels = { "provence", "sora", "vigna", "platinum", "chen" }
 local GibModelGroup = { "provence", "sora", "vigna", "platinum", "chen", "ifrit", "centaureissi" }
-local LegsAndTorso = { "chen", "platinum", "ifrit", "provence", "skadi", "sora", "vigna", "lapluma", "angelina", "amiya", "centaureissi", "charolic" }
 
 local PhysicsBones = {
 	"ValveBiped.Bip01_Pelvis",
@@ -683,11 +683,11 @@ function GibFacePose(ent)
 			}
 		elseif GF2Models[Model] then
 			Exp = {
-				["eye_blink_left"] = math.Rand(0,1),
-				["eye_blink_right"] = math.Rand(0,1),
-				["brows_worry"] = math.Rand(0,1),
-				["mouth_surprised"] = math.Rand(0,1),
-				["eyes_look_up"] = math.Rand(0,1)
+				["eye_blink_left"] = math.Rand(0.5,1),
+				["eye_blink_right"] = math.Rand(0.5,1),
+				["brows_worry"] = math.Rand(0.5,1),
+				["mouth_surprised"] = math.Rand(0.5,1),
+				["eyes_look_up"] = math.Rand(0.5,1)
 			}
 		else
 			Exp = { ["blink"] = math.Rand(0.5,1) }
