@@ -20,5 +20,3 @@ local NewModel = { -- add new tables inside here
 }
 
 table.insert(Model_Table,NewModel) -- don't touch
-
-table.insert(RagHead,Name)

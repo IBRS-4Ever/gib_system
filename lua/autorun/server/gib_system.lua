@@ -61,7 +61,7 @@ end )
 local files, _ = file.Find("autorun/gibbing_system/models/*.lua", "LUA")
 
 local LegsAndTorso = {}
-local RagHead = {}
+local RagHead = { "platinum", "skadi" }
 
 for _, Model in ipairs(GibModels) do
 	LocalizedText("zh-cn","[碎尸系统] 已加载文件 "..Model)
