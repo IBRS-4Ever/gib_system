@@ -9,7 +9,10 @@ GF2Models = {
 	["daiyan"] = true,
 	["groza"] = true,
 	["jiangyu"] = true,
+	["ksenia"] = true,
 	["lenna"] = true,
+	["littara"] = true,
+	["mosin_nagant"] = true,
 	["nagant"] = true,
 	["nemesis"] = true,
 	["peritya"] = true,
@@ -19,12 +22,15 @@ GF2Models = {
 	["vepley"] = true,
 	["sabrina"] = true,
 	["macqiato"] = true,
+	["suomi"] = true,
+	["ullrid"] = true,
 	
 	["groza_violet_rain"] = true,
 	["daiyan_exquisite_jade"] = true,
 	["charolic_leaping_rabbit"] = true,
 	["lenna_energetic_magic"] = true,
 	["vepley_sparkling_wish"] = true,
+	["vepley_summer_echo"] = true,
 	["macqiato_ballroom"] = true,
 	
 	["centaureissi_combat"] = true,
@@ -45,5 +51,8 @@ GF2Models = {
 	["tololo_combat"] = true,
 	["sharkry_combat"] = true,
 	["vepley_combat"] = true,
-	["sabrina_combat"] = true
+	["sabrina_combat"] = true,
+	["macqiato_combat"] = true,
+	["suomi_combat"] = true,
+	["ullrid_combat"] = true
 }
