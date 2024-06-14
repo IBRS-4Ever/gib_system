@@ -1251,22 +1251,22 @@ function CreateGibs(ent)
 	elseif ConditionGib == "legs_&_torso" then
 
 		if table.HasValue( LegsAndTorso, GetConVar("gibsystem_gib_name"):GetString() ) then
-			LegsGib = GetConVar("gibsystem_gib_name"):GetString()
+			Model = GetConVar("gibsystem_gib_name"):GetString()
 		else
-			LegsGib = LegsAndTorso[math.random(1, #LegsAndTorso)]
+			Model = LegsAndTorso[math.random(1, #LegsAndTorso)]
 		end
 
-		if !table.HasValue(RagHead,LegsGib) then
-			SpawnGib("physics", "models/gib_system/"..LegsGib.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
+		if !table.HasValue(RagHead,Model) then
+			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
 		else
-			SpawnGib("ragdoll", "models/gib_system/"..LegsGib.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
+			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
 		end
 		
-		SpawnGib("ragdoll", "models/gib_system/"..LegsGib.."_torso.mdl", 1, "ValveBiped.Bip01_Spine1", "body", false, true, true)
-		SpawnGib("ragdoll", "models/gib_system/"..LegsGib.."_legs.mdl", 1, "ValveBiped.Bip01_Spine1", "body", false, true, true)
+		SpawnGib("ragdoll", "models/gib_system/"..Model.."_torso.mdl", 1, "ValveBiped.Bip01_Spine1", "body", false, true, true)
+		SpawnGib("ragdoll", "models/gib_system/"..Model.."_legs.mdl", 1, "ValveBiped.Bip01_Spine1", "body", false, true, true)
 
-		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..LegsGib.." | 碎尸组合：上/下半身")
-		LocalizedText("en","[Gibbing System] Selected Model: "..LegsGib.." | Gib Group : "..ConditionGib)
+		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：上/下半身")
+		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 	end
 	-- DamageForce = nil
 	-- DamagePosition = nil

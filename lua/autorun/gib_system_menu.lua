@@ -182,7 +182,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		AppListExt:AddLine( "#gs.addon.extension.gf2_combat", "3220684563" )
 		AppListExt:AddLine( "#gs.addon.extension.gf2_outfit", "3221849153" )
 		AppListExt:AddLine( "#gs.addon.extension.gf2_dorm", "3224747672" )
-		AppListExt:AddLine( "#gs.addon.extension.project_snow", "3257369456" )
+		AppListExt:AddLine( "#gs.addon.extension.project_snowbreak", "3257369456" )
 
 		AppListExt.DoDoubleClick = function( lst, index, pnl )
 			gui.OpenURL( WorkshopLink..pnl:GetColumnText( 2 ) )
