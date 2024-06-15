@@ -31,7 +31,7 @@ GF2Models = {
 	["lenna_energetic_magic"] = true,
 	["vepley_sparkling_wish"] = true,
 	["vepley_summer_echo"] = true,
-	["macqiato_ballroom"] = true,
+	["macqiato_ballroom_interlude"] = true,
 	
 	["centaureissi_combat"] = true,
 	["charolic_combat"] = true,
