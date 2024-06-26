@@ -39,14 +39,6 @@ gibgroup["#gs.gibgroup.no_left_no_leg"] = {gibsystem_gib_group = "no_left_no_leg
 ]]--
 gibgroup["#gs.gibgroup.legs_and_torso"] = {gibsystem_gib_group = "legs_&_torso"}
 
-local gibname = {}
-gibname["#gs.gibname.default"] = {gibsystem_gib_name = "default"}
-
-local files, _ = file.Find("autorun/gibbing_system/models/*.lua", "LUA")
-for _, filename in ipairs(files) do
-	gibname["#gs.model."..tostring(filename:gsub("%.lua$", ""))] = {gibsystem_gib_name = tostring(filename:gsub("%.lua$", ""))}
-end
-
 hook.Add("AddToolMenuTabs", "GIBBING_SYSTEM_ADDMENU", function()
 	spawnmenu.AddToolCategory("Options", "GIBBING SYSTEM Settings", "#GS.Title")
 end)
@@ -63,28 +55,12 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		pnl:AddControl( "CheckBox", { Label = "#GS.Random.GF2_Toe_Rotating", Command = "gibsystem_random_gf2_toe_rotating" } )
 		pnl:AddControl( "CheckBox", { Label = "#GS.Random.Bodygroup", Command = "gibsystem_random_bodygroup" } )
 		pnl:AddControl( "CheckBox", { Label = "#GS.Random.Skin", Command = "gibsystem_random_skin" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.BloodEffect", Command = "gibsystem_blood_effect" } )
 		pnl:AddControl( "CheckBox", { Label = "#GS.DeathExpress", Command = "gibsystem_death_express" } )
 		pnl:AddControl( "ComboBox", { Label = "#GS.Ragdoll_Convulsion", Options = convulsionmode } )
 		pnl:AddControl( "ComboBox", { Label = "#GS.GibsCollision", Options = collisiongroup } )
 		pnl:AddControl( "CheckBox", { Label = "#GS.Deathcam", Command = "gibsystem_deathcam_enable" } )
 		pnl:AddControl( "ComboBox", { Label = "#GS.Deathcam.Mode", Options = cammode } )
 		pnl:AddControl( "ComboBox", { Label = "#GS.GibGroup", Options = gibgroup } )
-		pnl:AddControl( "ComboBox", { Label = "#GS.GibName", Options = gibname } )
-		pnl:AddControl( "textbox", { Label = "#GS.HeadMess", Command = "gibsystem_head_mass" } )
-		pnl:AddControl( "textbox", { Label = "#GS.BodyMess", Command = "gibsystem_body_mass" } )
-		pnl:AddControl( "Slider", { Label = "#GS.GibsRemoveTimer", Type = "Integer", Command = "gibsystem_ragdoll_removetimer", Min = "-1", Max = "100" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.Rope", Command = "gibsystem_rope" } )
-		pnl:AddControl( "Slider", { Label = "#GS.Rope_Strength", Type = "Integer", Command = "gibsystem_rope_strength", Min = "0", Max = "5000" } )
-		pnl:AddControl( "Slider", { Label = "#GS.BloodEffectLength", Type = "Integer", Command = "gibsystem_blood_time", Min = "0", Max = "100" } )
-		pnl:AddControl( "Slider", { Label = "#GS.BodyBloodEffectLength", Type = "Integer", Command = "gibsystem_blood_time_body", Min = "0", Max = "100" } )
-		pnl:AddControl( "Button", { Label = "#GS.Cleanup_Gibs", Command = "CleanGibs" } )
-	end)
-	
-	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System EXP", "#GS.Experiments","","",function(pnl)
-		pnl:ClearControls()
-		pnl:AddControl( "CheckBox", { Label = "#GS.ExperimentsEnabled", Command = "gibsystem_experiment" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation", Command = "gibsystem_deathanimation" } )
 		
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
 		Button:SetText( "#GS.GibName" )					// Set the text on the button		
@@ -143,8 +119,25 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 						PropPanel:Add( icon )
 				end
 			-- end
-			
 		end
+		
+		pnl:AddControl( "textbox", { Label = "#GS.HeadMess", Command = "gibsystem_head_mass" } )
+		pnl:AddControl( "textbox", { Label = "#GS.BodyMess", Command = "gibsystem_body_mass" } )
+		pnl:AddControl( "Slider", { Label = "#GS.GibsRemoveTimer", Type = "Integer", Command = "gibsystem_ragdoll_removetimer", Min = "-1", Max = "100" } )
+		pnl:AddControl( "CheckBox", { Label = "#GS.Rope", Command = "gibsystem_rope" } )
+		pnl:AddControl( "Slider", { Label = "#GS.Rope_Strength", Type = "Integer", Command = "gibsystem_rope_strength", Min = "0", Max = "5000" } )
+		pnl:AddControl( "CheckBox", { Label = "#GS.BloodEffect", Command = "gibsystem_blood_effect" } )
+		pnl:AddControl( "Slider", { Label = "#GS.BloodEffectLength", Type = "Integer", Command = "gibsystem_blood_time", Min = "0", Max = "100" } )
+		pnl:AddControl( "Slider", { Label = "#GS.BodyBloodEffectLength", Type = "Integer", Command = "gibsystem_blood_time_body", Min = "0", Max = "100" } )
+		pnl:AddControl( "Button", { Label = "#GS.Cleanup_Gibs", Command = "CleanGibs" } )
+	end)
+	
+	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System EXP", "#GS.Experiments","","",function(pnl)
+		pnl:ClearControls()
+		pnl:AddControl( "CheckBox", { Label = "#GS.ExperimentsEnabled", Command = "gibsystem_experiment" } )
+		pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation", Command = "gibsystem_deathanimation" } )
+		
+		
 	end)
 	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System Addons", "#GS.Addons","","",function(pnl)
 		

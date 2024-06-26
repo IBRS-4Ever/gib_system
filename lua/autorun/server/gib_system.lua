@@ -312,6 +312,7 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			GibFacePose(head)
 			RandomBodyGroup(head)
 			RandomSkin(head)
+			-- BloodEffect(head,"1","ValveBiped.Bip01_Neck1")
 			table.insert(GibsCreated,head)
 			
 			for i = 0, head:GetPhysicsObjectCount() - 1 do
@@ -323,7 +324,7 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 				
 				-- phys:ApplyForceCenter( velocity )
 				if DamageForce and DamagePosition then
-					phys:ApplyForceOffset(DamageForce / (4+head:GetPhysicsObjectCount()), DamagePosition)
+					phys:ApplyForceOffset( (DamageForce / head:GetPhysicsObjectCount()) + Vector(0,0,2500), DamagePosition)
 				else
 					phys:ApplyForceOffset(Vector(0,0,0), Vector(0,0,0))
 				end
@@ -344,7 +345,8 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			DM:SetCycle(1) -- Was 0, Set to 1 to make ragdoll looks good.
 			RandomBodyGroup(DM)
 			RandomSkin(DM)
-			BloodEffect(DM,"1","ValveBiped.Bip01_Head1")
+			BloodEffect(DM,2,"forward")
+			-- BloodEffect(DM,"1","ValveBiped.Bip01_Head1")
 			
 			--[[
 			local DM = ents.Create("prop_gs_deathanim")
@@ -410,7 +412,8 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 				end
 				
 				FingerRotation(ragdoll)
-				BloodEffect(ragdoll,"1","ValveBiped.Bip01_Head1")
+				BloodEffect(ragdoll,2,"forward")
+				-- BloodEffect(ragdoll,"1","ValveBiped.Bip01_Head1")
 				table.insert(GibsCreated,ragdoll)
 				SafeRemoveEntity(DM)
 				ragdoll:CallOnRemove("RemoveHeadTimer",function(ragdoll) timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() ) end)
@@ -457,6 +460,7 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 			GibFacePose(head)
 			RandomBodyGroup(head)
 			RandomSkin(head)
+			-- BloodEffect(head,"1","ValveBiped.Bip01_Neck1")
 			table.insert(GibsCreated,head)
 			
 			for i = 0, head:GetPhysicsObjectCount() - 1 do
@@ -468,7 +472,7 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 				
 				-- phys:ApplyForceCenter( velocity )
 				if DamageForce and DamagePosition then
-					phys:ApplyForceOffset(DamageForce / (4+head:GetPhysicsObjectCount()), DamagePosition)
+					phys:ApplyForceOffset( (DamageForce / head:GetPhysicsObjectCount()) + Vector(0,0,2500), DamagePosition)
 				else
 					phys:ApplyForceOffset(Vector(0,0,0), Vector(0,0,0))
 				end
@@ -480,7 +484,7 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 			DM:SetPos( player:GetPos() )
 			DM:SetAngles( player:GetAngles() )
 			DM:Spawn()
-			DM:SetOwner( player )
+			--DM:SetOwner( player )
 			DM:ResetSequence( DM:LookupSequence( anim ) )
 			print("Sequence Is: "..anim)
 			DM:ResetSequenceInfo()
@@ -489,7 +493,7 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 			RandomBodyGroup(DM)
 			RandomSkin(DM)
 			
-			BloodEffect(DM,1,"ValveBiped.Bip01_Head1")
+			BloodEffect(DM,2,"forward")
 			
 			player:Spectate(5)
 			player:SetObserverMode(OBS_MODE_CHASE)
@@ -540,7 +544,7 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 			end
 			
 			FingerRotation(ragdoll)
-			BloodEffect(ragdoll,1,"ValveBiped.Bip01_Head1",-DM:SequenceDuration())
+			BloodEffect(ragdoll,2,"forward",-DM:SequenceDuration())
 			table.insert(GibsCreated,ragdoll)
 			SafeRemoveEntity(DM)
 			
@@ -705,13 +709,11 @@ end
 
 function BloodEffect(ent,Type,AttachmentPoint,BonusTime)
 	if GetConVar( "gibsystem_blood_effect" ):GetBool() then
-		local AP = ent:LookupAttachment( "forward" )
+		local AP = ent:LookupAttachment( AttachmentPoint )
 		if BonusTime == nil then
 			BonusTime = 0
 		end
 		if Type == 2 and AP != nil then
-			local ParticleBody = { "blood_advisor_pierce_spray", "blood_advisor_pierce_spray_b", "blood_advisor_pierce_spray_c" }
-			local ParticleBodyIndex = ParticleBody[math.random(1, #ParticleBody)]
 			local timerDuration = GetConVar( "gibsystem_blood_time_body" ):GetInt()+BonusTime -- 定时器持续时间（秒）
 			local timerInterval = 1 -- 定时器间隔时间（秒）
 			local timerCount = timerDuration / timerInterval -- 重复次数
@@ -719,9 +721,10 @@ function BloodEffect(ent,Type,AttachmentPoint,BonusTime)
 			
 			table.insert(timers, timerBodyName)
 			timer.Create(timerBodyName, timerInterval, timerCount, function()
-				ParticleEffectAttach( ParticleBodyIndex, 4, ent, AP )
+				ParticleEffectAttach( "blood_advisor_pierce_spray", 4, ent, AP )
 			end)
 		else
+			-- print(ent:GetModel().." has no attachment named "..AP.."!")
 			local timerDuration = GetConVar( "gibsystem_blood_time" ):GetInt()+BonusTime -- 定时器持续时间（秒）
 			local timerInterval = 0.1 -- 定时器间隔时间（秒）
 			local timerCount = timerDuration / timerInterval -- 重复次数
@@ -905,7 +908,7 @@ function CreateGibs(ent)
 		Gib:SetAngles( ent:GetAngles() )
 		Gib:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
 		Gib:Spawn()
-		Gib:SetOwner( ent )
+		--Gib:SetOwner( ent )
 		Gib:SetName("Gib"..Bodypart.."Index"..Gib:EntIndex())
 		Gib:Activate()
 		
@@ -934,8 +937,8 @@ function CreateGibs(ent)
 					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
 				end
 					
-				-- phys:ApplyForceOffset( (DamageForce / Gib:GetPhysicsObjectCount()) + Vector(0,0,2500), DamagePosition)
-				phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
+				phys:ApplyForceOffset( (DamageForce / Gib:GetPhysicsObjectCount()) + Vector(0,0,2500), DamagePosition)
+				-- phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
 			end
 
 			head = Entity(Gib:EntIndex())
@@ -1014,7 +1017,7 @@ function CreateGibs(ent)
 			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
 		end
 		
-		SpawnGib("ragdoll", "models/gib_system/"..Model.."_headless.mdl", 1, "ValveBiped.Bip01_Neck1", "body", false, true, true)
+		SpawnGib("ragdoll", "models/gib_system/"..Model.."_headless.mdl", 2, "forward", "body", false, true, true)
 		
 		CreateRope(head, body)
 		
