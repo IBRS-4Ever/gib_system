@@ -390,7 +390,6 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			
 			timer.Simple(DM:SequenceDuration(), function()
 				local ent = DM
-
 				local ragdoll = ents.Create( "prop_ragdoll" )
 				ragdoll:SetModel( ent:GetModel() )
 				ragdoll:SetPos( ent:GetPos() )
@@ -962,7 +961,12 @@ function CreateGibs(ent)
 
 			for i = 0, Gib:GetPhysicsObjectCount() - 1 do
 				local phys = Gib:GetPhysicsObjectNum( i )
-					
+				local Bone_name = Gib:GetBoneName(Gib:TranslatePhysBoneToBone( i ))
+				if ( IsValid( phys ) ) then
+					local pos, ang = ent:GetBonePosition( ent:LookupBone(Bone_name) )
+					if ( pos ) then phys:SetPos( pos ) end
+					if ( ang ) then phys:SetAngles( ang ) end
+				end
 				if GetConVar("gibsystem_body_mass"):GetInt() > 0 then
 					phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
 				end
