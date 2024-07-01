@@ -165,6 +165,16 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		pnl:AddControl( "label", { Text = "" } )
 		pnl:AddControl( "label", { Text = "#gs.addon.extension" } )
 		
+		local ExtAddons = {
+			["#gs.addon.extension.gf2_combat"] = 3220684563,
+			["#gs.addon.extension.gf2_outfit"] = 3221849153,
+			["#gs.addon.extension.gf2_dorm"] = 3224747672,
+			["#gs.addon.extension.snowbreak"] = 3257369456,
+			["#gs.addon.extension.arknights"] = 3277264014,
+			["#gs.addon.extension.honkai_impact_3rd"] = 3277267079,
+			["#gs.addon.extension.extra_gibs"] = 3277262546
+		}
+		
 		local AppListExt = vgui.Create( "DListView", pnl )
 		AppListExt:Dock( FILL )
 		AppListExt:SetSize(100, 307) -- Size
@@ -172,11 +182,11 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		AppListExt:AddColumn( "#gs.addon" ):SetWidth(200)
 		AppListExt:AddColumn( "#gs.addon.ID" )
 
-		AppListExt:AddLine( "#gs.addon.extension.gf2_combat", "3220684563" )
-		AppListExt:AddLine( "#gs.addon.extension.gf2_outfit", "3221849153" )
-		AppListExt:AddLine( "#gs.addon.extension.gf2_dorm", "3224747672" )
-		AppListExt:AddLine( "#gs.addon.extension.snowbreak", "3257369456" )
-
+		for k,v in pairs(ExtAddons) do
+			print(v..", "..k)
+			AppListExt:AddLine( k, v )
+		end
+		
 		AppListExt.DoDoubleClick = function( lst, index, pnl )
 			gui.OpenURL( WorkshopLink..pnl:GetColumnText( 2 ) )
 		end

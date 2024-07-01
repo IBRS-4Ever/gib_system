@@ -61,6 +61,7 @@ end )
 local files, _ = file.Find("autorun/gibbing_system/models/*.lua", "LUA")
 
 local LegsAndTorso = {}
+local Limbs = {}
 local RagHead = { "platinum", "skadi" }
 
 for _, Model in ipairs(GibModels) do
@@ -68,11 +69,6 @@ for _, Model in ipairs(GibModels) do
 	LocalizedText("en","[Gibbing System] Loaded file "..Model)
 	util.PrecacheModel("models/gib_system/"..Model.."_headless.mdl")
 	util.PrecacheModel("models/gib_system/"..Model.."_head.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..Model.."/left_leg.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..Model.."/right_leg.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..Model.."/left_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..Model.."/right_arm.mdl")
-	util.PrecacheModel("models/gib_system/limbs/"..Model.."/torso.mdl")
 	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_legs.mdl")
 	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_arms.mdl")
 	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_leg_left_arm.mdl")
@@ -88,10 +84,18 @@ for _, Model in ipairs(GibModels) do
 	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_arm.mdl")
 	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_no_leg.mdl")
 	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_leg.mdl")
-	util.PrecacheModel("models/gib_system/"..Model.."_legs.mdl")
-	util.PrecacheModel("models/gib_system/"..Model.."_torso.mdl")
 	if file.Exists( "models/gib_system/"..Model.."_legs.mdl", "GAME" ) and file.Exists( "models/gib_system/"..Model.."_torso.mdl", "GAME" ) then
 		table.insert(LegsAndTorso, Model)
+		util.PrecacheModel("models/gib_system/"..Model.."_legs.mdl")
+		util.PrecacheModel("models/gib_system/"..Model.."_torso.mdl")
+	end
+	if file.Exists( "models/gib_system/limbs/"..Model.."/left_leg.mdl", "GAME" ) and file.Exists( "models/gib_system/limbs/"..Model.."/right_leg.mdl", "GAME" ) and file.Exists( "models/gib_system/limbs/"..Model.."/left_arm.mdl", "GAME" ) and file.Exists( "models/gib_system/limbs/"..Model.."/right_arm.mdl", "GAME" ) and file.Exists( "models/gib_system/limbs/"..Model.."/torso.mdl", "GAME" ) then
+		table.insert(Limbs, Model)
+		util.PrecacheModel("models/gib_system/limbs/"..Model.."/left_leg.mdl")
+		util.PrecacheModel("models/gib_system/limbs/"..Model.."/right_leg.mdl")
+		util.PrecacheModel("models/gib_system/limbs/"..Model.."/left_arm.mdl")
+		util.PrecacheModel("models/gib_system/limbs/"..Model.."/right_arm.mdl")
+		util.PrecacheModel("models/gib_system/limbs/"..Model.."/torso.mdl")
 	end
 end
 
@@ -123,6 +127,7 @@ CreateConVar( "gibsystem_gib_group", "default" , FCVAR_ARCHIVE + FCVAR_SERVER_CA
 CreateConVar( "gibsystem_gib_name", "default" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Gib Name.")
 CreateConVar( "gibsystem_experiment", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Experimental Features.")
 CreateConVar( "gibsystem_deathanimation", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable death animations.")
+CreateConVar( "gibsystem_deathanimation_name", "default" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set death animation.")
 
 local last_dmgpos = {}
 local timers = {}
@@ -284,7 +289,11 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			CreateGibs(npc)
 		else
 			
-			local anim = anims_table[math.random(1,#anims_table)]
+			if GetConVar("gibsystem_deathanimation_name"):GetString() == "default" then
+				anim = anims_table[math.random(1,#anims_table)]
+			else
+				anim = GetConVar("gibsystem_deathanimation_name"):GetString()
+			end
 			
 			if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
 				Model = GetConVar("gibsystem_gib_name"):GetString()
@@ -430,7 +439,11 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 		if !GetConVar( "gibsystem_experiment" ):GetBool() or !GetConVar( "gibsystem_deathanimation" ):GetBool() then
 			CreateGibs(player)
 		else
-			local anim = anims_table[math.random(1,#anims_table)]
+			if GetConVar("gibsystem_deathanimation_name"):GetString() == "default" then
+				anim = anims_table[math.random(1,#anims_table)]
+			else
+				anim = GetConVar("gibsystem_deathanimation_name"):GetString()
+			end
 
 			if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
 				Model = GetConVar("gibsystem_gib_name"):GetString()
@@ -544,7 +557,7 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 			end
 			
 			FingerRotation(ragdoll)
-			BloodEffect(ragdoll,2,"forward",-DM:SequenceDuration())
+			BloodEffect(ragdoll,2,"forward",DM:SequenceDuration())
 			table.insert(GibsCreated,ragdoll)
 			SafeRemoveEntity(DM)
 			
@@ -691,7 +704,9 @@ function GibFacePose(ent)
 				["eye_blink_right"] = math.Rand(0.5,1),
 				["brows_worry"] = math.Rand(0.5,1),
 				["mouth_surprised"] = math.Rand(0.5,1),
-				["eyes_look_up"] = math.Rand(0.5,1)
+				["eyes_look_up"] = math.Rand(0.5,1),
+				["mouth_angry_teeth"] = math.Rand(0.25,0.5),
+				["mouth_wide_open"] = math.Rand(0.1,0.3)
 			}
 		else
 			Exp = { ["blink"] = math.Rand(0.5,1) }
@@ -714,7 +729,7 @@ function BloodEffect(ent,Type,AttachmentPoint,BonusTime)
 			BonusTime = 0
 		end
 		if Type == 2 and AP != nil then
-			local timerDuration = GetConVar( "gibsystem_blood_time_body" ):GetInt()+BonusTime -- 定时器持续时间（秒）
+			local timerDuration = GetConVar( "gibsystem_blood_time_body" ):GetInt()-BonusTime -- 定时器持续时间（秒）
 			local timerInterval = 1 -- 定时器间隔时间（秒）
 			local timerCount = timerDuration / timerInterval -- 重复次数
 			local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
@@ -725,7 +740,7 @@ function BloodEffect(ent,Type,AttachmentPoint,BonusTime)
 			end)
 		else
 			-- print(ent:GetModel().." has no attachment named "..AP.."!")
-			local timerDuration = GetConVar( "gibsystem_blood_time" ):GetInt()+BonusTime -- 定时器持续时间（秒）
+			local timerDuration = GetConVar( "gibsystem_blood_time" ):GetInt()-BonusTime -- 定时器持续时间（秒）
 			local timerInterval = 0.1 -- 定时器间隔时间（秒）
 			local timerCount = timerDuration / timerInterval -- 重复次数
 			local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
@@ -989,7 +1004,7 @@ function CreateGibs(ent)
 		GibModel = GibModelGroup[math.random(1, #GibModelGroup)]
 	end
 	
-	local Conditions = { "headless", "limbs", "no_legs", "no_arms", "no_right_leg_left_arm", "no_left_leg_right_arm", "no_left_leg", "no_right_leg", "no_left_arm", "no_right_arm", "no_right", "no_left", "no_right_no_arm", "no_left_no_arm", "no_right_no_leg", "no_left_no_leg", "legs_&_torso" }
+	local Conditions = { "headless", "limbs", "no_legs", "no_arms", "no_right_leg_left_arm", "no_left_leg_right_arm", "no_left_leg", "no_right_leg", "no_left_arm", "no_right_arm", "no_right", "no_left", "no_right_no_arm", "no_left_no_arm", "no_right_no_leg", "no_left_no_leg", "legs_&_torso", "halves" }
 	
 	if table.HasValue( Conditions, GetConVar("gibsystem_gib_group"):GetString() ) then
 		ConditionGib = GetConVar("gibsystem_gib_group"):GetString()
@@ -1025,21 +1040,27 @@ function CreateGibs(ent)
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 	
 	elseif ConditionGib == "limbs" then
-	
-		if !table.HasValue(RagHead,GibModel) then
-			SpawnGib("physics", "models/gib_system/"..GibModel.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
+		
+		if table.HasValue( Limbs, GetConVar("gibsystem_gib_name"):GetString() ) then
+			Model = GetConVar("gibsystem_gib_name"):GetString()
 		else
-			SpawnGib("ragdoll", "models/gib_system/"..GibModel.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
+			Model = Limbs[math.random(1, #Limbs)]
+		end
+
+		if !table.HasValue(RagHead,Model) then
+			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
+		else
+			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
 		end
 		
-		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false, true, true)
-		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false, true, true)
-		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
-		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false, true, true)
-		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel.."/torso.mdl", 1, "ValveBiped.bip01_pelvis", "body", false, true, true)
+		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false, true, true)
+		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false, true, true)
+		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
+		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false, true, true)
+		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/torso.mdl", 1, "ValveBiped.bip01_pelvis", "body", false, true, true)
 
-		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibModel.." | 碎尸组合：碎块")
-		LocalizedText("en","[Gibbing System] Selected Model: "..GibModel.." | Gib Group : "..ConditionGib)
+		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：碎块")
+		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 	
 	elseif ConditionGib == "no_legs" then
 	
@@ -1258,7 +1279,7 @@ function CreateGibs(ent)
 		else
 			Model = LegsAndTorso[math.random(1, #LegsAndTorso)]
 		end
-
+		
 		if !table.HasValue(RagHead,Model) then
 			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
 		else
@@ -1269,6 +1290,20 @@ function CreateGibs(ent)
 		SpawnGib("ragdoll", "models/gib_system/"..Model.."_legs.mdl", 1, "ValveBiped.Bip01_Spine1", "body", false, true, true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：上/下半身")
+		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
+		
+	elseif ConditionGib == "halves" then
+
+		if !table.HasValue(RagHead,Model) then
+			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
+		else
+			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
+		end
+		
+		SpawnGib("ragdoll", "models/gib_system/"..Model.."_half_left.mdl", 2, "forward", "body", false, true, true)
+		SpawnGib("ragdoll", "models/gib_system/"..Model.."_half_right.mdl", 2, "forward", "body", false, true, true)
+
+		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：左右半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 	end
 	-- DamageForce = nil

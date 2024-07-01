@@ -32,6 +32,7 @@ GF2Models = {
 	["vepley_sparkling_wish"] = true,
 	["vepley_summer_echo"] = true,
 	["macqiato_ballroom_interlude"] = true,
+	["suomi_midsummer_pixie"] = true,
 	
 	["centaureissi_combat"] = true,
 	["charolic_combat"] = true,
