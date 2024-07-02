@@ -951,7 +951,7 @@ function CreateGibs(ent)
 					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
 				end
 					
-				phys:ApplyForceOffset( (DamageForce / Gib:GetPhysicsObjectCount()) + Vector(0,0,2500), DamagePosition)
+				phys:ApplyForceOffset( (DamageForce / Gib:GetPhysicsObjectCount()) + (Vector(0,0,2500) / Gib:GetPhysicsObjectCount()), DamagePosition)
 				-- phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
 			end
 
@@ -962,7 +962,7 @@ function CreateGibs(ent)
 			for i = 0, Gib:GetPhysicsObjectCount() - 1 do
 				local phys = Gib:GetPhysicsObjectNum( i )
 				local Bone_name = Gib:GetBoneName(Gib:TranslatePhysBoneToBone( i ))
-				if ( IsValid( phys ) ) then
+				if ( IsValid( phys ) && ent:LookupBone(Bone_name) != null ) then
 					local pos, ang = ent:GetBonePosition( ent:LookupBone(Bone_name) )
 					if ( pos ) then phys:SetPos( pos ) end
 					if ( ang ) then phys:SetAngles( ang ) end
