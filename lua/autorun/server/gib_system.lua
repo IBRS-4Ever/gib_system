@@ -13,7 +13,6 @@ Expressions_Table = {}
 local GmodLanguage = string.lower(GetConVar("gmod_language"):GetString())
 
 function LocalizedText(lang,text)
-	local DefaultLang = "en-us"
 	if GmodLanguage == lang then
 		MsgN(text)
 	end
@@ -99,6 +98,9 @@ for _, Model in ipairs(GibModels) do
 	end
 end
 
+LocalizedText("zh-cn","[碎尸系统] 已加载 "..table.Count(GibModels).." 个模型。"..table.Count(LegsAndTorso).." 个上下半身模型，"..table.Count(Limbs).." 个断肢模型。")
+LocalizedText("en","[Gibbing System] Loaded "..table.Count(GibModels).." Model(s). "..table.Count(LegsAndTorso).." Legs & Torso Model(s), "..table.Count(Limbs).." Limbs Model(s).")
+
 LocalizedText("zh-cn","[碎尸系统] 加载完成。\n")
 LocalizedText("en","[Gibbing System] Loading Complete.\n")
 
@@ -133,30 +135,8 @@ local last_dmgpos = {}
 local timers = {}
 local GibsCreated = {}
 
-local UnfinishedModels = { "ifrit", "centaureissi" }
+local UnfinishedModels = { "ifrit", "centaureissi", "suomi_midsummer_pixie" }
 local CompletedModels = { "provence", "sora", "vigna", "platinum", "chen" }
-local GibModelGroup = { "provence", "sora", "vigna", "platinum", "chen", "ifrit", "centaureissi" }
-
-local PhysicsBones = {
-	"ValveBiped.Bip01_Pelvis",
-	"ValveBiped.Bip01_L_Thigh",
-	"ValveBiped.Bip01_R_Thigh",
-	"ValveBiped.Bip01_L_Calf",
-	"ValveBiped.Bip01_R_Calf",
-	"ValveBiped.Bip01_L_Foot",
-	"ValveBiped.Bip01_R_Foot",
-	"ValveBiped.Bip01_Spine",
-	"ValveBiped.Bip01_Spine1",
-	"ValveBiped.Bip01_Spine2",
-	"ValveBiped.Bip01_Spine4",
-	"ValveBiped.Bip01_L_UpperArm",
-	"ValveBiped.Bip01_R_UpperArm",
-	"ValveBiped.Bip01_L_Forearm",
-	"ValveBiped.Bip01_R_Forearm",
-	"ValveBiped.Bip01_L_Hand",
-	"ValveBiped.Bip01_R_Hand",
-	"ValveBiped.Bip01_Head1"
-}
 
 local anims_table = {
 	"DIE_Simple_01",
@@ -909,7 +889,7 @@ function CreateGibs(ent)
 		local RagHead = { "models/gib_system/platinum_head.mdl", "models/gib_system/skadi_head.mdl" }
 		
 		if Bodypart == "head" and !table.HasValue(RagHead,mdl) then
-			local HeadPos = ent:LookupBone("ValveBiped.Bip01_Head1")
+			local HeadPos = ent:LookupBone("ValveBiped.Bip01_Head1") or ent:LookupBone("ValveBiped.HC_Body_Bone") or 0
 			
 			if HeadPos then
 				Gib:SetPos( ent:GetBonePosition(HeadPos) ) 
@@ -991,21 +971,12 @@ function CreateGibs(ent)
 
 		table.insert(GibsCreated,Gib)
 		
-		if !Gib.Owner:IsPlayer() then return end
-		
-		cleanup.Add( Gib.Owner, "props", body )
-		undo.Create( "Gib" )
-		undo.AddEntity( body )
-		undo.AddEntity( head )
-		undo.SetPlayer( Gib.Owner )
-		undo.Finish()
-		
 	end
 	
-	if table.HasValue( GibModelGroup, GetConVar("gibsystem_gib_name"):GetString() ) then
+	if table.HasValue( Limbs, GetConVar("gibsystem_gib_name"):GetString() ) then
 		GibModel = GetConVar("gibsystem_gib_name"):GetString()
 	else
-		GibModel = GibModelGroup[math.random(1, #GibModelGroup)]
+		GibModel = Limbs[math.random(1, #Limbs)]
 	end
 	
 	local Conditions = { "headless", "limbs", "no_legs", "no_arms", "no_right_leg_left_arm", "no_left_leg_right_arm", "no_left_leg", "no_right_leg", "no_left_arm", "no_right_arm", "no_right", "no_left", "no_right_no_arm", "no_left_no_arm", "no_right_no_leg", "no_left_no_leg", "legs_&_torso", "halves" }
@@ -1018,6 +989,8 @@ function CreateGibs(ent)
 	
 	if table.HasValue( UnfinishedModels, GibModel ) then
 		GibModel2 = CompletedModels[math.random(1, #CompletedModels)]
+		LocalizedText("zh-cn","[碎尸系统] 模型 "..GibModel.." 不存在此碎尸组合，已替换模型为 "..GibModel2.."。")
+		LocalizedText("en","[Gibbing System] Model "..GibModel.." doesn't support this Gib Group, Replaced model with "..GibModel2..".")
 	else
 		GibModel2 = GibModel
 	end

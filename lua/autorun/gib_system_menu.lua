@@ -69,7 +69,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		Button.DoClick = function()
 			local frame = vgui.Create( "DFrame" )
 			frame:SetSize( ScrW() / 1.2, ScrH() / 1.1 )
-			frame:SetTitle( "Choose A Character..." )
+			frame:SetTitle( string.format( language.GetPhrase("#gs.choose_character"), language.GetPhrase("#gs.model."..GetConVar("gibsystem_gib_name"):GetString()) ) )
 			frame:Center()
 
 			frame:MakePopup()
@@ -85,40 +85,54 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			PropPanel:SetTriggerSpawnlistChange( false )
 			PropPanel:Dock( FILL )
 
-			local Categorised = {}
+			local EntList = list.Get("GIBSYSTEM_CATEGORY_INFO")
+			
+			for _, Model in ipairs(GibModels) do
+				if !list.HasEntry("GIBSYSTEM_CATEGORY_INFO",Model) then
+					list.Set("GIBSYSTEM_CATEGORY_INFO", Model,{})
+				end
+			end
+			
+			-- Categorize them
+			local Categories = {}
+			for k, v in pairs(EntList) do
+				local Category = v.Category or "#gs.category.uncategorized"
+				local Tab = Categories[Category] or {}
+				Tab[k] = v
+				Categories[Category] = Tab
+			end
+			
+			local DefaultHeader = vgui.Create( "ContentHeader", PropPanel )
+			DefaultHeader:SetText( "#gs.category.default" )
+			PropPanel:Add( DefaultHeader )
+				
+			local icon = vgui.Create( "ContentIcon", PropPanel )
+			icon:SetMaterial( "gib_system/default.png" )
+			icon:SetName( "#gs.model.default" )
+			icon.DoClick = function()
+				RunConsoleCommand( "gibsystem_gib_name", "default" )
+			frame:Close()
+			end
+			PropPanel:Add( icon )
 
-			-- for k, model in ipairs( GibsystemCategory ) do 
-				-- Categorised[ model.Category ] = Categorised[ model.Category ] or {}
-				-- table.insert( Categorised[ model.Category ], model )
-			-- end
-
-			-- for CategoryName, v in SortedPairs( Categorised ) do
+			for CategoryName, v in SortedPairs(Categories) do
+			
 				local Header = vgui.Create( "ContentHeader", PropPanel )
-				Header:SetText( "Gib System" )
+				Header:SetText( CategoryName )
 				PropPanel:Add( Header )
 				
-				local icon = vgui.Create( "ContentIcon", PropPanel )
-				icon:SetMaterial( "gib_system/default.png" )
-				icon:SetName( "#gs.model.default" )
-				icon.DoClick = function()
-					RunConsoleCommand( "gibsystem_gib_name", "default" )
-				frame:Close()
-				end
-				PropPanel:Add( icon )
-				
-				for _, Model in ipairs(GibModels) do
+				for name, ent in SortedPairsByMemberValue(v, "Name") do
+					local icon = vgui.Create( "ContentIcon", PropPanel )
+					icon:SetMaterial( "gib_system/" .. name .. ".png" )
+					icon:SetName( "#gs.model." .. name )
 
-						local icon = vgui.Create( "ContentIcon", PropPanel )
-						icon:SetMaterial( "gib_system/" .. Model .. ".png" )
-						icon:SetName( "#gs.model." .. Model )
-
-						icon.DoClick = function()
-							RunConsoleCommand( "gibsystem_gib_name", Model )
-						frame:Close()
-						end
-						PropPanel:Add( icon )
+					icon.DoClick = function()
+						RunConsoleCommand( "gibsystem_gib_name", name )
+					frame:Close()
+					end
+					PropPanel:Add( icon )
 				end
-			-- end
+			end
 		end
 		
 		pnl:AddControl( "textbox", { Label = "#GS.HeadMess", Command = "gibsystem_head_mass" } )
@@ -182,11 +196,6 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		AppListExt:AddColumn( "#gs.addon" ):SetWidth(200)
 		AppListExt:AddColumn( "#gs.addon.ID" )
 
-		for k,v in pairs(ExtAddons) do
-			print(v..", "..k)
-			AppListExt:AddLine( k, v )
-		end
-		
 		AppListExt.DoDoubleClick = function( lst, index, pnl )
 			gui.OpenURL( WorkshopLink..pnl:GetColumnText( 2 ) )
 		end
