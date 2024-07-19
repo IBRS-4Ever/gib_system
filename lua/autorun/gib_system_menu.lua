@@ -195,7 +195,12 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		AppListExt:SetMultiSelect( false )
 		AppListExt:AddColumn( "#gs.addon" ):SetWidth(200)
 		AppListExt:AddColumn( "#gs.addon.ID" )
-
+		
+		for k,v in pairs(ExtAddons) do
+			-- print(v..", "..k)
+			AppListExt:AddLine( k, v )
+		end
+		
 		AppListExt.DoDoubleClick = function( lst, index, pnl )
 			gui.OpenURL( WorkshopLink..pnl:GetColumnText( 2 ) )
 		end

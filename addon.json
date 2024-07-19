@@ -1,9 +1,9 @@
 {
-	"title": "Server Content",
+	"title": "Server Content Base",
 	"type": "ServerContent",
 	"tags": 
 	[
-		"cartoon",
-		"fun"
+		"fun",
+		"cartoon"
 	]
 }

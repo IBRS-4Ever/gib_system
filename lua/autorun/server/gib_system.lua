@@ -10,6 +10,8 @@ Model_Table = {}
 
 Expressions_Table = {}
 
+RagHead = {}
+
 local GmodLanguage = string.lower(GetConVar("gmod_language"):GetString())
 
 function LocalizedText(lang,text)
@@ -61,7 +63,6 @@ local files, _ = file.Find("autorun/gibbing_system/models/*.lua", "LUA")
 
 local LegsAndTorso = {}
 local Limbs = {}
-local RagHead = { "platinum", "skadi" }
 
 for _, Model in ipairs(GibModels) do
 	LocalizedText("zh-cn","[碎尸系统] 已加载文件 "..Model)
@@ -104,6 +105,11 @@ LocalizedText("en","[Gibbing System] Loaded "..table.Count(GibModels).." Model(s
 LocalizedText("zh-cn","[碎尸系统] 加载完成。\n")
 LocalizedText("en","[Gibbing System] Loading Complete.\n")
 
+--[[
+PrintTable(Expressions_Table) 
+PrintTable(RagHead)
+]]--
+
 CreateConVar( "gibsystem_enabled", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Gib System.")
 CreateConVar( "gibsystem_gibbing_player", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Gib System for Players.")
 CreateConVar( "gibsystem_gibbing_npc", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Gib System for NPCs.")
@@ -125,7 +131,7 @@ CreateConVar( "gibsystem_rope", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + F
 CreateConVar( "gibsystem_rope_strength", 1000 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Rope Strength.")
 CreateConVar( "gibsystem_body_mass", 10 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Body Mass.")
 CreateConVar( "gibsystem_head_mass", 20 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Head Mass.")
-CreateConVar( "gibsystem_gib_group", "default" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Gib Group.")
+CreateConVar( "gibsystem_gib_group", "headless" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Gib Group.")
 CreateConVar( "gibsystem_gib_name", "default" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Gib Name.")
 CreateConVar( "gibsystem_experiment", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Experimental Features.")
 CreateConVar( "gibsystem_deathanimation", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable death animations.")
@@ -324,9 +330,9 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			DM:SetModel( "models/gib_system/"..Model.."_headless.mdl" )
 			DM:SetPos( npc:GetPos() )
 			DM:SetAngles( npc:GetAngles() )
-			DM:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
+			DM:SetCollisionGroup(0)
 			DM:Spawn()
-			DM:SetOwner( npc )
+			-- DM:SetOwner( npc )
 			DM:SetName( "DM" )
 			DM:ResetSequence( DM:LookupSequence( anim ) )
 			print("Sequence Is: "..anim)
@@ -335,38 +341,6 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			RandomBodyGroup(DM)
 			RandomSkin(DM)
 			BloodEffect(DM,2,"forward")
-			-- BloodEffect(DM,"1","ValveBiped.Bip01_Head1")
-			
-			--[[
-			local DM = ents.Create("prop_gs_deathanim")
-			DM.model = "models/gib_system/"..Model.."_headless.mdl"
-			DM:SetPos( npc:GetPos() )
-			DM:SetAngles( npc:GetAngles() )
-			-- DM:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
-			-- DM:SetOwner( npc )
-			-- DM:SetName( "DM" )
-			DM.anim = anim
-			DM:Spawn()
-			print("Sequence Is: "..anim)
-			DM:ResetSequenceInfo()
-			DM:SetCycle(1) -- Was 0, Set to 1 to make ragdoll looks good.
-			RandomBodyGroup(DM)
-			BloodEffect(DM,"1","ValveBiped.Bip01_Head1")
-			]]--
-			-- print( DM:GetSequenceMovement( DM:LookupSequence( anim ) ) )
-			
-			--[[
-			local timerDuration = DM:SequenceDuration()
-			local timerInterval = 0.1 -- 定时器间隔时间（秒）
-			local timerCount = timerDuration / timerInterval -- 重复次数
-			local timerBodyName = "DMMoveTimer".. DM:EntIndex()
-			local value, vector, angle = DM:GetSequenceMovement( DM:LookupSequence( anim ) )
-			local speed = DM:GetSequenceGroundSpeed( DM:LookupSequence( anim ) )
-			table.insert(timers, timerBodyName)
-			timer.Create(timerBodyName, timerInterval, timerCount, function()
-				DM:SetPos( DM:GetPos()- (vector/timerDuration) )
-			end)
-			]]--
 			
 			timer.Simple(DM:SequenceDuration(), function()
 				local ent = DM
@@ -864,6 +838,15 @@ function GibConvulsion(ent)
 end
 
 function CreateGibs(ent)
+	--[[
+	if table.Count(GibsCreated) > 1 then
+		PrintTable(GibsCreated)
+		SafeRemoveEntity(GibsCreated[1])
+		table.remove(GibsCreated,1)
+		print(GibsCreated[1])
+	end
+	]]--
+	
 	local dmgpos = last_dmgpos[ent]
 	local phys_bone, lpos
 
@@ -989,8 +972,8 @@ function CreateGibs(ent)
 	
 	if table.HasValue( UnfinishedModels, GibModel ) then
 		GibModel2 = CompletedModels[math.random(1, #CompletedModels)]
-		LocalizedText("zh-cn","[碎尸系统] 模型 "..GibModel.." 不存在此碎尸组合，已替换模型为 "..GibModel2.."。")
-		LocalizedText("en","[Gibbing System] Model "..GibModel.." doesn't support this Gib Group, Replaced model with "..GibModel2..".")
+		-- LocalizedText("zh-cn","[碎尸系统] 模型 "..GibModel.." 不存在此碎尸组合，已替换模型为 "..GibModel2.."。")
+		-- LocalizedText("en","[Gibbing System] Model "..GibModel.." doesn't support this Gib Group, Replaced model with "..GibModel2..".")
 	else
 		GibModel2 = GibModel
 	end
@@ -1034,7 +1017,7 @@ function CreateGibs(ent)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false, true, true)
-		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/torso.mdl", 1, "ValveBiped.bip01_pelvis", "body", false, true, true)
+		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/torso.mdl", 2, "forward", "body", false, true, true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：碎块")
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
@@ -1049,7 +1032,7 @@ function CreateGibs(ent)
 		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false, true, true)
-		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel2.."/no_limb/no_legs.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
+		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel2.."/no_limb/no_legs.mdl", 2, "forward", "body", false, true, true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibModel.." | 碎尸组合：无双腿")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibModel.." | Gib Group : "..ConditionGib)
@@ -1064,7 +1047,7 @@ function CreateGibs(ent)
 		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false, true, true)
-		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel2.."/no_limb/no_arms.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
+		SpawnGib("ragdoll", "models/gib_system/limbs/"..GibModel2.."/no_limb/no_arms.mdl", 2, "forward", "body", false, true, true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibModel.." | 碎尸组合：无双手")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibModel.." | Gib Group : "..ConditionGib)
