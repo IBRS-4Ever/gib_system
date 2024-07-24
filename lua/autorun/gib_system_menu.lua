@@ -18,7 +18,7 @@ cammode["#gs.cammode.body"] = {gibsystem_deathcam_mode = "1"}
 //cammode["#gs.cammode.legs"] = {gibsystem_deathcam_mode = "2"}
 
 local gibgroup = {}
--- gibgroup["#gs.gibgroup.random"] = {gibsystem_gib_group = "default"}
+-- gibgroup["#gs.gibgroup.random"] = {gibsystem_gib_group = "random"}
 gibgroup["#gs.gibgroup.headless"] = {gibsystem_gib_group = "headless"}
 gibgroup["#gs.gibgroup.limbs"] = {gibsystem_gib_group = "limbs"}
 --[[
@@ -110,7 +110,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			icon:SetMaterial( "gib_system/default.png" )
 			icon:SetName( "#gs.model.default" )
 			icon.DoClick = function()
-				RunConsoleCommand( "gibsystem_gib_name", "default" )
+				RunConsoleCommand( "gibsystem_gib_name", "random" )
 			frame:Close()
 			end
 			PropPanel:Add( icon )

@@ -63,6 +63,7 @@ local files, _ = file.Find("autorun/gibbing_system/models/*.lua", "LUA")
 
 local LegsAndTorso = {}
 local Limbs = {}
+local Half = {}
 
 for _, Model in ipairs(GibModels) do
 	LocalizedText("zh-cn","[碎尸系统] 已加载文件 "..Model)
@@ -96,6 +97,11 @@ for _, Model in ipairs(GibModels) do
 		util.PrecacheModel("models/gib_system/limbs/"..Model.."/left_arm.mdl")
 		util.PrecacheModel("models/gib_system/limbs/"..Model.."/right_arm.mdl")
 		util.PrecacheModel("models/gib_system/limbs/"..Model.."/torso.mdl")
+	end
+	if file.Exists( "models/gib_system/"..Model.."_half_left.mdl", "GAME" ) and file.Exists( "models/gib_system/"..Model.."_half_right.mdl", "GAME" ) then
+		table.insert(Half, Model)
+		util.PrecacheModel("models/gib_system/"..Model.."_half_left.mdl")
+		util.PrecacheModel("models/gib_system/"..Model.."_half_right.mdl")
 	end
 end
 
@@ -132,10 +138,10 @@ CreateConVar( "gibsystem_rope_strength", 1000 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN
 CreateConVar( "gibsystem_body_mass", 10 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Body Mass.")
 CreateConVar( "gibsystem_head_mass", 20 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Head Mass.")
 CreateConVar( "gibsystem_gib_group", "headless" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Gib Group.")
-CreateConVar( "gibsystem_gib_name", "default" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Gib Name.")
+CreateConVar( "gibsystem_gib_name", "random" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Gib Name.")
 CreateConVar( "gibsystem_experiment", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Experimental Features.")
 CreateConVar( "gibsystem_deathanimation", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable death animations.")
-CreateConVar( "gibsystem_deathanimation_name", "default" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set death animation.")
+CreateConVar( "gibsystem_deathanimation_name", "random" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set death animation.")
 
 local last_dmgpos = {}
 local timers = {}
@@ -275,7 +281,7 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			CreateGibs(npc)
 		else
 			
-			if GetConVar("gibsystem_deathanimation_name"):GetString() == "default" then
+			if GetConVar("gibsystem_deathanimation_name"):GetString() == "random" then
 				anim = anims_table[math.random(1,#anims_table)]
 			else
 				anim = GetConVar("gibsystem_deathanimation_name"):GetString()
@@ -392,7 +398,7 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 		if !GetConVar( "gibsystem_experiment" ):GetBool() or !GetConVar( "gibsystem_deathanimation" ):GetBool() then
 			CreateGibs(player)
 		else
-			if GetConVar("gibsystem_deathanimation_name"):GetString() == "default" then
+			if GetConVar("gibsystem_deathanimation_name"):GetString() == "random" then
 				anim = anims_table[math.random(1,#anims_table)]
 			else
 				anim = GetConVar("gibsystem_deathanimation_name"):GetString()
@@ -914,7 +920,8 @@ function CreateGibs(ent)
 					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
 				end
 					
-				phys:ApplyForceOffset( (DamageForce / Gib:GetPhysicsObjectCount()) + (Vector(0,0,2500) / Gib:GetPhysicsObjectCount()), DamagePosition)
+				phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition)
+				-- phys:ApplyForceOffset( (DamageForce / Gib:GetPhysicsObjectCount()) + (Vector(0,0,2500) / Gib:GetPhysicsObjectCount()), DamagePosition)
 				-- phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
 			end
 
@@ -930,10 +937,16 @@ function CreateGibs(ent)
 					if ( pos ) then phys:SetPos( pos ) end
 					if ( ang ) then phys:SetAngles( ang ) end
 				end
+
 				if GetConVar("gibsystem_body_mass"):GetInt() > 0 then
 					phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
 				end
-				phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
+
+				if DamageForce and DamagePosition then
+					phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
+				else
+					phys:ApplyForceOffset( Vector(0,0,0), Vector(0,0,0) )
+				end
 			end
 			
 			body = Entity(Gib:EntIndex())
@@ -1253,7 +1266,13 @@ function CreateGibs(ent)
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 		
 	elseif ConditionGib == "halves" then
-
+		
+		if table.HasValue( Half, GetConVar("gibsystem_gib_name"):GetString() ) then
+			Model = GetConVar("gibsystem_gib_name"):GetString()
+		else
+			Model = Half[math.random(1, #Half)]
+		end
+		
 		if !table.HasValue(RagHead,Model) then
 			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
 		else
