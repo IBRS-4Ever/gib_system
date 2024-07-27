@@ -313,7 +313,6 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			GibFacePose(head)
 			RandomBodyGroup(head)
 			RandomSkin(head)
-			-- BloodEffect(head,"1","ValveBiped.Bip01_Neck1")
 			table.insert(GibsCreated,head)
 			
 			for i = 0, head:GetPhysicsObjectCount() - 1 do
@@ -322,10 +321,9 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 				if GetConVar("gibsystem_head_mass"):GetInt() > 0 then
 					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt()/head:GetPhysicsObjectCount() )
 				end
-				
-				-- phys:ApplyForceCenter( velocity )
+
 				if DamageForce and DamagePosition then
-					phys:ApplyForceOffset( (DamageForce / head:GetPhysicsObjectCount()) + Vector(0,0,2500), DamagePosition)
+					phys:ApplyForceOffset( DamageForce / head:GetPhysicsObjectCount(), DamagePosition)
 				else
 					phys:ApplyForceOffset(Vector(0,0,0), Vector(0,0,0))
 				end
@@ -344,6 +342,7 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			print("Sequence Is: "..anim)
 			DM:ResetSequenceInfo()
 			DM:SetCycle(1) -- Was 0, Set to 1 to make ragdoll looks good.
+			
 			RandomBodyGroup(DM)
 			RandomSkin(DM)
 			BloodEffect(DM,2,"forward")
@@ -374,14 +373,11 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 						local pos, ang = ent:GetBonePosition( ragdoll:TranslatePhysBoneToBone( i ) )
 						if ( pos ) then bone:SetPos( pos ) end
 						if ( ang ) then bone:SetAngles( ang ) end
-
-						-- bone:ApplyForceOffset( DamageForce / ragdoll:GetPhysicsObjectCount(), DamagePosition )
 					end
 				end
 				
 				FingerRotation(ragdoll)
 				BloodEffect(ragdoll,2,"forward")
-				-- BloodEffect(ragdoll,"1","ValveBiped.Bip01_Head1")
 				table.insert(GibsCreated,ragdoll)
 				SafeRemoveEntity(DM)
 				ragdoll:CallOnRemove("RemoveHeadTimer",function(ragdoll) timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() ) end)
@@ -425,14 +421,11 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 			head:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
 			head:SetModel("models/gib_system/"..Model.."_head.mdl")
 			head:Spawn()
-			-- head:SetOwner( player )
-			-- Gib:SetName(tostring(ent).."sGibIndex"..Gib:EntIndex())
 			head:SetName("headIndex"..head:EntIndex())
 			head:Activate()
 			GibFacePose(head)
 			RandomBodyGroup(head)
 			RandomSkin(head)
-			-- BloodEffect(head,"1","ValveBiped.Bip01_Neck1")
 			table.insert(GibsCreated,head)
 			
 			for i = 0, head:GetPhysicsObjectCount() - 1 do
@@ -444,7 +437,7 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 				
 				-- phys:ApplyForceCenter( velocity )
 				if DamageForce and DamagePosition then
-					phys:ApplyForceOffset( (DamageForce / head:GetPhysicsObjectCount()) + Vector(0,0,2500), DamagePosition)
+					phys:ApplyForceOffset( DamageForce / head:GetPhysicsObjectCount(), DamagePosition)
 				else
 					phys:ApplyForceOffset(Vector(0,0,0), Vector(0,0,0))
 				end
@@ -561,15 +554,15 @@ function GibFacePose(ent)
 			if flex == 1 then
 				Exp = {
 					["blink"] = math.Rand(0.5,1),
-					["mouthdisgust"] = 1,
-					["browssad"] = 1
+					["mouth disgust"] = 1,
+					["brows sad"] = 1
 				}
 			else
 				Exp = {
-					["eyelookup"] = 0.75,
-					["mouthdisgust"] = 1,
-					["browssad"] = 1,
-					["eyesshock"] = math.Rand(0,0.5)
+					["eye look up"] = 0.75,
+					["mouth disgust"] = 1,
+					["brows sad"] = 1,
+					["eyes shock"] = math.Rand(0.25,0.5)
 				}
 			end
 			
@@ -646,16 +639,10 @@ function GibFacePose(ent)
 			}
 		elseif Model == "lapluma" then
 			Exp = {
-				["right_inner_raiser"] = 1,
-				["left_inner_raiser"] = 1,
-				["right_upper_raiser"] = 1,
-				["left_upper_raiser"] = 1,
-				["right_part"] = 1,
-				["left_part"] = 1,
-				["right_corner_puller"] = 1,
-				["left_corner_puller"] = 1,
-				["right_corner_depressor"] = 1,
-				["left_corner_depressor"] = 1
+				["blink left"] = math.Rand(0.5,1),
+				["blink right"] = math.Rand(0.5,1),
+				["mouth sad open"] = math.Rand(0.5,1),
+				["brow worry"] = 1
 			}
 		elseif GF2Models[Model] then
 			Exp = {
@@ -693,10 +680,12 @@ function BloodEffect(ent,Type,AttachmentPoint,BonusTime)
 			local timerCount = timerDuration / timerInterval -- 重复次数
 			local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
 			
-			table.insert(timers, timerBodyName)
-			timer.Create(timerBodyName, timerInterval, timerCount, function()
-				ParticleEffectAttach( "blood_advisor_pierce_spray", 4, ent, AP )
-			end)
+			if timerDuration > 0 then
+				timer.Create(timerBodyName, timerInterval, timerCount, function()
+					ParticleEffectAttach( "blood_advisor_pierce_spray", 4, ent, AP )
+				end)
+				table.insert(timers, timerBodyName)
+			end
 		else
 			-- print(ent:GetModel().." has no attachment named "..AP.."!")
 			local timerDuration = GetConVar( "gibsystem_blood_time" ):GetInt()-BonusTime -- 定时器持续时间（秒）
@@ -704,19 +693,21 @@ function BloodEffect(ent,Type,AttachmentPoint,BonusTime)
 			local timerCount = timerDuration / timerInterval -- 重复次数
 			local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
 			
-			table.insert(timers, timerBodyName)
-			if AttachmentPoint != nil then
-				timer.Create(timerBodyName, timerInterval, timerCount, function()
-					local boneIndex = ent:LookupBone( AttachmentPoint )
-					local bonePos = ent:GetBonePosition(boneIndex or 0)
-					local effectData = EffectData()
-					
-					effectData:SetOrigin(bonePos)
-					effectData:SetMagnitude(1)
-					effectData:SetScale(1)
-					effectData:SetRadius(1)
-					util.Effect("BloodImpact", effectData)
-				end)
+			if timerDuration > 0 then
+				if AttachmentPoint != nil then
+					timer.Create(timerBodyName, timerInterval, timerCount, function()
+						local boneIndex = ent:LookupBone( AttachmentPoint )
+						local bonePos = ent:GetBonePosition(boneIndex or 0)
+						local effectData = EffectData()
+						
+						effectData:SetOrigin(bonePos)
+						effectData:SetMagnitude(1)
+						effectData:SetScale(1)
+						effectData:SetRadius(1)
+						util.Effect("BloodImpact", effectData)
+					end)
+					table.insert(timers, timerBodyName)
+				end
 			end
 		end
 	end
