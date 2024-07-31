@@ -127,6 +127,7 @@ CreateConVar( "gibsystem_ragdoll_collisiongroup", 0 , FCVAR_ARCHIVE + FCVAR_SERV
 CreateConVar( "gibsystem_ragdoll_removetimer", 10 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set ragdoll remove timer.")
 CreateConVar( "gibsystem_deathcam_enable", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Deathcam.")
 CreateConVar( "gibsystem_deathcam_mode", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Deathcam Mode, 0 = Head, 1 = Body.")
+CreateConVar( "gibsystem_deathcam_firstperson", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] First Person Deathcam Mode.")
 CreateConVar( "gibsystem_blood_effect", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Blood Effect.")
 CreateConVar( "gibsystem_blood_time", 5 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Blood Effect's Time.")
 CreateConVar( "gibsystem_blood_time_body", 30 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Blood Effect's Time.")
@@ -142,6 +143,7 @@ CreateConVar( "gibsystem_gib_name", "random" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_
 CreateConVar( "gibsystem_experiment", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Experimental Features.")
 CreateConVar( "gibsystem_deathanimation", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable death animations.")
 CreateConVar( "gibsystem_deathanimation_name", "random" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set death animation.")
+CreateConVar( "gibsystem_model_category", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Category for each model (If set).")
 
 local last_dmgpos = {}
 local timers = {}
@@ -565,7 +567,13 @@ function GibFacePose(ent)
 					["eyes shock"] = math.Rand(0.25,0.5)
 				}
 			end
-			
+		elseif Model == "amiya" then
+			Exp = {
+				["blink"] = math.Rand(0.5,1),
+				["e"] = 1,
+				["pupil"] = math.Rand(0.5,1),
+				["brows sad"] = 1
+			}
 		elseif Model == "skadi" then
 			local flex = math.random(1,2)
 			if flex == 1 then
@@ -618,10 +626,12 @@ function GibFacePose(ent)
 		elseif Model == "sora" then
 			Exp = {
 				["blink"] = math.Rand(0.5,1),
+				["eye look up"] = math.Rand(0.5,1),
 				["mouth sad"] = 1,
 				["mouth aah"] = 1,
 				["teeth up"] = 0.1,
-				["teeth down"] = 0.1
+				["teeth down"] = 0.1,
+				["brows worry"] = 1
 			}
 		elseif Model == "rosmontis" then
 			Exp = {
