@@ -574,6 +574,12 @@ function GibFacePose(ent)
 				["pupil"] = math.Rand(0.5,1),
 				["brows sad"] = 1
 			}
+		elseif Model == "skyfire" then
+			Exp = {
+				["blink"] = math.Rand(0.25,1),
+				["mouth ah"] = math.Rand(0,1),
+				["brows worry 2"] = 1
+			}
 		elseif Model == "skadi" then
 			local flex = math.random(1,2)
 			if flex == 1 then
