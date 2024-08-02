@@ -18,10 +18,9 @@ cammode["#gs.cammode.body"] = {gibsystem_deathcam_mode = "1"}
 //cammode["#gs.cammode.legs"] = {gibsystem_deathcam_mode = "2"}
 
 local gibgroup = {}
--- gibgroup["#gs.gibgroup.random"] = {gibsystem_gib_group = "random"}
+gibgroup["#gs.gibgroup.random"] = {gibsystem_gib_group = "random"}
 gibgroup["#gs.gibgroup.headless"] = {gibsystem_gib_group = "headless"}
 gibgroup["#gs.gibgroup.limbs"] = {gibsystem_gib_group = "limbs"}
---[[
 gibgroup["#gs.gibgroup.no_legs"] = {gibsystem_gib_group = "no_legs"}
 gibgroup["#gs.gibgroup.no_arms"] = {gibsystem_gib_group = "no_arms"}
 gibgroup["#gs.gibgroup.no_right_leg_left_arm"] = {gibsystem_gib_group = "no_right_leg_left_arm"}
@@ -36,8 +35,8 @@ gibgroup["#gs.gibgroup.no_right_no_arm"] = {gibsystem_gib_group = "no_right_no_a
 gibgroup["#gs.gibgroup.no_left_no_arm"] = {gibsystem_gib_group = "no_left_no_arm"}
 gibgroup["#gs.gibgroup.no_right_no_leg"] = {gibsystem_gib_group = "no_right_no_leg"}
 gibgroup["#gs.gibgroup.no_left_no_leg"] = {gibsystem_gib_group = "no_left_no_leg"}
-]]--
 gibgroup["#gs.gibgroup.legs_and_torso"] = {gibsystem_gib_group = "legs_&_torso"}
+gibgroup["#gs.gibgroup.halves"] = {gibsystem_gib_group = "halves"}
 
 hook.Add("AddToolMenuTabs", "GIBBING_SYSTEM_ADDMENU", function()
 	spawnmenu.AddToolCategory("Options", "GIBBING SYSTEM Settings", "#GS.Title")
