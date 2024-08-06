@@ -2,7 +2,6 @@
 AddCSLuaFile()
 
 include("autorun/gibbing_system/defaultnpcs.lua")
-include("autorun/gibbing_system/gf2_models.lua")
 include("autorun/gibbing_system/models.lua")
 
 Model_Path = "autorun/gibbing_system/models/"
@@ -605,28 +604,23 @@ function GibFacePose(ent)
 				Exp = {
 					["blink"] = math.Rand(0.5,1),
 					["mouth corner lower"] = 1,
-					["mouth corner upper"] = -1,
-					["mouth smile"] = -1,
-					["brow sadl"] = 1,
-					["brow sadr"] = 1
+					["mouth n"] = 1,
+					["mouth i"] = 1,
+					["brow sad"] = 1
 				}
 			elseif flex == 2 then
 				Exp = {
-					["eye scalel"] = 0.5,
-					["eye scaler"] = 0.5,
-					["eye upl"] = 0.25,
-					["eye upr"] = 0.25,
+					["eye scale"] = 0.5,
+					["eye up"] = 0.25,
 					["mouth o"] = 1
 				}
 			else
 				Exp = {
 					["mouth a"] = math.Rand(0.3,0.7),
-					["brow sadr"] = 1,
-					["brow sadl"] = 1,
+					["brow sad"] = 1,
 					["blink"] = math.Rand(0.5,1),
 					["mouth corner lower"] = 1,
-					["eye upl"] = 0.3,
-					["eye upr"] = 0.3
+					["eye up"] = 0.3
 				}
 			end
 		elseif Model == "sora" then
@@ -660,7 +654,7 @@ function GibFacePose(ent)
 				["mouth sad open"] = math.Rand(0.5,1),
 				["brow worry"] = 1
 			}
-		elseif GF2Models[Model] then
+		elseif list.HasEntry( "GIBSYSTEM_GIRLS_FRONTLINE_2_MODELS", Model ) then
 			Exp = {
 				["eye_blink_left"] = math.Rand(0.5,1),
 				["eye_blink_right"] = math.Rand(0.5,1),
@@ -673,8 +667,6 @@ function GibFacePose(ent)
 		else
 			Exp = { ["blink"] = math.Rand(0.5,1) }
 		end
-		-- print(Model,GF2Models[Model])
-		-- PrintTable(GF2Models)
 		for i = 0, num_expressions - 1 do
 			local name = string.lower(ent:GetFlexName(i))
 			if Exp[name] != nil then
