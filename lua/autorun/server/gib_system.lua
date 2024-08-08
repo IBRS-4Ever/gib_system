@@ -148,7 +148,7 @@ local last_dmgpos = {}
 local timers = {}
 local GibsCreated = {}
 
-local UnfinishedModels = { "ifrit", "centaureissi", "suomi_midsummer_pixie" }
+local UnfinishedModels = { "ifrit", "centaureissi", "suomi_midsummer_pixie", "dushevnaya" }
 local CompletedModels = { "provence", "sora", "vigna", "platinum", "chen" }
 
 local anims_table = {
