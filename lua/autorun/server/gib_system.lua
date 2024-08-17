@@ -5,7 +5,6 @@ include("autorun/gibbing_system/defaultnpcs.lua")
 include("autorun/gibbing_system/models.lua")
 
 Model_Path = "autorun/gibbing_system/models/"
-Model_Table = {}
 
 Expressions_Table = {}
 
@@ -37,9 +36,6 @@ local function GibSystem_Initialize()
 end
 
 GibSystem_Initialize()
-hook.Add("InitPostEntity","GibSystem_Initialize",GibSystem_Initialize)
-
--- PrintTable(Model_Table)
 
 LocalizedText("zh-cn","[碎尸系统] 正在加载文件...")
 LocalizedText("en","[Gibbing System] Loading Files...")
@@ -53,9 +49,8 @@ else
 	LocalizedText("en","[Gibbing System] Can't find Fedhoria.")
 end
 
-concommand.Add( "GibsystemReload", function( ply, cmd, args )
-	Model_Table = {}
-	GibSystem_Initialize()
+concommand.Add( "gibsystem_print_table", function( ply, cmd, args)
+	PrintTable(Expressions_Table)
 end )
 
 local files, _ = file.Find("autorun/gibbing_system/models/*.lua", "LUA")
@@ -254,25 +249,6 @@ end)
 local anims = nil
 
 hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
---[[
-	local model = Model_Table[math.random(1,#Model_Table)]
-	local name = model.name
-	MsgN(name)
-	
-	for _,vtbl in pairs(Model_Table) do
-		local model = vtbl[math.random(1,#vtbl)]
-			local name = model.name
-			MsgN(name)
-		for k,v in pairs(vtbl) do
-			
-			local tbl2 = v[k]
-			
-			if v ~= nil and v.mdl ~= nil then
-				MsgN(v.mdl.." Part: "..v.part)
-			end
-		end
-	end
-]]--
 
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and DefaultNPCs[npc:GetClass()] then
 			
@@ -538,7 +514,7 @@ end)
 function CreateRope(gib1,gib2,gib1phys,gib2phys,vec1,vec2)
 	if GetConVar( "gibsystem_rope" ):GetBool() then
 		if IsValid(gib1) and IsValid(gib2) then
-			local constraint = constraint.Rope(gib1, gib2, gib1:TranslateBoneToPhysBone( gib1:LookupBone( "ValveBiped.Bip01_Head1" ) ), gib2:TranslateBoneToPhysBone( gib2:LookupBone( "ValveBiped.Bip01_Spine4" or "ValveBiped.Bip01_Spine2" or "ValveBiped.Bip01_Spine1" ) ), Vector(0,0,-3), Vector(5,0,0), 10, 0, GetConVar( "gibsystem_rope_strength" ):GetInt(), 2, "cable/redlaser", false)
+			local constraint = constraint.Rope(gib1, gib2, gib1:TranslateBoneToPhysBone( gib1:LookupBone( "ValveBiped.Bip01_Head1" ) ), gib2:TranslateBoneToPhysBone( gib2:LookupBone( "ValveBiped.Bip01_Spine4" or "ValveBiped.Bip01_Spine2" or "ValveBiped.Bip01_Spine1" ) ), Vector(0,0,-3), Vector(5,0,0), 5, 0, GetConVar( "gibsystem_rope_strength" ):GetInt(), 2, "cable/redlaser", false)
 		else
 			LocalizedText("zh-cn","[碎尸系统] 无效实体索引。无法创建绳索。")
 			LocalizedText("en","[Gibbing System] Invaild Index. Can't create rope.")
@@ -612,7 +588,9 @@ function GibFacePose(ent)
 				Exp = {
 					["eye scale"] = 0.5,
 					["eye up"] = 0.25,
-					["mouth o"] = 1
+					["mouth a 2"] = math.Rand(0.5,1),
+					["mouth corner lower"] = 1,
+					["brow sad"] = 1
 				}
 			else
 				Exp = {
