@@ -59,6 +59,9 @@ local LegsAndTorso = {}
 local Limbs = {}
 local Half = {}
 
+local UnfinishedModels = {}
+local CompletedModels = {}
+
 for _, Model in ipairs(GibModels) do
 	LocalizedText("zh-cn","[碎尸系统] 已加载文件 "..Model)
 	LocalizedText("en","[Gibbing System] Loaded file "..Model)
@@ -91,6 +94,11 @@ for _, Model in ipairs(GibModels) do
 		util.PrecacheModel("models/gib_system/limbs/"..Model.."/left_arm.mdl")
 		util.PrecacheModel("models/gib_system/limbs/"..Model.."/right_arm.mdl")
 		util.PrecacheModel("models/gib_system/limbs/"..Model.."/torso.mdl")
+		if !file.Exists( "models/gib_system/limbs/"..Model.."/no_limb/no_right_leg.mdl", "GAME" ) then
+			table.insert(UnfinishedModels, Model)
+		else
+			table.insert(CompletedModels, Model)
+		end
 	end
 	if file.Exists( "models/gib_system/"..Model.."_half_left.mdl", "GAME" ) and file.Exists( "models/gib_system/"..Model.."_half_right.mdl", "GAME" ) then
 		table.insert(Half, Model)
@@ -142,9 +150,6 @@ CreateConVar( "gibsystem_model_category", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_E
 local last_dmgpos = {}
 local timers = {}
 local GibsCreated = {}
-
-local UnfinishedModels = { "ifrit", "centaureissi", "suomi_midsummer_pixie", "dushevnaya" }
-local CompletedModels = { "provence", "sora", "vigna", "platinum", "chen" }
 
 local anims_table = {
 	"DIE_Simple_01",
