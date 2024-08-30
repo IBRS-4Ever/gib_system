@@ -3,6 +3,9 @@ AddCSLuaFile()
 
 include("autorun/gibbing_system/defaultnpcs.lua")
 include("autorun/gibbing_system/models.lua")
+include("autorun/gibbing_system/expressions.lua")
+include("autorun/gibbing_system/finger_rotation.lua")
+include("autorun/gibbing_system/death_anims.lua")
 
 Model_Path = "autorun/gibbing_system/models/"
 
@@ -55,9 +58,9 @@ end )
 
 local files, _ = file.Find("autorun/gibbing_system/models/*.lua", "LUA")
 
-local LegsAndTorso = {}
+local UpperAndLower = {}
 local Limbs = {}
-local Half = {}
+local LeftAndRight = {}
 
 local UnfinishedModels = {}
 local CompletedModels = {}
@@ -83,7 +86,7 @@ for _, Model in ipairs(GibModels) do
 	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_no_leg.mdl")
 	util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_leg.mdl")
 	if file.Exists( "models/gib_system/"..Model.."_legs.mdl", "GAME" ) and file.Exists( "models/gib_system/"..Model.."_torso.mdl", "GAME" ) then
-		table.insert(LegsAndTorso, Model)
+		table.insert(UpperAndLower, Model)
 		util.PrecacheModel("models/gib_system/"..Model.."_legs.mdl")
 		util.PrecacheModel("models/gib_system/"..Model.."_torso.mdl")
 	end
@@ -101,14 +104,14 @@ for _, Model in ipairs(GibModels) do
 		end
 	end
 	if file.Exists( "models/gib_system/"..Model.."_half_left.mdl", "GAME" ) and file.Exists( "models/gib_system/"..Model.."_half_right.mdl", "GAME" ) then
-		table.insert(Half, Model)
+		table.insert(LeftAndRight, Model)
 		util.PrecacheModel("models/gib_system/"..Model.."_half_left.mdl")
 		util.PrecacheModel("models/gib_system/"..Model.."_half_right.mdl")
 	end
 end
 
-LocalizedText("zh-cn","[碎尸系统] 已加载 "..table.Count(GibModels).." 个模型。"..table.Count(LegsAndTorso).." 个上下半身模型，"..table.Count(Limbs).." 个断肢模型。")
-LocalizedText("en","[Gibbing System] Loaded "..table.Count(GibModels).." Model(s). "..table.Count(LegsAndTorso).." Legs & Torso Model(s), "..table.Count(Limbs).." Limbs Model(s).")
+LocalizedText("zh-cn","[碎尸系统] 已加载 "..table.Count(GibModels).." 个模型。")
+LocalizedText("en","[Gibbing System] Loaded "..table.Count(GibModels).." Model(s). ")
 
 LocalizedText("zh-cn","[碎尸系统] 加载完成。\n")
 LocalizedText("en","[Gibbing System] Loading Complete.\n")
@@ -151,75 +154,6 @@ local last_dmgpos = {}
 local timers = {}
 local GibsCreated = {}
 
-local anims_table = {
-	"DIE_Simple_01",
-	"DIE_Simple_02",
-	"DIE_Simple_03",
-	"DIE_Simple_04",
-	"DIE_Simple_05",
-	"DIE_Simple_06",
-	"DIE_Simple_07",
-	"DIE_Simple_08",
-	"DIE_Simple_09",
-	"DIE_Simple_10",
-	"DIE_Simple_11",
-	"DIE_Simple_12",
-	"DIE_Simple_13",
-	"DIE_Simple_14",
-	"DIE_Simple_15",
-	"DIE_Simple_16",
-	"DIE_Simple_17",
-	"DIE_Simple_18",
-	"DIE_Simple_19",
-	"DIE_Simple_20",
-	"DIE_Simple_21",
-	"DIE_Headshot_FFront_01",
-	"DIE_Headshot_FFront_02",
-	"DIE_Headshot_FFront_03",
-	"DIE_Headshot_FFront_04",
-	"DIE_Headshot_FFront_05",
-	"DIE_FBack_01",
-	"DIE_FBack_02",
-	"DIE_FBack_03",
-	"DIE_FBack_04",
-	"DIE_FBack_05",
-	"DIE_FBack_06",
-	"DIE_Headshot_FBack_01",
-	"DIE_Headshot_FBack_02",
-	"DIE_Headshot_FBack_03",
-	"DIE_Shotgun_FBack_01",
-	"DIE_Shotgun_FBack_02",
-	"DIE_Shotgun_FFront_01",
-	"DIE_Shotgun_FFront_02",
-	"DIE_Shotgun_FFront_03",
-	"DIE_Shotgun_FFront_04",
-	"DIE_Shotgun_FFront_05",
-	"DIE_Shotgun_FFront_06",
-	"DIE_Shotgun_FFront_07",
-	"DIE_Shotgun_FFront_08",
-	"DIE_Shotgun_FFront_09",
-	"DIE_Shotgun_FLeft_01",
-	"DIE_Shotgun_FLeft_02",
-	"DIE_Shotgun_FLeft_03",
-	"DIE_Shotgun_FFront_01",
-	"DAZE_01",
-	"SHOTFOOT_01",
-	"SHOTFOOT_02",
-	"SHOTFOOT_03",
-	"SHOVE_Backward_01",
-	"SHOVE_Backward_02",
-	"SHOVE_Backward_03",
-	"SHOVE_Backward_04",
-	"SHOVE_Backward_05",
-	"SHOVE_Backward_06",
-	"SHOVE_Forward_01",
-	"SHOVE_Leftward_01",
-	"SHOVE_Rightward_01",
-	"SHOTHAND_01",
-	"SHOTHAND_02",
-	"SHOTHAND_03"
-}
-			
 local function RemoveTimers()
     for _, timerid in ipairs(timers) do
         timer.Remove(timerid)
@@ -527,138 +461,6 @@ function CreateRope(gib1,gib2,gib1phys,gib2phys,vec1,vec2)
 	end
 end
 
-function GibFacePose(ent)
-	if GetConVar( "gibsystem_death_express" ):GetBool() then
-		local Exp = {}
-		local num_expressions = ent:GetFlexNum() -- 获取模型的表情数量
-		if Model == "platinum" then
-			local flex = math.random(1,2)
-			if flex == 1 then
-				Exp = {
-					["blink"] = math.Rand(0.5,1),
-					["mouth disgust"] = 1,
-					["brows sad"] = 1
-				}
-			else
-				Exp = {
-					["eye look up"] = 0.75,
-					["mouth disgust"] = 1,
-					["brows sad"] = 1,
-					["eyes shock"] = math.Rand(0.25,0.5)
-				}
-			end
-		elseif Model == "amiya" then
-			Exp = {
-				["blink"] = math.Rand(0.5,1),
-				["e"] = 1,
-				["pupil"] = math.Rand(0.5,1),
-				["brows sad"] = 1
-			}
-		elseif Model == "skyfire" then
-			Exp = {
-				["blink"] = math.Rand(0.25,1),
-				["mouth ah"] = math.Rand(0,1),
-				["brows worry 2"] = 1
-			}
-		elseif Model == "skadi" then
-			local flex = math.random(1,2)
-			if flex == 1 then
-				Exp = {
-					["blink"] = math.Rand(0.5,1),
-					["mouthdisgust"] = 1,
-					["browssad"] = 1
-				}
-			else
-				Exp = {
-					["eyelookup"] = 0.75,
-					["mouthsadopen"] = 1,
-					["browssad"] = 1,
-					["eyesshock"] = math.Rand(0.25,0.75)
-				}
-			end
-		elseif Model == "skadi_alter" then
-			Exp = { ["eyeslookup"] = 1 }
-		elseif Model == "provence" then
-			local flex = math.random(1,3)
-			local Exp_Value = {}
-			if flex == 1 then
-				Exp = {
-					["blink"] = math.Rand(0.5,1),
-					["mouth corner lower"] = 1,
-					["mouth n"] = 1,
-					["mouth i"] = 1,
-					["brow sad"] = 1
-				}
-			elseif flex == 2 then
-				Exp = {
-					["eye scale"] = 0.5,
-					["eye up"] = 0.25,
-					["mouth a 2"] = math.Rand(0.5,1),
-					["mouth corner lower"] = 1,
-					["brow sad"] = 1
-				}
-			else
-				Exp = {
-					["mouth a"] = math.Rand(0.3,0.7),
-					["brow sad"] = 1,
-					["blink"] = math.Rand(0.5,1),
-					["mouth corner lower"] = 1,
-					["eye up"] = 0.3
-				}
-			end
-		elseif Model == "sora" then
-			Exp = {
-				["blink"] = math.Rand(0.5,1),
-				["eye look up"] = math.Rand(0.5,1),
-				["mouth sad"] = 1,
-				["mouth aah"] = 1,
-				["teeth up"] = 0.1,
-				["teeth down"] = 0.1,
-				["brows worry"] = 1
-			}
-		elseif Model == "rosmontis" then
-			Exp = {
-				["eyescryingop"] = 1,
-				["mouthshockedop"] = 0.3,
-				["eyebrowsshockedcl"] = 1
-			}
-		elseif Model == "schwarz" then
-			Exp = { ["blink"] = 0.7 }
-		elseif Model == "chen" then
-			Exp = {
-				["blink"] = math.Rand(0.5,1),
-				["hmm"] = 1,
-				["sad"] = 1
-			}
-		elseif Model == "lapluma" then
-			Exp = {
-				["blink left"] = math.Rand(0.5,1),
-				["blink right"] = math.Rand(0.5,1),
-				["mouth sad open"] = math.Rand(0.5,1),
-				["brow worry"] = 1
-			}
-		elseif list.HasEntry( "GIBSYSTEM_GIRLS_FRONTLINE_2_MODELS", Model ) then
-			Exp = {
-				["eye_blink_left"] = math.Rand(0.5,1),
-				["eye_blink_right"] = math.Rand(0.5,1),
-				["brows_worry"] = math.Rand(0.5,1),
-				["mouth_surprised"] = math.Rand(0.5,1),
-				["eyes_look_up"] = math.Rand(0.5,1),
-				["mouth_angry_teeth"] = math.Rand(0.25,0.5),
-				["mouth_wide_open"] = math.Rand(0.1,0.3)
-			}
-		else
-			Exp = { ["blink"] = math.Rand(0.5,1) }
-		end
-		for i = 0, num_expressions - 1 do
-			local name = string.lower(ent:GetFlexName(i))
-			if Exp[name] != nil then
-				ent:SetFlexWeight(i, Exp[name])
-			end
-		end
-	end
-end
-
 function BloodEffect(ent,Type,AttachmentPoint,BonusTime)
 	if GetConVar( "gibsystem_blood_effect" ):GetBool() then
 		local AP = ent:LookupAttachment( AttachmentPoint )
@@ -704,90 +506,6 @@ function BloodEffect(ent,Type,AttachmentPoint,BonusTime)
 	end
 end
 
-function FingerRotation(ent)
-	if GetConVar( "gibsystem_random_finger_rotating" ):GetBool() then
-		local Fingers = {
-			["ValveBiped.Bip01_L_Finger1"] = Angle(math.Rand(-5,5),-25-math.Rand(0,4),0),
-			["ValveBiped.Bip01_L_Finger11"] = Angle(0,-35-math.Rand(0,4),0),
-			["ValveBiped.Bip01_L_Finger12"] = Angle(0,-25-math.Rand(0,4),0),
-			["ValveBiped.Bip01_L_Finger2"] = Angle(math.Rand(-5,5),-26-math.Rand(0,4),0),
-			["ValveBiped.Bip01_L_Finger21"] = Angle(0,-35-math.Rand(0,40),0),
-			["ValveBiped.Bip01_L_Finger22"] = Angle(0,-25-math.Rand(0,40),0),
-			["ValveBiped.Bip01_L_Finger3"] = Angle(math.Rand(-5,5),-25-math.Rand(0,4),0),
-			["ValveBiped.Bip01_L_Finger31"] = Angle(0,-35-math.Rand(0,40),0),
-			["ValveBiped.Bip01_L_Finger32"] = Angle(0,-25-math.Rand(0,40),0),
-			["ValveBiped.Bip01_L_Finger4"] = Angle(math.Rand(-5,5),-25-math.Rand(0,30),0),
-			["ValveBiped.Bip01_L_Finger41"] = Angle(0,-20-math.Rand(0,20),0),
-			["ValveBiped.Bip01_L_Finger42"] = Angle(0,-20-math.Rand(0,3),0),
-			["ValveBiped.Bip01_L_Finger0"] = Angle(0,10-math.Rand(0,2),0),
-			["ValveBiped.Bip01_L_Finger01"] = Angle(0,20-math.Rand(0,2),0),
-			["ValveBiped.Bip01_L_Finger02"] = Angle(0,25-math.Rand(0,3),0),
-			["ValveBiped.Bip01_R_Finger1"] = Angle(math.Rand(-5,5),-25-math.Rand(0,4),0),
-			["ValveBiped.Bip01_R_Finger11"] = Angle(0,-35-math.Rand(0,4),0),
-			["ValveBiped.Bip01_R_Finger12"] = Angle(0,-25-math.Rand(0,4),0),
-			["ValveBiped.Bip01_R_Finger2"] = Angle(math.Rand(-5,5),-27-math.Rand(0,4),0),
-			["ValveBiped.Bip01_R_Finger21"] = Angle(0,-35-math.Rand(0,4),0),
-			["ValveBiped.Bip01_R_Finger22"] = Angle(0,-25-math.Rand(0,4),0),
-			["ValveBiped.Bip01_R_Finger3"] = Angle(math.Rand(-5,5),-25-math.Rand(0,4),0),
-			["ValveBiped.Bip01_R_Finger31"] = Angle(0,-32-math.Rand(0,4),0),
-			["ValveBiped.Bip01_R_Finger32"] = Angle(0,-20-math.Rand(0,40),0),
-			["ValveBiped.Bip01_R_Finger4"] = Angle(math.Rand(-5,5),-25-math.Rand(0,30),0),
-			["ValveBiped.Bip01_R_Finger41"] = Angle(0,-25-math.Rand(0,20),0),
-			["ValveBiped.Bip01_R_Finger42"] = Angle(0,-25-math.Rand(0,3),0),
-			["ValveBiped.Bip01_R_Finger0"] = Angle(0,10-math.Rand(0,2),0),
-			["ValveBiped.Bip01_R_Finger01"] = Angle(0,20-math.Rand(0,2),0),
-			["ValveBiped.Bip01_R_Finger02"] = Angle(0,25-math.Rand(0,3),0)
-		}
-		for bonename = 0 , ent:GetBoneCount() do 
-			if Fingers[ent:GetBoneName(bonename)] != nil then
-				ent:ManipulateBoneAngles(bonename,Fingers[ent:GetBoneName(bonename)])
-			end
-		end
-	end
-
-	if GetConVar("gibsystem_random_toe_rotating"):GetBool() then
-		local Toes_Bones = { 
-			["ValveBiped.Bip01_L_Toe0"] = true,
-			["ValveBiped.Bip01_R_Toe0"] = true
-		}
-		for bonename = 0 , ent:GetBoneCount() do 
-			if Toes_Bones[ ent:GetBoneName(bonename) ] then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			end
-		end
-	end
-
-	if GetConVar("gibsystem_random_gf2_toe_rotating"):GetBool() then
-		local GF2_Toes_Bones = { 
-			["BigToe1_L"] = true,
-			["BigToe2_L"] = true,
-			["BigToe1_R"] = true,
-			["BigToe2_R"] = true,
-			["LongToe1_L"] = true,
-			["LongToe2_L"] = true,
-			["LongToe1_R"] = true,
-			["LongToe2_R"] = true,
-			["MiddleToe1_L"] = true,
-			["MiddleToe2_L"] = true,
-			["MiddleToe1_R"] = true,
-			["MiddleToe2_R"] = true,
-			["RingToe1_L"] = true,
-			["RingToe2_L"] = true,
-			["RingToe1_R"] = true,
-			["RingToe2_R"] = true,
-			["PinkyToe1_L"] = true,
-			["PinkyToe2_L"] = true,
-			["PinkyToe1_R"] = true,
-			["PinkyToe2_R"] = true
-		}
-		for bonename = 0 , ent:GetBoneCount() do 
-			if GF2_Toes_Bones[ ent:GetBoneName(bonename) ] then
-				ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
-			end
-		end
-	end
-end
-	
 function RandomBodyGroup(ent)
 	if GetConVar( "gibsystem_random_bodygroup" ):GetBool() then
 		local BodygroupBlacklist = { "tail", "ears", "horns", "horn left", "horn right" }
@@ -826,15 +544,7 @@ function GibConvulsion(ent)
 end
 
 function CreateGibs(ent)
-	--[[
-	if table.Count(GibsCreated) > 1 then
-		PrintTable(GibsCreated)
-		SafeRemoveEntity(GibsCreated[1])
-		table.remove(GibsCreated,1)
-		print(GibsCreated[1])
-	end
-	]]--
-	
+
 	local dmgpos = last_dmgpos[ent]
 	local phys_bone, lpos
 
@@ -957,7 +667,7 @@ function CreateGibs(ent)
 		GibModel = Limbs[math.random(1, #Limbs)]
 	end
 	
-	local Conditions = { "headless", "limbs", "no_legs", "no_arms", "no_right_leg_left_arm", "no_left_leg_right_arm", "no_left_leg", "no_right_leg", "no_left_arm", "no_right_arm", "no_right", "no_left", "no_right_no_arm", "no_left_no_arm", "no_right_no_leg", "no_left_no_leg", "legs_&_torso", "halves" }
+	local Conditions = { "headless", "limbs", "no_legs", "no_arms", "no_right_leg_left_arm", "no_left_leg_right_arm", "no_left_leg", "no_right_leg", "no_left_arm", "no_right_arm", "no_right", "no_left", "no_right_no_arm", "no_left_no_arm", "no_right_no_leg", "no_left_no_leg", "upper_and_lower", "left_and_right" }
 	
 	if table.HasValue( Conditions, GetConVar("gibsystem_gib_group"):GetString() ) then
 		ConditionGib = GetConVar("gibsystem_gib_group"):GetString()
@@ -1227,12 +937,12 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibModel.." | 碎尸组合：无左半无腿")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibModel.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "legs_&_torso" then
+	elseif ConditionGib == "upper_and_lower" then
 
-		if table.HasValue( LegsAndTorso, GetConVar("gibsystem_gib_name"):GetString() ) then
+		if table.HasValue( UpperAndLower, GetConVar("gibsystem_gib_name"):GetString() ) then
 			Model = GetConVar("gibsystem_gib_name"):GetString()
 		else
-			Model = LegsAndTorso[math.random(1, #LegsAndTorso)]
+			Model = UpperAndLower[math.random(1, #UpperAndLower)]
 		end
 		
 		if !table.HasValue(RagHead,Model) then
@@ -1247,12 +957,12 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：上/下半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 		
-	elseif ConditionGib == "halves" then
+	elseif ConditionGib == "left_and_right" then
 		
-		if table.HasValue( Half, GetConVar("gibsystem_gib_name"):GetString() ) then
+		if table.HasValue( LeftAndRight, GetConVar("gibsystem_gib_name"):GetString() ) then
 			Model = GetConVar("gibsystem_gib_name"):GetString()
 		else
-			Model = Half[math.random(1, #Half)]
+			Model = LeftAndRight[math.random(1, #LeftAndRight)]
 		end
 		
 		if !table.HasValue(RagHead,Model) then

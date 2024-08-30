@@ -35,8 +35,8 @@ gibgroup["#gs.gibgroup.no_right_no_arm"] = {gibsystem_gib_group = "no_right_no_a
 gibgroup["#gs.gibgroup.no_left_no_arm"] = {gibsystem_gib_group = "no_left_no_arm"}
 gibgroup["#gs.gibgroup.no_right_no_leg"] = {gibsystem_gib_group = "no_right_no_leg"}
 gibgroup["#gs.gibgroup.no_left_no_leg"] = {gibsystem_gib_group = "no_left_no_leg"}
-gibgroup["#gs.gibgroup.legs_and_torso"] = {gibsystem_gib_group = "legs_&_torso"}
-gibgroup["#gs.gibgroup.halves"] = {gibsystem_gib_group = "halves"}
+gibgroup["#gs.gibgroup.upper_and_lower"] = {gibsystem_gib_group = "upper_and_lower"}
+gibgroup["#gs.gibgroup.left_and_right"] = {gibsystem_gib_group = "left_and_right"}
 
 hook.Add("AddToolMenuTabs", "GIBBING_SYSTEM_ADDMENU", function()
 	spawnmenu.AddToolCategory("Options", "GIBBING SYSTEM Settings", "#GS.Title")

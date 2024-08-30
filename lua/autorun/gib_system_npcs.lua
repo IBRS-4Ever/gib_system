@@ -6,7 +6,7 @@ local RndModel = GibModels[math.random(1, #GibModels)]
 
 hook.Add( "OnEntityCreated", "RandomModel", function()
 	RndModel = GibModels[math.random(1, #GibModels)]
-	local NPC = { 	Name = "Headless Citizens", 
+	local NPC = { 	Name = "#GS.HeadlessCitizen", 
 				Class = "npc_citizen",
 				KeyValues = { citizentype = 4 },
 				Model = "models/gib_system/"..RndModel.."_headless.mdl",
