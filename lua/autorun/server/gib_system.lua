@@ -48,8 +48,9 @@ if file.Exists( "fedhoria/modules.lua", "LUA" ) then
 	LocalizedText("zh-cn","[碎尸系统] 已检测到 Fedhoria 并已加载。")
 	LocalizedText("en","[Gibbing System] Fedhoria detected and loaded.")
 else
-	LocalizedText("zh-cn","[碎尸系统] 未发现 Fedhoria。")
-	LocalizedText("en","[Gibbing System] Can't find Fedhoria.")
+	LocalizedText("zh-cn","[碎尸系统] 未发现 Fedhoria。碎尸系统已禁用。")
+	LocalizedText("en","[Gibbing System] Can't find Fedhoria. Gibbing System Disabled.")
+	return false
 end
 
 concommand.Add( "gibsystem_print_table", function( ply, cmd, args)
@@ -508,7 +509,7 @@ end
 
 function RandomBodyGroup(ent)
 	if GetConVar( "gibsystem_random_bodygroup" ):GetBool() then
-		local BodygroupBlacklist = { "tail", "ears", "horns", "horn left", "horn right" }
+		local BodygroupBlacklist = { "tail", "ears", "horns", "horn left", "horn right", "fox ears" }
 		local num_bodygroups = ent:GetNumBodyGroups()
 		for i = 0, num_bodygroups - 1 do
 			local bodygroup_name = ent:GetBodygroupName(i)
