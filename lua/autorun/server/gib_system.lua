@@ -6,12 +6,9 @@ include("autorun/gibbing_system/models.lua")
 include("autorun/gibbing_system/expressions.lua")
 include("autorun/gibbing_system/finger_rotation.lua")
 include("autorun/gibbing_system/death_anims.lua")
+include("autorun/gibbing_system/tables.lua")
 
 Model_Path = "autorun/gibbing_system/models/"
-
-Expressions_Table = {}
-
-RagHead = {}
 
 local GmodLanguage = string.lower(GetConVar("gmod_language"):GetString())
 
@@ -58,13 +55,6 @@ concommand.Add( "gibsystem_print_table", function( ply, cmd, args)
 end )
 
 local files, _ = file.Find("autorun/gibbing_system/models/*.lua", "LUA")
-
-local UpperAndLower = {}
-local Limbs = {}
-local LeftAndRight = {}
-
-local UnfinishedModels = {}
-local CompletedModels = {}
 
 for _, Model in ipairs(GibModels) do
 	LocalizedText("zh-cn","[碎尸系统] 已加载文件 "..Model)
@@ -151,10 +141,6 @@ CreateConVar( "gibsystem_deathanimation", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_E
 CreateConVar( "gibsystem_deathanimation_name", "random" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set death animation.")
 CreateConVar( "gibsystem_model_category", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Category for each model (If set).")
 
-local last_dmgpos = {}
-local timers = {}
-local GibsCreated = {}
-
 local function RemoveTimers()
     for _, timerid in ipairs(timers) do
         timer.Remove(timerid)
@@ -197,110 +183,7 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 		if !GetConVar( "gibsystem_experiment" ):GetBool() or !GetConVar( "gibsystem_deathanimation" ):GetBool() then
 			CreateGibs(npc)
 		else
-			
-			if GetConVar("gibsystem_deathanimation_name"):GetString() == "random" then
-				anim = anims_table[math.random(1,#anims_table)]
-			else
-				anim = GetConVar("gibsystem_deathanimation_name"):GetString()
-			end
-			
-			if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-				Model = GetConVar("gibsystem_gib_name"):GetString()
-			else
-				Model = GibModels[math.random(1, #GibModels)]
-			end
-			
-			local head = nil
-			local HeadPos = npc:LookupBone("ValveBiped.Bip01_Head1") or npc:LookupBone("ValveBiped.HC_Body_Bone") or 0
-			
-			if !table.HasValue(RagHead,Model) then
-				head = ents.Create("prop_physics")
-				head:SetPos( npc:GetBonePosition(HeadPos) ) 
-			else
-				head = ents.Create("prop_ragdoll")
-				head:SetPos( npc:GetPos() ) 
-			end
-			
-			head:SetAngles( npc:GetAngles() )
-			head:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
-			head:SetModel("models/gib_system/"..Model.."_head.mdl")
-			head:Spawn()
-			head:SetOwner( npc )
-			head:Activate()
-			GibFacePose(head)
-			RandomBodyGroup(head)
-			RandomSkin(head)
-			table.insert(GibsCreated,head)
-			
-			for i = 0, head:GetPhysicsObjectCount() - 1 do
-				local phys = head:GetPhysicsObjectNum( i )
-				
-				if GetConVar("gibsystem_head_mass"):GetInt() > 0 then
-					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt()/head:GetPhysicsObjectCount() )
-				end
-
-				if DamageForce and DamagePosition then
-					phys:ApplyForceOffset( DamageForce / head:GetPhysicsObjectCount(), DamagePosition)
-				else
-					phys:ApplyForceOffset(Vector(0,0,0), Vector(0,0,0))
-				end
-			end
-			
-			local DM = ents.Create("prop_dynamic")
-		
-			DM:SetModel( "models/gib_system/"..Model.."_headless.mdl" )
-			DM:SetPos( npc:GetPos() )
-			DM:SetAngles( npc:GetAngles() )
-			DM:SetCollisionGroup(0)
-			DM:Spawn()
-			-- DM:SetOwner( npc )
-			DM:SetName( "DM" )
-			DM:ResetSequence( DM:LookupSequence( anim ) )
-			print("Sequence Is: "..anim)
-			DM:ResetSequenceInfo()
-			DM:SetCycle(1) -- Was 0, Set to 1 to make ragdoll looks good.
-			
-			RandomBodyGroup(DM)
-			RandomSkin(DM)
-			BloodEffect(DM,2,"forward")
-			
-			timer.Simple(DM:SequenceDuration(), function()
-				local ent = DM
-				local ragdoll = ents.Create( "prop_ragdoll" )
-				ragdoll:SetModel( ent:GetModel() )
-				ragdoll:SetPos( ent:GetPos() )
-				ragdoll:SetAngles( ent:GetAngles() )
-				ragdoll:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
-				ragdoll:SetSkin( ent:GetSkin() )
-				ragdoll:SetFlexScale( ent:GetFlexScale() )
-				for i = 0, ent:GetNumBodyGroups() - 1 do ragdoll:SetBodygroup( i, ent:GetBodygroup( i ) ) end
-				for i = 0, ent:GetBoneCount() do
-					ragdoll:ManipulateBoneScale( i, ent:GetManipulateBoneScale( i ) )
-					ragdoll:ManipulateBoneAngles( i, ent:GetManipulateBoneAngles( i ) )
-					ragdoll:ManipulateBonePosition( i, ent:GetManipulateBonePosition( i ) )
-					ragdoll:ManipulateBoneJiggle( i, ent:GetManipulateBoneJiggle( i ) ) -- Even though we don't know what this does, I am still putting this here.
-				end
-
-				ragdoll:Spawn()
-				ragdoll:Activate()
-				
-				for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
-					local bone = ragdoll:GetPhysicsObjectNum( i )
-					if ( IsValid( bone ) ) then
-						local pos, ang = ent:GetBonePosition( ragdoll:TranslatePhysBoneToBone( i ) )
-						if ( pos ) then bone:SetPos( pos ) end
-						if ( ang ) then bone:SetAngles( ang ) end
-					end
-				end
-				
-				FingerRotation(ragdoll)
-				BloodEffect(ragdoll,2,"forward")
-				table.insert(GibsCreated,ragdoll)
-				SafeRemoveEntity(DM)
-				ragdoll:CallOnRemove("RemoveHeadTimer",function(ragdoll) timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() ) end)
-			end)
-			DM:CallOnRemove("RemoveHeadTimer",function(DM) timer.Remove( "BloodImpactTimer"..DM:EntIndex() ) end)
-			
+			CreateDeathAnimationGib(npc)
 		end
 	end
 end)
@@ -311,142 +194,7 @@ hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 		if !GetConVar( "gibsystem_experiment" ):GetBool() or !GetConVar( "gibsystem_deathanimation" ):GetBool() then
 			CreateGibs(player)
 		else
-			if GetConVar("gibsystem_deathanimation_name"):GetString() == "random" then
-				anim = anims_table[math.random(1,#anims_table)]
-			else
-				anim = GetConVar("gibsystem_deathanimation_name"):GetString()
-			end
-
-			if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-				Model = GetConVar("gibsystem_gib_name"):GetString()
-			else
-				Model = GibModels[math.random(1, #GibModels)]
-			end
-			
-			local head = nil
-			local HeadPos = player:LookupBone("ValveBiped.Bip01_Head1")
-			
-			if !table.HasValue(RagHead,Model) then
-				head = ents.Create("prop_physics")
-				head:SetPos( player:GetBonePosition(HeadPos) ) 
-			else
-				head = ents.Create("prop_ragdoll")
-				head:SetPos( player:GetPos() ) 
-			end
-			
-			head:SetAngles( player:GetAngles() )
-			head:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
-			head:SetModel("models/gib_system/"..Model.."_head.mdl")
-			head:Spawn()
-			head:SetName("headIndex"..head:EntIndex())
-			head:Activate()
-			GibFacePose(head)
-			RandomBodyGroup(head)
-			RandomSkin(head)
-			table.insert(GibsCreated,head)
-			
-			for i = 0, head:GetPhysicsObjectCount() - 1 do
-				local phys = head:GetPhysicsObjectNum( i )
-				
-				if GetConVar("gibsystem_head_mass"):GetInt() > 0 then
-					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt()/head:GetPhysicsObjectCount() )
-				end
-				
-				-- phys:ApplyForceCenter( velocity )
-				if DamageForce and DamagePosition then
-					phys:ApplyForceOffset( DamageForce / head:GetPhysicsObjectCount(), DamagePosition)
-				else
-					phys:ApplyForceOffset(Vector(0,0,0), Vector(0,0,0))
-				end
-			end
-			
-			local DM = ents.Create("prop_dynamic")
-		
-			DM:SetModel( "models/gib_system/"..Model.."_headless.mdl" )
-			DM:SetPos( player:GetPos() )
-			DM:SetAngles( player:GetAngles() )
-			DM:Spawn()
-			--DM:SetOwner( player )
-			DM:ResetSequence( DM:LookupSequence( anim ) )
-			print("Sequence Is: "..anim)
-			DM:ResetSequenceInfo()
-			DM:SetCycle(1) -- Was 0, Set to 1 to make ragdoll looks good.
-			
-			RandomBodyGroup(DM)
-			RandomSkin(DM)
-			
-			BloodEffect(DM,2,"forward")
-			
-			player:Spectate(5)
-			player:SetObserverMode(OBS_MODE_CHASE)
-			
-			if GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 0 then
-				player:SpectateEntity(head)
-			elseif GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 1 then
-				player:SpectateEntity(DM)
-			end
-			
-			timer.Simple(DM:SequenceDuration(), function()
-			local ent = DM
-
-			local ragdoll = ents.Create( "prop_ragdoll" )
-			ragdoll:SetModel( ent:GetModel() )
-			ragdoll:SetPos( ent:GetPos() )
-			ragdoll:SetAngles( ent:GetAngles() )
-			ragdoll:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
-			ragdoll:SetSkin( ent:GetSkin() )
-			ragdoll:SetFlexScale( ent:GetFlexScale() )
-			for i = 0, ent:GetNumBodyGroups() - 1 do ragdoll:SetBodygroup( i, ent:GetBodygroup( i ) ) end
-			for i = 0, ent:GetFlexNum() - 1 do ragdoll:SetFlexWeight( i, ent:GetFlexWeight( i ) ) end
-			for i = 0, ent:GetBoneCount() do
-				ragdoll:ManipulateBoneScale( i, ent:GetManipulateBoneScale( i ) )
-				ragdoll:ManipulateBoneAngles( i, ent:GetManipulateBoneAngles( i ) )
-				ragdoll:ManipulateBonePosition( i, ent:GetManipulateBonePosition( i ) )
-				ragdoll:ManipulateBoneJiggle( i, ent:GetManipulateBoneJiggle( i ) ) -- Even though we don't know what this does, I am still putting this here.
-			end
-
-			ragdoll:Spawn()
-			ragdoll:Activate()
-			
-			for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
-				local bone = ragdoll:GetPhysicsObjectNum( i )
-				if ( IsValid( bone ) ) then
-					local pos, ang = ent:GetBonePosition( ragdoll:TranslatePhysBoneToBone( i ) )
-					if ( pos ) then bone:SetPos( pos ) end
-					if ( ang ) then bone:SetAngles( ang ) end
-
-					-- bone:ApplyForceOffset( DamageForce / ragdoll:GetPhysicsObjectCount(), DamagePosition )
-				end
-			end
-			
-			if GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 0 then
-				player:SpectateEntity(head)
-			elseif GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 1 then
-				player:SpectateEntity(ragdoll)
-			end
-			
-			FingerRotation(ragdoll)
-			BloodEffect(ragdoll,2,"forward",DM:SequenceDuration())
-			table.insert(GibsCreated,ragdoll)
-			SafeRemoveEntity(DM)
-			
-			ragdoll:CallOnRemove("RemoveHeadTimer",function(ragdoll) timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() ) end)
-			end)
-		DM:CallOnRemove("RemoveHeadTimer",function(DM) timer.Remove( "BloodImpactTimer"..DM:EntIndex() ) end)
-		
-		end
-		
-		SafeRemoveEntity(player:GetRagdollEntity())
-		if GetConVar( "gibsystem_deathcam_enable" ):GetBool() and (!GetConVar( "gibsystem_experiment" ):GetBool() or !GetConVar( "gibsystem_deathanimation" ):GetBool()) then		
-			player:Spectate(5)
-			player:SetObserverMode(OBS_MODE_CHASE)
-			if GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 0 then
-				player:SpectateEntity(head)
-			elseif GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 1 then
-				player:SpectateEntity(body)
-			else
-				player:SpectateEntity(body)
-			end
+			CreateDeathAnimationGib(player)
 		end
 	end
 end)
@@ -954,7 +702,7 @@ function CreateGibs(ent)
 		
 		SpawnGib("ragdoll", "models/gib_system/"..Model.."_torso.mdl", 1, "ValveBiped.Bip01_Spine1", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/"..Model.."_legs.mdl", 1, "ValveBiped.Bip01_Spine1", "body", false, true, true)
-
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：上/下半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 		

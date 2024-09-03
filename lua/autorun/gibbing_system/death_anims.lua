@@ -1,4 +1,6 @@
 
+include("autorun/gibbing_system/tables.lua")
+
 AddCSLuaFile()
 
 anims_table = {
@@ -70,8 +72,10 @@ anims_table = {
 	"SHOTHAND_03"
 }
 
-/*
 function CreateDeathAnimationGib(ent)
+	if ent:IsPlayer() then
+		SafeRemoveEntity(ent:GetRagdollEntity())
+	end
 	if GetConVar("gibsystem_deathanimation_name"):GetString() == "random" then
 		anim = anims_table[math.random(1,#anims_table)]
 	else
@@ -85,17 +89,17 @@ function CreateDeathAnimationGib(ent)
 	end
 		
 	local head = nil
-	local HeadPos = player:LookupBone("ValveBiped.Bip01_Head1")
+	local HeadPos = ent:LookupBone("ValveBiped.Bip01_Head1")
 		
 	if !table.HasValue(RagHead,Model) then
 		head = ents.Create("prop_physics")
-		head:SetPos( player:GetBonePosition(HeadPos) ) 
+		head:SetPos( ent:GetBonePosition(HeadPos) ) 
 	else
 		head = ents.Create("prop_ragdoll")
-		head:SetPos( player:GetPos() ) 
+		head:SetPos( ent:GetPos() ) 
 	end
 		
-		head:SetAngles( player:GetAngles() )
+		head:SetAngles( ent:GetAngles() )
 		head:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
 		head:SetModel("models/gib_system/"..Model.."_head.mdl")
 		head:Spawn()
@@ -124,10 +128,10 @@ function CreateDeathAnimationGib(ent)
 	local DM = ents.Create("prop_dynamic")
 	
 	DM:SetModel( "models/gib_system/"..Model.."_headless.mdl" )
-	DM:SetPos( player:GetPos() )
-	DM:SetAngles( player:GetAngles() )
+	DM:SetPos( ent:GetPos() )
+	DM:SetAngles( ent:GetAngles() )
 	DM:Spawn()
-	--DM:SetOwner( player )
+	--DM:SetOwner( ent )
 	DM:ResetSequence( DM:LookupSequence( anim ) )
 	print("Sequence Is: "..anim)
 	DM:ResetSequenceInfo()
@@ -137,33 +141,33 @@ function CreateDeathAnimationGib(ent)
 	RandomSkin(DM)
 		
 	BloodEffect(DM,2,"forward")
-		
-	player:Spectate(5)
-	player:SetObserverMode(OBS_MODE_CHASE)
-		
-	if GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 0 then
-		player:SpectateEntity(head)
-	elseif GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 1 then
-		player:SpectateEntity(DM)
+	
+	if ent:IsPlayer() then
+		ent:Spectate(5)
+		ent:SetObserverMode(OBS_MODE_CHASE)
+		if GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 0 then
+			ent:SpectateEntity(head)
+		elseif GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 1 then
+			ent:SpectateEntity(DM)
+		end
 	end
-		
+	
 	timer.Simple(DM:SequenceDuration(), function()
-		local ent = DM
 
 		local ragdoll = ents.Create( "prop_ragdoll" )
-		ragdoll:SetModel( ent:GetModel() )
-		ragdoll:SetPos( ent:GetPos() )
-		ragdoll:SetAngles( ent:GetAngles() )
+		ragdoll:SetModel( DM:GetModel() )
+		ragdoll:SetPos( DM:GetPos() )
+		ragdoll:SetAngles( DM:GetAngles() )
 		ragdoll:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
-		ragdoll:SetSkin( ent:GetSkin() )
-		ragdoll:SetFlexScale( ent:GetFlexScale() )
-		for i = 0, ent:GetNumBodyGroups() - 1 do ragdoll:SetBodygroup( i, ent:GetBodygroup( i ) ) end
-		for i = 0, ent:GetFlexNum() - 1 do ragdoll:SetFlexWeight( i, ent:GetFlexWeight( i ) ) end
-		for i = 0, ent:GetBoneCount() do
-			ragdoll:ManipulateBoneScale( i, ent:GetManipulateBoneScale( i ) )
-			ragdoll:ManipulateBoneAngles( i, ent:GetManipulateBoneAngles( i ) )
-			ragdoll:ManipulateBonePosition( i, ent:GetManipulateBonePosition( i ) )
-			ragdoll:ManipulateBoneJiggle( i, ent:GetManipulateBoneJiggle( i ) ) -- Even though we don't know what this does, I am still putting this here.
+		ragdoll:SetSkin( DM:GetSkin() )
+		ragdoll:SetFlexScale( DM:GetFlexScale() )
+		for i = 0, DM:GetNumBodyGroups() - 1 do ragdoll:SetBodygroup( i, DM:GetBodygroup( i ) ) end
+		for i = 0, DM:GetFlexNum() - 1 do ragdoll:SetFlexWeight( i, DM:GetFlexWeight( i ) ) end
+		for i = 0, DM:GetBoneCount() do
+			ragdoll:ManipulateBoneScale( i, DM:GetManipulateBoneScale( i ) )
+			ragdoll:ManipulateBoneAngles( i, DM:GetManipulateBoneAngles( i ) )
+			ragdoll:ManipulateBonePosition( i, DM:GetManipulateBonePosition( i ) )
+			ragdoll:ManipulateBoneJiggle( i, DM:GetManipulateBoneJiggle( i ) ) -- Even though we don't know what this does, I am still putting this here.
 		end
 
 		ragdoll:Spawn()
@@ -172,7 +176,7 @@ function CreateDeathAnimationGib(ent)
 		for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
 			local bone = ragdoll:GetPhysicsObjectNum( i )
 			if ( IsValid( bone ) ) then
-				local pos, ang = ent:GetBonePosition( ragdoll:TranslatePhysBoneToBone( i ) )
+				local pos, ang = DM:GetBonePosition( ragdoll:TranslatePhysBoneToBone( i ) )
 				if ( pos ) then bone:SetPos( pos ) end
 				if ( ang ) then bone:SetAngles( ang ) end
 
@@ -180,12 +184,20 @@ function CreateDeathAnimationGib(ent)
 			end
 		end
 		
-		if GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 0 then
-			player:SpectateEntity(head)
-		elseif GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 1 then
-			player:SpectateEntity(ragdoll)
-		end
 		
+		if ent:IsPlayer() then
+			if !ent:Alive() then
+				ent:Spectate(5)
+				ent:SetObserverMode(OBS_MODE_CHASE)
+
+				if GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 0 then
+					ent:SpectateEntity(head)
+				elseif GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 1 then
+					ent:SpectateEntity(ragdoll)
+				end
+			end
+		end
+	
 		FingerRotation(ragdoll)
 		BloodEffect(ragdoll,2,"forward",DM:SequenceDuration())
 		table.insert(GibsCreated,ragdoll)
@@ -194,6 +206,4 @@ function CreateDeathAnimationGib(ent)
 		ragdoll:CallOnRemove("RemoveHeadTimer",function(ragdoll) timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() ) end)
 	end)
 	DM:CallOnRemove("RemoveHeadTimer",function(DM) timer.Remove( "BloodImpactTimer"..DM:EntIndex() ) end)
-	
 end
-*/
