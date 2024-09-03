@@ -10,6 +10,8 @@ include("autorun/gibbing_system/tables.lua")
 
 Model_Path = "autorun/gibbing_system/models/"
 
+RagHead = {}
+
 local GmodLanguage = string.lower(GetConVar("gmod_language"):GetString())
 
 function LocalizedText(lang,text)
@@ -180,21 +182,29 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 			
 		SafeRemoveEntity(npc)
 		npc:EmitSound( "Gib_System.Headshot_Fleshy" )
-		if !GetConVar( "gibsystem_experiment" ):GetBool() or !GetConVar( "gibsystem_deathanimation" ):GetBool() then
-			CreateGibs(npc)
-		else
+		if GetConVar( "gibsystem_experiment" ):GetBool() and GetConVar( "gibsystem_deathanimation" ):GetBool() then
 			CreateDeathAnimationGib(npc)
+		else
+			CreateGibs(npc)
 		end
 	end
 end)
 
 hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_player" ):GetBool() then
+		SafeRemoveEntity(player:GetRagdollEntity())
 		player:EmitSound( "Gib_System.Headshot_Fleshy" )
-		if !GetConVar( "gibsystem_experiment" ):GetBool() or !GetConVar( "gibsystem_deathanimation" ):GetBool() then
-			CreateGibs(player)
-		else
+		if GetConVar( "gibsystem_experiment" ):GetBool() and GetConVar( "gibsystem_deathanimation" ):GetBool() then
 			CreateDeathAnimationGib(player)
+		else
+			CreateGibs(player)
+		end
+		player:Spectate(5)
+		player:SetObserverMode(OBS_MODE_CHASE)
+		if GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 0 then
+			player:SpectateEntity(head)
+		elseif GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 1 then
+			player:SpectateEntity(body)
 		end
 	end
 end)
@@ -360,10 +370,13 @@ function CreateGibs(ent)
 				if GetConVar("gibsystem_head_mass"):GetInt() > 0 then
 					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
 				end
-					
-				phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition)
-				-- phys:ApplyForceOffset( (DamageForce / Gib:GetPhysicsObjectCount()) + (Vector(0,0,2500) / Gib:GetPhysicsObjectCount()), DamagePosition)
-				-- phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
+				
+				if ent:IsPlayer() then
+					phys:ApplyForceCenter( phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
+					print(ent:GetVelocity())
+				else
+					phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition)
+				end
 			end
 
 			head = Entity(Gib:EntIndex())
@@ -384,7 +397,12 @@ function CreateGibs(ent)
 				end
 
 				if DamageForce and DamagePosition then
-					phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
+					if ent:IsPlayer() then
+						phys:ApplyForceCenter( phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
+						print(ent:GetVelocity())
+					else
+						phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition)
+					end
 				else
 					phys:ApplyForceOffset( Vector(0,0,0), Vector(0,0,0) )
 				end

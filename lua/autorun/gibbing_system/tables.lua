@@ -2,7 +2,6 @@
 AddCSLuaFile()
 
 Expressions_Table = {}
-RagHead = {}
 
 UpperAndLower = {}
 Limbs = {}

@@ -73,9 +73,6 @@ anims_table = {
 }
 
 function CreateDeathAnimationGib(ent)
-	if ent:IsPlayer() then
-		SafeRemoveEntity(ent:GetRagdollEntity())
-	end
 	if GetConVar("gibsystem_deathanimation_name"):GetString() == "random" then
 		anim = anims_table[math.random(1,#anims_table)]
 	else
