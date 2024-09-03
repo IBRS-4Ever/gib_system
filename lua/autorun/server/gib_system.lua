@@ -372,10 +372,11 @@ function CreateGibs(ent)
 				end
 				
 				if ent:IsPlayer() then
-					phys:ApplyForceCenter( phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
-					print(ent:GetVelocity())
+					-- phys:ApplyForceCenter( phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
+					phys:ApplyForceCenter( (DamageForce / Gib:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
 				else
-					phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition)
+					phys:ApplyForceCenter( (DamageForce / Gib:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )
+					-- phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
 				end
 			end
 
@@ -398,10 +399,11 @@ function CreateGibs(ent)
 
 				if DamageForce and DamagePosition then
 					if ent:IsPlayer() then
-						phys:ApplyForceCenter( phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
-						print(ent:GetVelocity())
+						-- phys:ApplyForceCenter( phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
+						phys:ApplyForceCenter( (DamageForce / Gib:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
 					else
-						phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition)
+						-- phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
+						phys:ApplyForceCenter( (DamageForce / Gib:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )
 					end
 				else
 					phys:ApplyForceOffset( Vector(0,0,0), Vector(0,0,0) )
@@ -744,8 +746,8 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：左右半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 	end
-	-- DamageForce = nil
-	-- DamagePosition = nil
+	DamageForce = Vector(0,0,0)
+	DamagePosition = Vector(0,0,0)
 end
 
 local function CleanGibs()
