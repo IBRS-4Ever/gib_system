@@ -7,7 +7,6 @@ UpperAndLower = {}
 Limbs = {}
 LeftAndRight = {}
 
-UnfinishedModels = {}
 CompletedModels = {}
 
 last_dmgpos = {}
