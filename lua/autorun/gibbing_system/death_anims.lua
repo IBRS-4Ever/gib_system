@@ -88,7 +88,7 @@ function CreateDeathAnimationGib(ent)
 	local head = nil
 	local HeadPos = ent:LookupBone("ValveBiped.Bip01_Head1")
 		
-	if !table.HasValue(RagHead,Model) then
+	if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
 		head = ents.Create("prop_physics")
 		head:SetPos( ent:GetBonePosition(HeadPos) ) 
 	else
@@ -96,16 +96,16 @@ function CreateDeathAnimationGib(ent)
 		head:SetPos( ent:GetPos() ) 
 	end
 		
-		head:SetAngles( ent:GetAngles() )
-		head:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
-		head:SetModel("models/gib_system/"..Model.."_head.mdl")
-		head:Spawn()
-		head:SetName("headIndex"..head:EntIndex())
-		head:Activate()
-		GibFacePose(head)
-		RandomBodyGroup(head)
-		RandomSkin(head)
-		table.insert(GibsCreated,head)
+	head:SetAngles( ent:GetAngles() )
+	head:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
+	head:SetModel("models/gib_system/"..Model.."_head.mdl")
+	head:Spawn()
+	head:SetName("headIndex"..head:EntIndex())
+	head:Activate()
+	GibFacePose(head)
+	RandomBodyGroup(head)
+	RandomSkin(head)
+	table.insert(GibsCreated,head)
 		
 	for i = 0, head:GetPhysicsObjectCount() - 1 do
 		local phys = head:GetPhysicsObjectNum( i )

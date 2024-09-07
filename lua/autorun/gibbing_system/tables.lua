@@ -8,6 +8,7 @@ Limbs = {}
 LeftAndRight = {}
 
 CompletedModels = {}
+BlackListedModels = {}
 
 last_dmgpos = {}
 timers = {}

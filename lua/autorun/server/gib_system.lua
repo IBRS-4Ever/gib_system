@@ -169,8 +169,6 @@ hook.Add("EntityTakeDamage", "gibsystem", function(ent, dmginfo)
 	last_dmgpos[ent] = dmginfo:GetDamagePosition()
 end)
 
-local anims = nil
-
 hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and DefaultNPCs[npc:GetClass()] then
@@ -284,7 +282,7 @@ function RandomSkin(ent)
 		ent:SetSkin(choice)
 	end
 end
-	
+
 function GibConvulsion(ent)
 	if GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 1 then
 		ent:Input( "StartRagdollBoogie", ent, ent, "" )
@@ -310,7 +308,7 @@ function CreateGibs(ent)
 			lpos = phys:WorldToLocal(dmgpos)
 		end
 	end
-	
+
 	function SpawnGib(Type, mdl, AttachmentType, AttachmentPoint, Bodypart, FacePose, FingerPose, convulsion)
 		local Gib = ents.Create("prop_"..tostring(Type))
 		
@@ -323,8 +321,8 @@ function CreateGibs(ent)
 		Gib:SetModel( mdl )
 		
 		if Bodypart == "head" and Type != "ragdoll" then
-			local HeadPos = ent:LookupBone("ValveBiped.Bip01_Head1") or ent:LookupBone("ValveBiped.HC_Body_Bone") or 0
-			
+			local HeadPos = ent:LookupBone("ValveBiped.Bip01_Head1") or ent:LookupBone("ValveBiped.HC_Body_Bone") or ent:LookupBone("ValveBiped.Headcrab_Cube1") or false
+
 			if HeadPos then
 				Gib:SetPos( ent:GetBonePosition(HeadPos) ) 
 			else

@@ -127,12 +127,63 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 
 					icon.DoClick = function()
 						RunConsoleCommand( "gibsystem_gib_name", name )
-					frame:Close()
+						frame:Close()
 					end
+					
+					--[[
+					icon.DoRightClick = function()
+						if table.HasValue(BlackListedModels, name) then
+							table.remove(BlackListedModels, BlackListedModels[name])
+							table.insert(GibModels, name)
+							table.insert(UpperAndLower, name)
+							table.insert(Limbs, name)
+							table.insert(LeftAndRight, name)
+							table.insert(CompletedModels, name)
+						else
+							table.insert(BlackListedModels, name)
+							table.remove(GibModels, GibModels[name])
+							table.remove(UpperAndLower, UpperAndLower[name])
+							table.remove(Limbs, Limbs[name])
+							table.remove(LeftAndRight, LeftAndRight[name])
+							table.remove(CompletedModels, CompletedModels[name])
+						end
+						RunConsoleCommand( "GS_UpdateBlacklist" )
+					end
+					]]--
+					
 					PropPanel:Add( icon )
 				end
 			end
 		end
+		
+		--[[
+		local BlacklistModelsViewBox = vgui.Create( "DListView", pnl )
+		BlacklistModelsViewBox:Dock( FILL )
+		BlacklistModelsViewBox:SetSize(100, 307) -- Size
+		BlacklistModelsViewBox:SetMultiSelect( false )
+		BlacklistModelsViewBox:AddColumn( "#gs.model" )
+		BlacklistModelsViewBox:AddColumn( "#gs.model.ID" )
+		
+		for _, Model in ipairs(BlackListedModels) do
+			BlacklistModelsViewBox:AddLine( "#gs.model."..Model, Model )
+		end
+		
+		BlacklistModelsViewBox.DoDoubleClick = function( lst, index, pnl )
+			table.remove(BlackListedModels, BlackListedModels[pnl:GetColumnText( 2 )])
+			BlacklistModelsViewBox:RemoveLine( index )
+		end
+		
+		local function UpdateList() 
+			BlacklistModelsViewBox:Clear()
+			for _, Model in ipairs(BlackListedModels) do
+				BlacklistModelsViewBox:AddLine( "#gs.model."..Model, Model )
+			end
+		end
+		
+		concommand.Add("GS_UpdateBlacklist", UpdateList)
+
+		pnl:AddItem(BlacklistModelsViewBox)
+		]]--
 		
 		pnl:AddControl( "textbox", { Label = "#GS.HeadMess", Command = "gibsystem_head_mass" } )
 		pnl:AddControl( "textbox", { Label = "#GS.BodyMess", Command = "gibsystem_body_mass" } )
