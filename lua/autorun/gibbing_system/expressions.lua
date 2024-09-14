@@ -6,6 +6,7 @@ function GibFacePose(ent)
 		local num_expressions = ent:GetFlexNum() 												-- 获取模型的表情数量
 		local ModelExpressions = Expressions_Table[Model] 										-- 获取表情列表中该模型的表情值。
 		local Expressions = {}
+		
 		if ModelExpressions then 																-- 如果 ModelExpressions 表中有该模型的表情值，则从表中读取。
 			Expressions = ModelExpressions[math.random(1, table.Count(ModelExpressions))]
 		elseif list.HasEntry( "GIBSYSTEM_GIRLS_FRONTLINE_2_MODELS", Model ) then 				-- 如果是少前2的模型，则套用以下值。
