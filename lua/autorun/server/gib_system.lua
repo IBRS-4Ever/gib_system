@@ -137,6 +137,7 @@ CreateConVar( "gibsystem_experiment", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECU
 CreateConVar( "gibsystem_deathanimation", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable death animations.")
 CreateConVar( "gibsystem_deathanimation_name", "random" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set death animation.")
 CreateConVar( "gibsystem_model_category", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Category for each model (If set).")
+CreateConVar( "gibsystem_gib_base_on_model", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Choose Model Base on materials.")
 
 local function RemoveTimers()
     for _, timerid in ipairs(timers) do
@@ -427,16 +428,27 @@ function CreateGibs(ent)
 	if table.HasValue( Conditions, GetConVar("gibsystem_gib_group"):GetString() ) then
 		ConditionGib = GetConVar("gibsystem_gib_group"):GetString()
 	else
-		ConditionGib = Conditions[math.random(1, #Conditions)]
+		ConditionGib = Conditions[math.random( #Conditions )]
 	end
 	
-	if ConditionGib == "headless" then
+	local Materials = ent:GetMaterials()
 		
-		if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = GibModels[math.random(1,#GibModels)]
+	if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
+		Model = GetConVar("gibsystem_gib_name"):GetString()
+	elseif GetConVar("gibsystem_gib_base_on_model"):GetBool() then
+		Model = GibModels[math.random( #GibModels )]
+		for i = 1, table.Count(Materials) do
+			if Model_Link_Materials[Materials[i]] then
+				Model = Model_Link_Materials[Materials[i]]
+				break
+			end
 		end
+	else
+		Model = GibModels[math.random( #GibModels )]
+	end
+		
+	
+	if ConditionGib == "headless" then
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
 			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
@@ -453,10 +465,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "limbs" then
 		
-		if table.HasValue( Limbs, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = Limbs[math.random(1, #Limbs)]
+		if !table.HasValue( Limbs, Model ) then
+			Model = Limbs[math.random( #Limbs )]
 		end
 
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -476,10 +486,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_legs" then
 		
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -497,10 +505,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_arms" then
 		
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -518,10 +524,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_right_leg_left_arm" then
 		
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -539,10 +543,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_left_leg_right_arm" then
 	
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -560,10 +562,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_left_leg" then
 		
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -580,10 +580,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_right_leg" then
 		
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -600,10 +598,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_left_arm" then
 	
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -620,10 +616,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_right_arm" then
 	
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -640,10 +634,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_right" then
 	
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -661,10 +653,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_left" then
 	
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -682,10 +672,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_right_no_arm" then
 	
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -704,10 +692,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_left_no_arm" then
 	
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -726,10 +712,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_right_no_leg" then
 	
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -748,10 +732,8 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_left_no_leg" then
 	
-		if table.HasValue( CompletedModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = CompletedModels[math.random(1, #CompletedModels)]
+		if !table.HasValue( CompletedModels, Model ) then
+			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -769,11 +751,9 @@ function CreateGibs(ent)
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 	
 	elseif ConditionGib == "upper_and_lower" then
-
-		if table.HasValue( UpperAndLower, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = UpperAndLower[math.random(1, #UpperAndLower)]
+		
+		if !table.HasValue( UpperAndLower, Model ) then
+			Model = UpperAndLower[math.random( #UpperAndLower )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
@@ -790,10 +770,8 @@ function CreateGibs(ent)
 		
 	elseif ConditionGib == "left_and_right" then
 		
-		if table.HasValue( LeftAndRight, GetConVar("gibsystem_gib_name"):GetString() ) then
-			Model = GetConVar("gibsystem_gib_name"):GetString()
-		else
-			Model = LeftAndRight[math.random(1, #LeftAndRight)]
+		if !table.HasValue( LeftAndRight, Model ) then
+			Model = LeftAndRight[math.random( #LeftAndRight )]
 		end
 		
 		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then

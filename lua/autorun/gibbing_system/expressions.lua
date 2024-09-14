@@ -8,7 +8,7 @@ function GibFacePose(ent)
 		local Expressions = {}
 		
 		if ModelExpressions then 																-- 如果 ModelExpressions 表中有该模型的表情值，则从表中读取。
-			Expressions = ModelExpressions[math.random(1, table.Count(ModelExpressions))]
+			Expressions = ModelExpressions[math.random( #ModelExpressions )]
 		elseif GIRLS_FRONTLINE_2_MODELS[Model] then 											-- 如果是少前2的模型，则套用以下值。
 			Expressions = {
 				["eye_blink_left"] = math.Rand(0.5,1),
