@@ -3,6 +3,8 @@ AddCSLuaFile()
 
 Expressions_Table = {}
 
+GIRLS_FRONTLINE_2_MODELS = {}
+
 UpperAndLower = {}
 Limbs = {}
 LeftAndRight = {}
