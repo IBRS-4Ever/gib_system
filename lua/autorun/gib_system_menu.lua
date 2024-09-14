@@ -60,6 +60,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		pnl:AddControl( "CheckBox", { Label = "#GS.Deathcam", Command = "gibsystem_deathcam_enable" } )
 		pnl:AddControl( "ComboBox", { Label = "#GS.Deathcam.Mode", Options = cammode } )
 		pnl:AddControl( "ComboBox", { Label = "#GS.GibGroup", Options = gibgroup } )
+		pnl:AddControl( "CheckBox", { Label = "#GS.CategorizeModels", Command = "gibsystem_model_category" } )
 		
 		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
 		Button:SetText( "#GS.GibName" )					// Set the text on the button		
@@ -114,76 +115,41 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			end
 			PropPanel:Add( icon )
 
-			for CategoryName, v in SortedPairs(Categories) do
-			
-				local Header = vgui.Create( "ContentHeader", PropPanel )
-				Header:SetText( CategoryName )
-				PropPanel:Add( Header )
+			if GetConVar("gibsystem_model_category"):GetBool() then
+				for CategoryName, v in SortedPairs(Categories) do
 				
-				for name, ent in SortedPairsByMemberValue(v, "Name") do
+					local Header = vgui.Create( "ContentHeader", PropPanel )
+					Header:SetText( CategoryName )
+					PropPanel:Add( Header )
+					
+					for name, ent in SortedPairsByMemberValue(v, "Name") do
+						local icon = vgui.Create( "ContentIcon", PropPanel )
+						icon:SetMaterial( "gib_system/" .. name .. ".png" )
+						icon:SetName( "#gs.model." .. name )
+
+						icon.DoClick = function()
+							RunConsoleCommand( "gibsystem_gib_name", name )
+							frame:Close()
+						end
+						
+						PropPanel:Add( icon )
+					end
+				end
+			else
+				for _, Model in ipairs(GibModels) do
+
 					local icon = vgui.Create( "ContentIcon", PropPanel )
-					icon:SetMaterial( "gib_system/" .. name .. ".png" )
-					icon:SetName( "#gs.model." .. name )
+					icon:SetMaterial( "gib_system/" .. Model .. ".png" )
+					icon:SetName( "#gs.model." .. Model )
 
 					icon.DoClick = function()
-						RunConsoleCommand( "gibsystem_gib_name", name )
-						frame:Close()
+						RunConsoleCommand( "gibsystem_gib_name", Model )
+					frame:Close()
 					end
-					
-					--[[
-					icon.DoRightClick = function()
-						if table.HasValue(BlackListedModels, name) then
-							table.remove(BlackListedModels, BlackListedModels[name])
-							table.insert(GibModels, name)
-							table.insert(UpperAndLower, name)
-							table.insert(Limbs, name)
-							table.insert(LeftAndRight, name)
-							table.insert(CompletedModels, name)
-						else
-							table.insert(BlackListedModels, name)
-							table.remove(GibModels, GibModels[name])
-							table.remove(UpperAndLower, UpperAndLower[name])
-							table.remove(Limbs, Limbs[name])
-							table.remove(LeftAndRight, LeftAndRight[name])
-							table.remove(CompletedModels, CompletedModels[name])
-						end
-						RunConsoleCommand( "GS_UpdateBlacklist" )
-					end
-					]]--
-					
 					PropPanel:Add( icon )
 				end
 			end
 		end
-		
-		--[[
-		local BlacklistModelsViewBox = vgui.Create( "DListView", pnl )
-		BlacklistModelsViewBox:Dock( FILL )
-		BlacklistModelsViewBox:SetSize(100, 307) -- Size
-		BlacklistModelsViewBox:SetMultiSelect( false )
-		BlacklistModelsViewBox:AddColumn( "#gs.model" )
-		BlacklistModelsViewBox:AddColumn( "#gs.model.ID" )
-		
-		for _, Model in ipairs(BlackListedModels) do
-			BlacklistModelsViewBox:AddLine( "#gs.model."..Model, Model )
-		end
-		
-		BlacklistModelsViewBox.DoDoubleClick = function( lst, index, pnl )
-			table.remove(BlackListedModels, BlackListedModels[pnl:GetColumnText( 2 )])
-			BlacklistModelsViewBox:RemoveLine( index )
-		end
-		
-		local function UpdateList() 
-			BlacklistModelsViewBox:Clear()
-			for _, Model in ipairs(BlackListedModels) do
-				BlacklistModelsViewBox:AddLine( "#gs.model."..Model, Model )
-			end
-		end
-		
-		concommand.Add("GS_UpdateBlacklist", UpdateList)
-
-		pnl:AddItem(BlacklistModelsViewBox)
-		]]--
 		
 		pnl:AddControl( "textbox", { Label = "#GS.HeadMess", Command = "gibsystem_head_mass" } )
 		pnl:AddControl( "textbox", { Label = "#GS.BodyMess", Command = "gibsystem_body_mass" } )
