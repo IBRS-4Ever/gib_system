@@ -10,7 +10,6 @@ hook.Add( "CreateClientsideRagdoll", "fade_out_corpses", function( entity, ragdo
 			if GetConVar( "developer" ):GetInt() > 0 then
 				print("Found Clientside Ragdoll: "..tostring(entity))
 			end
-			-- PrintTable(ragdoll:GetSaveTable())
 			ragdoll:SetSaveValue( "m_bFadingOut", true ) -- Set the magic internal variable that will cause the ragdoll to immediately start fading out
 		end)
 	end
