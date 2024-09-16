@@ -123,7 +123,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 					Header:SetText( CategoryName )
 					PropPanel:Add( Header )
 					
-					for name, ent in SortedPairsByMemberValue(v, "Name") do
+					for name, ent in SortedPairs(v) do
 						local icon = vgui.Create( "ContentIcon", PropPanel )
 						icon:SetMaterial( "gib_system/" .. name .. ".png" )
 						icon:SetName( "#gs.model." .. name )
