@@ -378,7 +378,7 @@ function CreateGibs(ent)
 
 		end
 		
-		if GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt() > -1 then
+		if GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt() > 0 then
 			timer.Create( "RemoveTimer"..Gib:EntIndex(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
 				if IsValid( Gib ) then
 					Gib:Remove()
@@ -757,8 +757,8 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：左右半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 	end
-	DamageForce = Vector(0,0,0)
-	DamagePosition = Vector(0,0,0)
+	-- DamageForce = Vector(0,0,0)
+	-- DamagePosition = Vector(0,0,0)
 end
 
 local function CleanGibs()
