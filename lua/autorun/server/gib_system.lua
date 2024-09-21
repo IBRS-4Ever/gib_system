@@ -51,12 +51,6 @@ else
 	return false
 end
 
-concommand.Add( "gibsystem_print_table", function( ply, cmd, args)
-	PrintTable(Expressions_Table)
-end )
-
-local files, _ = file.Find("autorun/gibbing_system/models/*.lua", "LUA")
-
 for _, Model in ipairs(GibModels) do
 	LocalizedText("zh-cn","[碎尸系统] 已加载文件 "..Model)
 	LocalizedText("en","[Gibbing System] Loaded file "..Model)
@@ -105,10 +99,6 @@ LocalizedText("en","[Gibbing System] Loaded "..table.Count(GibModels).." Model(s
 
 LocalizedText("zh-cn","[碎尸系统] 加载完成。\n")
 LocalizedText("en","[Gibbing System] Loading Complete.\n")
-
---[[
-PrintTable(Expressions_Table) 
-]]--
 
 local function RemoveTimers()
     for _, timerid in ipairs(timers) do
@@ -177,7 +167,7 @@ end)
 function CreateRope(gib1,gib2,gib1phys,gib2phys,vec1,vec2)
 	if GetConVar( "gibsystem_rope" ):GetBool() then
 		if IsValid(gib1) and IsValid(gib2) then
-			local constraint = constraint.Rope(gib1, gib2, gib1:TranslateBoneToPhysBone( gib1:LookupBone( "ValveBiped.Bip01_Head1" ) ), gib2:TranslateBoneToPhysBone( gib2:LookupBone( "ValveBiped.Bip01_Spine4" or "ValveBiped.Bip01_Spine2" or "ValveBiped.Bip01_Spine1" ) ), Vector(0,0,-3), Vector(5,0,0), 5, 0, GetConVar( "gibsystem_rope_strength" ):GetInt(), 2, "cable/redlaser", false)
+			local constraint = constraint.Rope(gib1, gib2, gib1:TranslateBoneToPhysBone( gib1:LookupBone( "ValveBiped.Bip01_Head1" ) ), gib2:TranslateBoneToPhysBone( gib2:LookupBone( "ValveBiped.Bip01_Spine4" or "ValveBiped.Bip01_Spine2" or "ValveBiped.Bip01_Spine1" ) ), Vector(0,0,-3), Vector(5,0,0), 5, 0, GetConVar( "gibsystem_rope_strength" ):GetInt(), 1, "gibs/intestines_beam", false)
 		else
 			LocalizedText("zh-cn","[碎尸系统] 无效实体索引。无法创建绳索。")
 			LocalizedText("en","[Gibbing System] Invaild Index. Can't create rope.")

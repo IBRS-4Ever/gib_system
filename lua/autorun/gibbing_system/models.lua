@@ -10,15 +10,3 @@ for _, filename in ipairs(files) do
 	include("autorun/gibbing_system/models/" .. filename)
 	table.insert(GibModels, tostring(filename:gsub("%.lua$", "")))
 end
-
---[[
-function UpdateModelList()
-	for _, filename in ipairs(files) do
-		AddCSLuaFile("autorun/gibbing_system/models/" .. filename)
-		include("autorun/gibbing_system/models/" .. filename)
-		table.insert(GibModels, tostring(filename:gsub("%.lua$", "")))
-	end
-end
-
-concommand.Add("GS_UpdateModelList", UpdateModelList)
-]]--
