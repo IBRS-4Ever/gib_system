@@ -3,7 +3,7 @@ include("autorun/gibbing_system/tables.lua")
 
 AddCSLuaFile()
 
-anims_table = {
+local anims_table = {
 	"DIE_Simple_01",
 	"DIE_Simple_02",
 	"DIE_Simple_03",
