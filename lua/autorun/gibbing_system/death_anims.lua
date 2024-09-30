@@ -1,6 +1,4 @@
 
-include("autorun/gibbing_system/tables.lua")
-
 AddCSLuaFile()
 
 local anims_table = {
@@ -78,11 +76,21 @@ function CreateDeathAnimationGib(ent)
 	else
 		anim = GetConVar("gibsystem_deathanimation_name"):GetString()
 	end
-
+	
+	local Materials = ent:GetMaterials()
+	
 	if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
 		Model = GetConVar("gibsystem_gib_name"):GetString()
+	elseif GetConVar("gibsystem_gib_base_on_model"):GetBool() then
+		Model = GibModels[math.random( #GibModels )]
+		for i = 1, table.Count(Materials) do
+			if Model_Link_Materials[Materials[i]] then
+				Model = Model_Link_Materials[Materials[i]]
+				break
+			end
+		end
 	else
-		Model = GibModels[math.random(1, #GibModels)]
+		Model = GibModels[math.random( #GibModels )]
 	end
 		
 	local head = nil
@@ -114,11 +122,10 @@ function CreateDeathAnimationGib(ent)
 			phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt()/head:GetPhysicsObjectCount() )
 		end
 		
-		-- phys:ApplyForceCenter( velocity )
-		if DamageForce and DamagePosition then
-			phys:ApplyForceOffset( DamageForce / head:GetPhysicsObjectCount(), DamagePosition)
+		if ent:IsPlayer() then
+			phys:ApplyForceCenter( (DamageForce / head:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
 		else
-			phys:ApplyForceOffset(Vector(0,0,0), Vector(0,0,0))
+			phys:ApplyForceCenter( (DamageForce / head:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )
 		end
 	end
 		

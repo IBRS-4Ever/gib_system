@@ -2,12 +2,12 @@
 AddCSLuaFile()
 
 include("autorun/gibbing_system/convars.lua")
+include("autorun/gibbing_system/tables.lua")
 include("autorun/gibbing_system/defaultnpcs.lua")
 include("autorun/gibbing_system/models.lua")
 include("autorun/gibbing_system/expressions.lua")
 include("autorun/gibbing_system/finger_rotation.lua")
 include("autorun/gibbing_system/death_anims.lua")
-include("autorun/gibbing_system/tables.lua")
 
 Model_Path = "autorun/gibbing_system/models/"
 
@@ -106,8 +106,8 @@ local function RemoveTimers()
     end
 end
 
-local DamageForce = Vector(0,0,0)
-local DamagePosition = Vector(0,0,0)
+DamageForce = Vector(0,0,0)
+DamagePosition = Vector(0,0,0)
 
 --[[
 hook.Add( "ScaleNPCDamage", "GSDamageInfoNPC", function( npc, hitgroup, dmginfo )
