@@ -19,11 +19,6 @@ function LocalizedText(lang,text)
 	end
 end
 
-function GSLanguageChanged()
-	GmodLanguage = string.lower(GetConVar("gmod_language"):GetString())
-end
-cvars.AddChangeCallback( "gmod_language", GSLanguageChanged, "GSLanguageChanged" )
-
 local function GibSystem_Initialize()
 	local files, folders = file.Find(Model_Path.."*","LUA")
 	for k, v in pairs(files) do
@@ -109,27 +104,26 @@ end
 DamageForce = Vector(0,0,0)
 DamagePosition = Vector(0,0,0)
 
---[[
-hook.Add( "ScaleNPCDamage", "GSDamageInfoNPC", function( npc, hitgroup, dmginfo )
-	DamageForce = dmginfo:GetDamageForce()
-	DamagePosition = dmginfo:GetDamagePosition()
-	last_dmgpos[npc] = dmginfo:GetDamagePosition()
-	
-end )
-
-hook.Add( "ScaleNPCDamage", "GSDamageInfoPlayer", function( plr, hitgroup, dmginfo )
-	DamageForce = dmginfo:GetDamageForce()
-	DamagePosition = dmginfo:GetDamagePosition()
-	last_dmgpos[plr] = dmginfo:GetDamagePosition()
-	print(DamageForce)
-end )
-]]--
-
 hook.Add("EntityTakeDamage", "gibsystem", function(ent, dmginfo)
+	if !(dmginfo:GetDamage() >= ent:Health()) then return end
 	DamageForce = dmginfo:GetDamageForce()
 	DamagePosition = dmginfo:GetDamagePosition()
 	last_dmgpos[ent] = dmginfo:GetDamagePosition()
 end)
+
+hook.Add( "ScaleNPCDamage", "GSDamageInfoNPC", function( npc, hitgroup, dmginfo )
+	if !(dmginfo:GetDamage() >= npc:Health()) then return end
+	DamageForce = dmginfo:GetDamageForce()
+	DamagePosition = dmginfo:GetDamagePosition()
+	last_dmgpos[npc] = dmginfo:GetDamagePosition()
+end )
+
+hook.Add( "ScaleNPCDamage", "GSDamageInfoPlayer", function( plr, hitgroup, dmginfo )
+	if !(dmginfo:GetDamage() >= plr:Health()) then return end
+	DamageForce = dmginfo:GetDamageForce()
+	DamagePosition = dmginfo:GetDamagePosition()
+	last_dmgpos[plr] = dmginfo:GetDamagePosition()
+end )
 
 hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 
@@ -167,7 +161,7 @@ end)
 function CreateRope(gib1,gib2,gib1phys,gib2phys,vec1,vec2)
 	if GetConVar( "gibsystem_rope" ):GetBool() then
 		if IsValid(gib1) and IsValid(gib2) then
-			local constraint = constraint.Rope(gib1, gib2, gib1:TranslateBoneToPhysBone( gib1:LookupBone( "ValveBiped.Bip01_Head1" ) ), gib2:TranslateBoneToPhysBone( gib2:LookupBone( "ValveBiped.Bip01_Spine4" or "ValveBiped.Bip01_Spine2" or "ValveBiped.Bip01_Spine1" ) ), Vector(0,0,-3), Vector(5,0,0), 5, 0, GetConVar( "gibsystem_rope_strength" ):GetInt(), 1, "gibs/intestines_beam", false)
+			local constraint = constraint.Rope(gib1, gib2, gib1:TranslateBoneToPhysBone( gib1:LookupBone( gib2phys or "ValveBiped.Bip01_Head1" ) ), gib2:TranslateBoneToPhysBone( gib2:LookupBone( gib2phys or "ValveBiped.Bip01_Spine4" or "ValveBiped.Bip01_Spine2" or "ValveBiped.Bip01_Spine1" ) ), Vector(0,0,-3), Vector(5,0,0), 5, 0, GetConVar( "gibsystem_rope_strength" ):GetInt(), 1, "gibs/intestines_beam", false)
 		else
 			LocalizedText("zh-cn","[碎尸系统] 无效实体索引。无法创建绳索。")
 			LocalizedText("en","[Gibbing System] Invaild Index. Can't create rope.")
@@ -368,6 +362,32 @@ function CreateGibs(ent)
 
 		end
 		
+		--[[
+		
+		local dmgpos = last_dmgpos[ent]
+		local phys_bone, lpos
+
+		if dmgpos then
+			phys_bone = Gib:GetClosestPhysBone(dmgpos)
+			if phys_bone then
+				local phys = Gib:GetPhysicsObjectNum(phys_bone)
+				print(Gib:GetBoneName(Gib:TranslatePhysBoneToBone(phys_bone)))
+				lpos = phys:WorldToLocal(dmgpos)
+			end
+		end
+
+		if GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 1 then
+			Gib:Input( "StartRagdollBoogie", Gib, Gib, "" )
+		elseif GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 2 then
+			timer.Simple(0, function()
+			if !IsValid(Gib) then return end	
+				fedhoria.StartModule(Gib, "stumble_legs", phys_bone, lpos)
+				last_dmgpos[ent] = nil		
+			end)
+		end
+
+		]]--
+
 		if GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt() > 0 then
 			timer.Create( "RemoveTimer"..Gib:EntIndex(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
 				if IsValid( Gib ) then
