@@ -203,7 +203,8 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			["#gs.addon.extension.snowbreak"] = 3257369456,
 			["#gs.addon.extension.arknights"] = 3277264014,
 			["#gs.addon.extension.honkai_impact_3rd"] = 3277267079,
-			["#gs.addon.extension.extra_gibs"] = 3277262546
+			["#gs.addon.extension.extra_gibs"] = 3277262546,
+			["#gs.addon.extension.honkai_star_rail"] = 3343204403
 		}
 		
 		local AppListExt = vgui.Create( "DListView", pnl )
