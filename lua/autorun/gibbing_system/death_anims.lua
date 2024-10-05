@@ -94,9 +94,9 @@ function CreateDeathAnimationGib(ent)
 	end
 		
 	local head = nil
-	local HeadPos = ent:LookupBone("ValveBiped.Bip01_Head1")
+	local HeadPos = ent:LookupBone("ValveBiped.Bip01_Head1") or ent:LookupBone("ValveBiped.HC_Body_Bone") or ent:LookupBone("ValveBiped.Headcrab_Cube1") or 0
 		
-	if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
+	if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) and HeadPos then
 		head = ents.Create("prop_physics")
 		head:SetPos( ent:GetBonePosition(HeadPos) ) 
 	else
