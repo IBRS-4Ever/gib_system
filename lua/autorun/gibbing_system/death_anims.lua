@@ -67,7 +67,11 @@ local anims_table = {
 	"SHOVE_Rightward_01",
 	"SHOTHAND_01",
 	"SHOTHAND_02",
-	"SHOTHAND_03"
+	"SHOTHAND_03",
+	"FIRE_01",
+	"FIRE_02",
+	"FIRE_03",
+	"FIRE_04"
 }
 
 function CreateDeathAnimationGib(ent)
