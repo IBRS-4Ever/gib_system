@@ -12,6 +12,7 @@ include("autorun/gibbing_system/death_anims.lua")
 Model_Path = "autorun/gibbing_system/models/"
 
 local GmodLanguage = string.lower(GetConVar("gmod_language"):GetString())
+Fedhoria = false 
 
 function LocalizedText(lang,text)
 	if GmodLanguage == lang then
@@ -38,12 +39,13 @@ LocalizedText("en","[Gibbing System] Loading Files...")
 
 if file.Exists( "fedhoria/modules.lua", "LUA" ) then
 	include("fedhoria/modules.lua")
+	Fedhoria = true
 	LocalizedText("zh-cn","[碎尸系统] 已检测到 Fedhoria 并已加载。")
 	LocalizedText("en","[Gibbing System] Fedhoria detected and loaded.")
 else
-	LocalizedText("zh-cn","[碎尸系统] 未发现 Fedhoria。碎尸系统已禁用。")
-	LocalizedText("en","[Gibbing System] Can't find Fedhoria. Gibbing System Disabled.")
-	return false
+	LocalizedText("zh-cn","[碎尸系统] 未发现 Fedhoria。")
+	LocalizedText("en","[Gibbing System] Can't find Fedhoria.")
+	Fedhoria = false
 end
 
 for _, Model in ipairs(GibModels) do
@@ -108,21 +110,27 @@ hook.Add("EntityTakeDamage", "gibsystem", function(ent, dmginfo)
 	if !(dmginfo:GetDamage() >= ent:Health()) then return end
 	DamageForce = dmginfo:GetDamageForce()
 	DamagePosition = dmginfo:GetDamagePosition()
-	last_dmgpos[ent] = dmginfo:GetDamagePosition()
+	if (Fedhoria) then
+		last_dmgpos[ent] = dmginfo:GetDamagePosition()
+	end
 end)
 
 hook.Add( "ScaleNPCDamage", "GSDamageInfoNPC", function( npc, hitgroup, dmginfo )
 	if !(dmginfo:GetDamage() >= npc:Health()) then return end
 	DamageForce = dmginfo:GetDamageForce()
 	DamagePosition = dmginfo:GetDamagePosition()
-	last_dmgpos[npc] = dmginfo:GetDamagePosition()
+	if (Fedhoria) then
+		last_dmgpos[npc] = dmginfo:GetDamagePosition()
+	end
 end )
 
 hook.Add( "ScaleNPCDamage", "GSDamageInfoPlayer", function( plr, hitgroup, dmginfo )
 	if !(dmginfo:GetDamage() >= plr:Health()) then return end
 	DamageForce = dmginfo:GetDamageForce()
 	DamagePosition = dmginfo:GetDamagePosition()
-	last_dmgpos[plr] = dmginfo:GetDamagePosition()
+	if (Fedhoria) then
+		last_dmgpos[plr] = dmginfo:GetDamagePosition()
+	end
 end )
 
 hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
@@ -164,7 +172,7 @@ function CreateRope(gib1,gib2,gib1phys,gib2phys,vec1,vec2)
 			local constraint = constraint.Rope(gib1, gib2, gib1:TranslateBoneToPhysBone( gib1:LookupBone( gib2phys or "ValveBiped.Bip01_Head1" ) ), gib2:TranslateBoneToPhysBone( gib2:LookupBone( gib2phys or "ValveBiped.Bip01_Spine4" or "ValveBiped.Bip01_Spine2" or "ValveBiped.Bip01_Spine1" ) ), Vector(0,0,-3), Vector(5,0,0), 5, 0, GetConVar( "gibsystem_rope_strength" ):GetInt(), 1, "gibs/intestines_beam", false)
 		else
 			LocalizedText("zh-cn","[碎尸系统] 无效实体索引。无法创建绳索。")
-			LocalizedText("en","[Gibbing System] Invaild Index. Can't create rope.")
+			LocalizedText("en","[Gibbing System] Invaild Entity Index. Can't create rope.")
 		end
 	end
 end
@@ -242,7 +250,7 @@ end
 function GibConvulsion(ent)
 	if GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 1 then
 		ent:Input( "StartRagdollBoogie", ent, ent, "" )
-	elseif GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 2 then
+	elseif GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 2 and Fedhoria then
 		timer.Simple(0, function()
 		if !IsValid(ent) then return end	
 			fedhoria.StartModule(ent, "stumble_legs", phys_bone, lpos)
@@ -252,16 +260,17 @@ function GibConvulsion(ent)
 end
 
 function CreateGibs(ent)
+	if Fedhoria then
+		local dmgpos = last_dmgpos[ent]
+		local phys_bone, lpos
 
-	local dmgpos = last_dmgpos[ent]
-	local phys_bone, lpos
-
-	if dmgpos then
-		phys_bone = ent:GetClosestPhysBone(dmgpos)
-		if phys_bone then
-			local phys = ent:GetPhysicsObjectNum(phys_bone)
-			
-			lpos = phys:WorldToLocal(dmgpos)
+		if dmgpos then
+			phys_bone = ent:GetClosestPhysBone(dmgpos)
+			if phys_bone then
+				local phys = ent:GetPhysicsObjectNum(phys_bone)
+				
+				lpos = phys:WorldToLocal(dmgpos)
+			end
 		end
 	end
 
@@ -427,15 +436,8 @@ function CreateGibs(ent)
 	else
 		Model = GibModels[math.random( #GibModels )]
 	end
-		
 	
 	if ConditionGib == "headless" then
-		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		end
 		
 		SpawnGib("ragdoll", "models/gib_system/"..Model.."_headless.mdl", 2, "forward", "body", false, true, true)
 		
@@ -450,12 +452,6 @@ function CreateGibs(ent)
 			Model = Limbs[math.random( #Limbs )]
 		end
 
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		end
-		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
@@ -471,12 +467,6 @@ function CreateGibs(ent)
 			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		end
-		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/no_limb/no_legs.mdl", 2, "forward", "body", false, true, true)
@@ -488,12 +478,6 @@ function CreateGibs(ent)
 		
 		if !table.HasValue( CompletedModels, Model ) then
 			Model = CompletedModels[math.random( #CompletedModels )]
-		end
-		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
 		end
 		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
@@ -509,12 +493,6 @@ function CreateGibs(ent)
 			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		end
-		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/no_limb/no_right_leg_left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
@@ -526,12 +504,6 @@ function CreateGibs(ent)
 	
 		if !table.HasValue( CompletedModels, Model ) then
 			Model = CompletedModels[math.random( #CompletedModels )]
-		end
-		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
 		end
 		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false, true, true)
@@ -547,12 +519,6 @@ function CreateGibs(ent)
 			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		end
-		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/no_limb/no_left_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
 
@@ -563,12 +529,6 @@ function CreateGibs(ent)
 		
 		if !table.HasValue( CompletedModels, Model ) then
 			Model = CompletedModels[math.random( #CompletedModels )]
-		end
-		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
 		end
 		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false, true, true)
@@ -583,12 +543,6 @@ function CreateGibs(ent)
 			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		end
-		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/no_limb/no_left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
 
@@ -601,12 +555,6 @@ function CreateGibs(ent)
 			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		end
-		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/no_limb/no_right_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
 
@@ -617,12 +565,6 @@ function CreateGibs(ent)
 	
 		if !table.HasValue( CompletedModels, Model ) then
 			Model = CompletedModels[math.random( #CompletedModels )]
-		end
-		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
 		end
 		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false, true, true)
@@ -638,12 +580,6 @@ function CreateGibs(ent)
 			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		end
-		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/no_limb/no_left.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
@@ -655,12 +591,6 @@ function CreateGibs(ent)
 	
 		if !table.HasValue( CompletedModels, Model ) then
 			Model = CompletedModels[math.random( #CompletedModels )]
-		end
-		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
 		end
 		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false, true, true)
@@ -677,12 +607,6 @@ function CreateGibs(ent)
 			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		end
-		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false, true, true)
@@ -695,12 +619,6 @@ function CreateGibs(ent)
 	
 		if !table.HasValue( CompletedModels, Model ) then
 			Model = CompletedModels[math.random( #CompletedModels )]
-		end
-		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
 		end
 		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false, true, true)
@@ -717,12 +635,6 @@ function CreateGibs(ent)
 			Model = CompletedModels[math.random( #CompletedModels )]
 		end
 		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		end
-		
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false, true, true)
@@ -737,12 +649,6 @@ function CreateGibs(ent)
 			Model = UpperAndLower[math.random( #UpperAndLower )]
 		end
 		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		end
-		
 		SpawnGib("ragdoll", "models/gib_system/"..Model.."_torso.mdl", 1, "ValveBiped.Bip01_Spine1", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/"..Model.."_legs.mdl", 1, "ValveBiped.Bip01_Spine1", "body", false, true, true)
 		
@@ -755,18 +661,19 @@ function CreateGibs(ent)
 			Model = LeftAndRight[math.random( #LeftAndRight )]
 		end
 		
-		if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
-			SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		else
-			SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
-		end
-		
 		SpawnGib("ragdoll", "models/gib_system/"..Model.."_half_left.mdl", 2, "forward", "body", false, true, true)
 		SpawnGib("ragdoll", "models/gib_system/"..Model.."_half_right.mdl", 2, "forward", "body", false, true, true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：左右半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 	end
+	
+	if !list.HasEntry("GIBSYSTEM_RAGDOLL_HEADS",Model) then
+		SpawnGib("physics", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
+	else
+		SpawnGib("ragdoll", "models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", true, false, false)
+	end
+	
 	-- DamageForce = Vector(0,0,0)
 	-- DamagePosition = Vector(0,0,0)
 end

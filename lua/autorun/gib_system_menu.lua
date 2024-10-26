@@ -4,7 +4,11 @@ include("autorun/gibbing_system/models.lua")
 local convulsionmode = {}
 convulsionmode["#gs.convulsionmode.none"] = {gibsystem_ragdoll_convulsion = "0"}
 convulsionmode["#gs.convulsionmode.default"] = {gibsystem_ragdoll_convulsion = "1"}
-convulsionmode["#gs.convulsionmode.fedhoria"] = {gibsystem_ragdoll_convulsion = "2"}
+if (Fedhoria) then
+	convulsionmode["#gs.convulsionmode.fedhoria"] = {gibsystem_ragdoll_convulsion = "2"}
+else
+	convulsionmode["#gs.convulsionmode.fedhoria_not_installed"] = {gibsystem_ragdoll_convulsion = "2"}
+end
 
 local collisiongroup = {}
 collisiongroup["#gs.collisiongroup.only_world"] = {gibsystem_ragdoll_collisiongroup = "1"}
@@ -43,126 +47,128 @@ hook.Add("AddToolMenuTabs", "GIBBING_SYSTEM_ADDMENU", function()
 end)
 
 hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
-	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System", "#GS.Settings","","",function(pnl)
-		pnl:ClearControls()
-		pnl:AddControl( "ComboBox", { MenuButton = 1, Folder = "gib_system" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.Enable", Command = "gibsystem_enabled" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.Gib_Players", Command = "gibsystem_gibbing_player" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.Gib_NPCs", Command = "gibsystem_gibbing_npc" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.Gib_Base_On_Model", Command = "gibsystem_gib_base_on_model" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.Random.Finger_Rotating", Command = "gibsystem_random_finger_rotating" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.Random.Toe_Rotating", Command = "gibsystem_random_toe_rotating" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.Random.GF2_Toe_Rotating", Command = "gibsystem_random_gf2_toe_rotating" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.Random.Bodygroup", Command = "gibsystem_random_bodygroup" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.Random.Skin", Command = "gibsystem_random_skin" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.DeathExpress", Command = "gibsystem_death_express" } )
-		pnl:AddControl( "ComboBox", { Label = "#GS.Ragdoll_Convulsion", Options = convulsionmode } )
-		pnl:AddControl( "ComboBox", { Label = "#GS.GibsCollision", Options = collisiongroup } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.Deathcam", Command = "gibsystem_deathcam_enable" } )
-		pnl:AddControl( "ComboBox", { Label = "#GS.Deathcam.Mode", Options = cammode } )
-		pnl:AddControl( "ComboBox", { Label = "#GS.GibGroup", Options = gibgroup } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.CategorizeModels", Command = "gibsystem_model_category" } )
-		
-		local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-		Button:SetText( "#GS.GibName" )					// Set the text on the button		
-		Button:SetSize( 100, 25 )					// Set the size
-		pnl:AddItem(Button)
-		Button.DoClick = function()
-			local frame = vgui.Create( "DFrame" )
-			frame:SetSize( ScrW() / 1.2, ScrH() / 1.1 )
-			frame:SetTitle( string.format( language.GetPhrase("#gs.choose_character"), language.GetPhrase("#gs.model."..GetConVar("gibsystem_gib_name"):GetString()) ) )
-			frame:Center()
-
-			frame:MakePopup()
-
-			frame:SetDraggable( false )
-
-			function frame:Paint( w, h )
-				Derma_DrawBackgroundBlur( self, self.m_fCreateTime )
-				draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0, 200 ) )
-			end
-
-			local PropPanel = vgui.Create( "ContentContainer", frame )
-			PropPanel:SetTriggerSpawnlistChange( false )
-			PropPanel:Dock( FILL )
-
-			local EntList = list.Get("GIBSYSTEM_CATEGORY_INFO")
+	if game.SinglePlayer() or LocalPlayer():IsAdmin() then
+		spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System", "#GS.Settings","","",function(pnl)
 			
-			for _, Model in ipairs(GibModels) do
-				if !list.HasEntry("GIBSYSTEM_CATEGORY_INFO",Model) then
-					list.Set("GIBSYSTEM_CATEGORY_INFO", Model,{})
+			pnl:ClearControls()
+			pnl:AddControl( "ComboBox", { MenuButton = 1, Folder = "gib_system" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.Enable", Command = "gibsystem_enabled" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.Gib_Players", Command = "gibsystem_gibbing_player" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.Gib_NPCs", Command = "gibsystem_gibbing_npc" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.Gib_Base_On_Model", Command = "gibsystem_gib_base_on_model" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.Random.Finger_Rotating", Command = "gibsystem_random_finger_rotating" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.Random.Toe_Rotating", Command = "gibsystem_random_toe_rotating" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.Random.GF2_Toe_Rotating", Command = "gibsystem_random_gf2_toe_rotating" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.Random.Bodygroup", Command = "gibsystem_random_bodygroup" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.Random.Skin", Command = "gibsystem_random_skin" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.DeathExpress", Command = "gibsystem_death_express" } )
+			pnl:AddControl( "ComboBox", { Label = "#GS.Ragdoll_Convulsion", Options = convulsionmode } )
+			pnl:AddControl( "ComboBox", { Label = "#GS.GibsCollision", Options = collisiongroup } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.Deathcam", Command = "gibsystem_deathcam_enable" } )
+			pnl:AddControl( "ComboBox", { Label = "#GS.Deathcam.Mode", Options = cammode } )
+			pnl:AddControl( "ComboBox", { Label = "#GS.GibGroup", Options = gibgroup } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.CategorizeModels", Command = "gibsystem_model_category" } )
+			
+			local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
+			Button:SetText( "#GS.GibName" )					// Set the text on the button		
+			Button:SetSize( 100, 25 )					// Set the size
+			pnl:AddItem(Button)
+			Button.DoClick = function()
+				local frame = vgui.Create( "DFrame" )
+				frame:SetSize( ScrW() / 1.2, ScrH() / 1.1 )
+				frame:SetTitle( string.format( language.GetPhrase("#gs.choose_character"), language.GetPhrase("#gs.model."..GetConVar("gibsystem_gib_name"):GetString()) ) )
+				frame:Center()
+
+				frame:MakePopup()
+
+				frame:SetDraggable( false )
+
+				function frame:Paint( w, h )
+					Derma_DrawBackgroundBlur( self, self.m_fCreateTime )
+					draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0, 200 ) )
 				end
-			end
-			
-			-- Categorize them
-			local Categories = {}
-			for k, v in pairs(EntList) do
-				local Category = v.Category or "#gs.category.uncategorized"
-				local Tab = Categories[Category] or {}
-				Tab[k] = v
-				Categories[Category] = Tab
-			end
-			
-			local DefaultHeader = vgui.Create( "ContentHeader", PropPanel )
-			DefaultHeader:SetText( "#gs.category.default" )
-			PropPanel:Add( DefaultHeader )
-				
-			local icon = vgui.Create( "ContentIcon", PropPanel )
-			icon:SetMaterial( "gib_system/random.png" )
-			icon:SetName( "#gs.model.random" )
-			icon.DoClick = function()
-				RunConsoleCommand( "gibsystem_gib_name", "random" )
-			frame:Close()
-			end
-			PropPanel:Add( icon )
 
-			if GetConVar("gibsystem_model_category"):GetBool() then
-				for CategoryName, v in SortedPairs(Categories) do
+				local PropPanel = vgui.Create( "ContentContainer", frame )
+				PropPanel:SetTriggerSpawnlistChange( false )
+				PropPanel:Dock( FILL )
+
+				local EntList = list.Get("GIBSYSTEM_CATEGORY_INFO")
 				
-					local Header = vgui.Create( "ContentHeader", PropPanel )
-					Header:SetText( CategoryName )
-					PropPanel:Add( Header )
+				for _, Model in ipairs(GibModels) do
+					if !list.HasEntry("GIBSYSTEM_CATEGORY_INFO",Model) then
+						list.Set("GIBSYSTEM_CATEGORY_INFO", Model,{})
+					end
+				end
+				
+				-- Categorize them
+				local Categories = {}
+				for k, v in pairs(EntList) do
+					local Category = v.Category or "#gs.category.uncategorized"
+					local Tab = Categories[Category] or {}
+					Tab[k] = v
+					Categories[Category] = Tab
+				end
+				
+				local DefaultHeader = vgui.Create( "ContentHeader", PropPanel )
+				DefaultHeader:SetText( "#gs.category.default" )
+				PropPanel:Add( DefaultHeader )
 					
-					for name, ent in SortedPairs(v) do
+				local icon = vgui.Create( "ContentIcon", PropPanel )
+				icon:SetMaterial( "gib_system/random.png" )
+				icon:SetName( "#gs.model.random" )
+				icon.DoClick = function()
+					RunConsoleCommand( "gibsystem_gib_name", "random" )
+				frame:Close()
+				end
+				PropPanel:Add( icon )
+
+				if GetConVar("gibsystem_model_category"):GetBool() then
+					for CategoryName, v in SortedPairs(Categories) do
+					
+						local Header = vgui.Create( "ContentHeader", PropPanel )
+						Header:SetText( CategoryName )
+						PropPanel:Add( Header )
+						
+						for name, ent in SortedPairs(v) do
+							local icon = vgui.Create( "ContentIcon", PropPanel )
+							icon:SetMaterial( "gib_system/" .. name .. ".png" )
+							icon:SetName( "#gs.model." .. name )
+
+							icon.DoClick = function()
+								RunConsoleCommand( "gibsystem_gib_name", name )
+								frame:Close()
+							end
+							
+							PropPanel:Add( icon )
+						end
+					end
+				else
+					for _, Model in ipairs(GibModels) do
+
 						local icon = vgui.Create( "ContentIcon", PropPanel )
-						icon:SetMaterial( "gib_system/" .. name .. ".png" )
-						icon:SetName( "#gs.model." .. name )
+						icon:SetMaterial( "gib_system/" .. Model .. ".png" )
+						icon:SetName( "#gs.model." .. Model )
 
 						icon.DoClick = function()
-							RunConsoleCommand( "gibsystem_gib_name", name )
-							frame:Close()
+							RunConsoleCommand( "gibsystem_gib_name", Model )
+						frame:Close()
 						end
-						
 						PropPanel:Add( icon )
 					end
 				end
-			else
-				for _, Model in ipairs(GibModels) do
-
-					local icon = vgui.Create( "ContentIcon", PropPanel )
-					icon:SetMaterial( "gib_system/" .. Model .. ".png" )
-					icon:SetName( "#gs.model." .. Model )
-
-					icon.DoClick = function()
-						RunConsoleCommand( "gibsystem_gib_name", Model )
-					frame:Close()
-					end
-					PropPanel:Add( icon )
-				end
 			end
-		end
-		
-		pnl:AddControl( "textbox", { Label = "#GS.HeadMess", Command = "gibsystem_head_mass" } )
-		pnl:AddControl( "textbox", { Label = "#GS.BodyMess", Command = "gibsystem_body_mass" } )
-		pnl:AddControl( "Slider", { Label = "#GS.GibsRemoveTimer", Type = "Integer", Command = "gibsystem_ragdoll_removetimer", Min = "0", Max = "100" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.Rope", Command = "gibsystem_rope" } )
-		pnl:AddControl( "Slider", { Label = "#GS.Rope_Strength", Type = "Integer", Command = "gibsystem_rope_strength", Min = "0", Max = "5000" } )
-		pnl:AddControl( "CheckBox", { Label = "#GS.BloodEffect", Command = "gibsystem_blood_effect" } )
-		pnl:AddControl( "Slider", { Label = "#GS.BloodEffectLength", Type = "Integer", Command = "gibsystem_blood_time", Min = "0", Max = "100" } )
-		pnl:AddControl( "Slider", { Label = "#GS.BodyBloodEffectLength", Type = "Integer", Command = "gibsystem_blood_time_body", Min = "0", Max = "100" } )
-		pnl:AddControl( "Button", { Label = "#GS.Cleanup_Gibs", Command = "CleanGibs" } )
-	end)
-	
+			
+			pnl:AddControl( "textbox", { Label = "#GS.HeadMess", Command = "gibsystem_head_mass" } )
+			pnl:AddControl( "textbox", { Label = "#GS.BodyMess", Command = "gibsystem_body_mass" } )
+			pnl:AddControl( "Slider", { Label = "#GS.GibsRemoveTimer", Type = "Integer", Command = "gibsystem_ragdoll_removetimer", Min = "0", Max = "100" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.Rope", Command = "gibsystem_rope" } )
+			pnl:AddControl( "Slider", { Label = "#GS.Rope_Strength", Type = "Integer", Command = "gibsystem_rope_strength", Min = "0", Max = "5000" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.BloodEffect", Command = "gibsystem_blood_effect" } )
+			pnl:AddControl( "Slider", { Label = "#GS.BloodEffectLength", Type = "Integer", Command = "gibsystem_blood_time", Min = "0", Max = "100" } )
+			pnl:AddControl( "Slider", { Label = "#GS.BodyBloodEffectLength", Type = "Integer", Command = "gibsystem_blood_time_body", Min = "0", Max = "100" } )
+			pnl:AddControl( "Button", { Label = "#GS.Cleanup_Gibs", Command = "CleanGibs" } )
+		end)
+	end
 	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System EXP", "#GS.Experiments","","",function(pnl)
 		pnl:ClearControls()
 		pnl:AddControl( "CheckBox", { Label = "#GS.ExperimentsEnabled", Command = "gibsystem_experiment" } )
