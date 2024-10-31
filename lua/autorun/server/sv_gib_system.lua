@@ -425,6 +425,8 @@ function CreateGibs(ent)
 		
 	if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
 		Model = GetConVar("gibsystem_gib_name"):GetString()
+	elseif string.find(ent:GetModel(), "klukai_astral_luminous") then
+		Model = "klukai_astral_luminous"
 	elseif GetConVar("gibsystem_gib_base_on_model"):GetBool() then
 		Model = GibModels[math.random( #GibModels )]
 		for i = 1, table.Count(Materials) do
