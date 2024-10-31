@@ -12,7 +12,7 @@ include("autorun/gibbing_system/death_anims.lua")
 Model_Path = "autorun/gibbing_system/models/"
 
 local GmodLanguage = string.lower(GetConVar("gmod_language"):GetString())
-Fedhoria = false 
+local Fedhoria = false 
 
 function LocalizedText(lang,text)
 	if GmodLanguage == lang then
