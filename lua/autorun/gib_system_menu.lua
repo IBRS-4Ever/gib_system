@@ -226,7 +226,6 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		AppListExt:AddColumn( "#gs.addon.ID" )
 		
 		for k,v in pairs(ExtAddons) do
-			-- print(v..", "..k)
 			AppListExt:AddLine( k, v )
 		end
 		

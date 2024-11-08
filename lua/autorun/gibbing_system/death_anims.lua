@@ -155,7 +155,7 @@ function CreateDeathAnimationGib(ent)
 	DM:ResetSequence( DM:LookupSequence( anim ) )
 	print("Sequence Is: "..anim)
 	DM:ResetSequenceInfo()
-	DM:SetCycle(1) -- Was 0, Set to 1 to make ragdoll looks good.
+	DM:SetCycle(1) -- 以前是 0，调成 1 之后生成的布娃娃就看起来正常了。
 		
 	RandomBodyGroup(DM)
 	RandomSkin(DM)
@@ -187,7 +187,7 @@ function CreateDeathAnimationGib(ent)
 			ragdoll:ManipulateBoneScale( i, DM:GetManipulateBoneScale( i ) )
 			ragdoll:ManipulateBoneAngles( i, DM:GetManipulateBoneAngles( i ) )
 			ragdoll:ManipulateBonePosition( i, DM:GetManipulateBonePosition( i ) )
-			ragdoll:ManipulateBoneJiggle( i, DM:GetManipulateBoneJiggle( i ) ) -- Even though we don't know what this does, I am still putting this here.
+			ragdoll:ManipulateBoneJiggle( i, DM:GetManipulateBoneJiggle( i ) )
 		end
 
 		ragdoll:Spawn()

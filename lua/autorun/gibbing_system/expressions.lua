@@ -9,8 +9,6 @@ function GibFacePose(ent)
 		
 		if ModelExpressions then 																-- 如果 ModelExpressions 表中有该模型的表情值，则从表中读取。
 			Expressions = ModelExpressions[math.random( #ModelExpressions )]
-			-- PrintTable(Expressions)
-			-- PrintTable(table.remove(Expressions_Table[Model]))
 			include("autorun/gibbing_system/models/"..Model..".lua")							-- 测试，重新加载模型配置文件来刷新表情。
 		elseif GIRLS_FRONTLINE_2_MODELS[Model] then 											-- 如果是少前2的模型，则套用以下值。
 			Expressions = {
