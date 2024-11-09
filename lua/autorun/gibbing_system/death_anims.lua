@@ -217,9 +217,10 @@ function CreateDeathAnimationGib(ent)
 		end
 	end)
 
-	hook.Add( "Tick", "GS_DeathAnimation_Think"..ragdoll:EntIndex(), function() 
+	local RagdollIndex = ragdoll:EntIndex()
+	hook.Add( "Tick", "GS_DeathAnimation_Think"..RagdollIndex, function() 
 		if !IsValid(DM) or !IsValid(ragdoll) then 
-			hook.Remove( "Tick", "GS_DeathAnimation_Think"..ragdoll:EntIndex() )
+			hook.Remove( "Tick", "GS_DeathAnimation_Think"..RagdollIndex )
 			return 
 		end
 		local AnmPos = DM:GetPos()
