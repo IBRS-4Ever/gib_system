@@ -27,6 +27,7 @@ CreateConVar( "gibsystem_gib_group", "headless" , FCVAR_ARCHIVE + FCVAR_SERVER_C
 CreateConVar( "gibsystem_gib_name", "random" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set Gib Name.")
 CreateConVar( "gibsystem_experiment", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable Experimental Features.")
 CreateConVar( "gibsystem_deathanimation", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable death animations.")
+CreateConVar( "gibsystem_deathanimation_movement", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable death animations movements.")
 CreateConVar( "gibsystem_deathanimation_name", "random" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set death animation.")
 CreateClientConVar( "gibsystem_model_category", 1 , true, false )
 CreateConVar( "gibsystem_gib_base_on_model", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Choose Model Base on materials.")

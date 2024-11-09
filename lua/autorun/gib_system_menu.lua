@@ -178,6 +178,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			pnl:AddControl( "label", { Text = "#GS.Experiments" } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.ExperimentsEnabled", Command = "gibsystem_experiment" } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation", Command = "gibsystem_deathanimation" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation_Movement", Command = "gibsystem_deathanimation_movement" } )
 		end)
 	end
 	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System Addons", "#GS.Addons","","",function(pnl)

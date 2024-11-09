@@ -320,7 +320,7 @@ function CreateGibs(ent)
 			GibConvulsion(Gib)
 		end
 		
-		FingerRotation(Gib)
+		FingerRotation(Gib,Model)
 		RandomBodyGroup(Gib)
 		RandomSkin(Gib)
 		
