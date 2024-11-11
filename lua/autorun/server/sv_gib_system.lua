@@ -106,7 +106,7 @@ end
 DamageForce = Vector(0,0,0)
 DamagePosition = Vector(0,0,0)
 
-hook.Add("EntityTakeDamage", "gibsystem", function(ent, dmginfo)
+hook.Add("EntityTakeDamage", "GibSystem_EntityTakeDamage", function(ent, dmginfo)
 	if !(dmginfo:GetDamage() >= ent:Health()) then return end
 	DamageForce = dmginfo:GetDamageForce()
 	DamagePosition = dmginfo:GetDamagePosition()
@@ -115,7 +115,7 @@ hook.Add("EntityTakeDamage", "gibsystem", function(ent, dmginfo)
 	end
 end)
 
-hook.Add( "ScaleNPCDamage", "GSDamageInfoNPC", function( npc, hitgroup, dmginfo )
+hook.Add( "ScaleNPCDamage", "GibSystem_DamageInfo_NPC", function( npc, hitgroup, dmginfo )
 	if !(dmginfo:GetDamage() >= npc:Health()) then return end
 	DamageForce = dmginfo:GetDamageForce()
 	DamagePosition = dmginfo:GetDamagePosition()
@@ -124,7 +124,7 @@ hook.Add( "ScaleNPCDamage", "GSDamageInfoNPC", function( npc, hitgroup, dmginfo 
 	end
 end )
 
-hook.Add( "ScaleNPCDamage", "GSDamageInfoPlayer", function( plr, hitgroup, dmginfo )
+hook.Add( "ScalePlayerDamage", "GibSystem_DamageInfo_Player", function( plr, hitgroup, dmginfo )
 	if !(dmginfo:GetDamage() >= plr:Health()) then return end
 	DamageForce = dmginfo:GetDamageForce()
 	DamagePosition = dmginfo:GetDamagePosition()
@@ -133,7 +133,7 @@ hook.Add( "ScaleNPCDamage", "GSDamageInfoPlayer", function( plr, hitgroup, dmgin
 	end
 end )
 
-hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
+hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
 
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and DefaultNPCs[npc:GetClass()] then
 			
@@ -147,7 +147,7 @@ hook.Add("OnNPCKilled", "SpawnGibs", function(npc, attacker, dmg)
 	end
 end)
 
-hook.Add("PlayerDeath", "SpawnGibs", function(player, attacker, dmg)
+hook.Add("PlayerDeath", "GibSystem_SpawnGibs_Player", function(player, attacker, dmg)
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_player" ):GetBool() then
 		SafeRemoveEntity(player:GetRagdollEntity())
 		player:EmitSound( "Gib_System.Headshot_Fleshy" )
@@ -704,8 +704,8 @@ local function CleanGibs()
 	for k,v in pairs(GibsCreated) do
 		if IsValid(v) then
 			SafeRemoveEntity(v)
+			GibsCreated[k] = nil
 		end
 	end
 end
-
 concommand.Add("CleanGibs", CleanGibs)

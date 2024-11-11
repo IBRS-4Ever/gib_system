@@ -183,6 +183,7 @@ function CreateDeathAnimationGib(ent)
 	ragdoll:Spawn()
 	ragdoll:Activate()
 	ragdoll:SetNoDraw(true)
+	ragdoll:SetGravity(0)
 	BloodEffect(ragdoll,2,"forward")
 	FingerRotation(ragdoll, Model)
 	table.insert(GibsCreated,ragdoll)
@@ -208,20 +209,24 @@ function CreateDeathAnimationGib(ent)
 			timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() )
 		end)
 	end
-	
 	ragdoll:CallOnRemove("RemoveGibTimer",function() timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() ) end)
-	hook.Add( "EntityTakeDamage", "GS_DeathAnimation_Ragdoll_DMG_Check", function( target, dmginfo )
+
+	local RagdollIndex_DMG = ragdoll:EntIndex()
+	hook.Add( "EntityTakeDamage", "GibSystem_DeathAnimation_Ragdoll_DMG_Check"..RagdollIndex_DMG, function( target, dmginfo )
 		if target == ragdoll and ( dmginfo:GetDamageType() != 1 and dmginfo:GetDamage() > 10 ) then
 			SafeRemoveEntity(DM)
 			ragdoll:SetNoDraw(false)
+			ragdoll:SetGravity(1)
+			hook.Remove( "EntityTakeDamage", "GibSystem_DeathAnimation_Ragdoll_DMG_Check"..RagdollIndex_DMG )
+			return
 		end
 	end)
 
 	local RagdollIndex = ragdoll:EntIndex()
-	hook.Add( "Tick", "GS_DeathAnimation_Think"..RagdollIndex, function() 
+	hook.Add( "Tick", "GibSystem_DeathAnimation_Think"..RagdollIndex, function() 
 		if !IsValid(DM) or !IsValid(ragdoll) then 
-			hook.Remove( "Tick", "GS_DeathAnimation_Think"..RagdollIndex )
-			return 
+			hook.Remove( "Tick", "GibSystem_DeathAnimation_Think"..RagdollIndex )
+			return
 		end
 		local AnmPos = DM:GetPos()
 		local RagPos = ragdoll:GetBonePosition(0)
@@ -251,6 +256,7 @@ function CreateDeathAnimationGib(ent)
 		end
 		if IsValid(ragdoll) then
 			ragdoll:SetNoDraw(false)
+			ragdoll:SetGravity(1)
 			if GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 2 and Fedhoria then
 				timer.Simple(1, function()
 				if !IsValid(ragdoll) then return end	
