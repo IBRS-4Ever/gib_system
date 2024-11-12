@@ -106,6 +106,7 @@ end
 DamageForce = Vector(0,0,0)
 DamagePosition = Vector(0,0,0)
 
+--[[
 hook.Add("EntityTakeDamage", "GibSystem_EntityTakeDamage", function(ent, dmginfo)
 	if !(dmginfo:GetDamage() >= ent:Health()) then return end
 	DamageForce = dmginfo:GetDamageForce()
@@ -114,6 +115,7 @@ hook.Add("EntityTakeDamage", "GibSystem_EntityTakeDamage", function(ent, dmginfo
 		last_dmgpos[ent] = dmginfo:GetDamagePosition()
 	end
 end)
+]]-- 
 
 hook.Add( "ScaleNPCDamage", "GibSystem_DamageInfo_NPC", function( npc, hitgroup, dmginfo )
 	if !(dmginfo:GetDamage() >= npc:Health()) then return end
