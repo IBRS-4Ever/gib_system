@@ -11,11 +11,9 @@ TOOL.Information = {
 
 local Bones = {}
 
--- Applies current convar hand to picked hand
 function TOOL:LeftClick( trace )
 
 	if ( IsValid( trace.Entity ) && trace.Entity:IsPlayer() ) then return false end
-	--if ( trace.Entity:GetClass() != "prop_ragdoll" && !trace.Entity:IsNPC() ) then return false end
 	local ent = trace.Entity
 	if ( CLIENT ) then return true end
 	

@@ -186,9 +186,9 @@ function BloodEffect(ent,Type,AttachmentPoint,BonusTime)
 			BonusTime = 0
 		end
 		if Type == 2 and AP != nil then
-			local timerDuration = GetConVar( "gibsystem_blood_time_body" ):GetInt()-BonusTime -- 定时器持续时间（秒）
-			local timerInterval = 1 -- 定时器间隔时间（秒）
-			local timerCount = timerDuration / timerInterval -- 重复次数
+			local timerDuration = GetConVar( "gibsystem_blood_time_body" ):GetInt()-BonusTime 	// 定时器持续时间（秒）
+			local timerInterval = 1 															// 定时器间隔时间（秒）
+			local timerCount = timerDuration / timerInterval 									// 重复次数
 			local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
 			
 			if timerDuration > 0 then
@@ -198,10 +198,9 @@ function BloodEffect(ent,Type,AttachmentPoint,BonusTime)
 				table.insert(timers, timerBodyName)
 			end
 		else
-			-- print(ent:GetModel().." has no attachment named "..AP.."!")
-			local timerDuration = GetConVar( "gibsystem_blood_time" ):GetInt()-BonusTime -- 定时器持续时间（秒）
-			local timerInterval = 0.1 -- 定时器间隔时间（秒）
-			local timerCount = timerDuration / timerInterval -- 重复次数
+			local timerDuration = GetConVar( "gibsystem_blood_time" ):GetInt()-BonusTime 	// 定时器持续时间（秒）
+			local timerInterval = 0.1 														// 定时器间隔时间（秒）
+			local timerCount = timerDuration / timerInterval 								// 重复次数
 			local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
 			
 			if timerDuration > 0 then
@@ -336,11 +335,9 @@ function CreateGibs(ent)
 				end
 				
 				if ent:IsPlayer() then
-					-- phys:ApplyForceCenter( phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
 					phys:ApplyForceCenter( (DamageForce / Gib:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
 				else
 					phys:ApplyForceCenter( (DamageForce / Gib:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )
-					-- phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
 				end
 			end
 
@@ -363,10 +360,8 @@ function CreateGibs(ent)
 
 				if DamageForce and DamagePosition then
 					if ent:IsPlayer() then
-						-- phys:ApplyForceCenter( phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
 						phys:ApplyForceCenter( (DamageForce / Gib:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
 					else
-						-- phys:ApplyForceOffset( DamageForce / Gib:GetPhysicsObjectCount(), DamagePosition )
 						phys:ApplyForceCenter( (DamageForce / Gib:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )
 					end
 				else

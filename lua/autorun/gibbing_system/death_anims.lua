@@ -104,6 +104,31 @@ local PhysBones = {
 	["ValveBiped.Bip01_Head1"] 		= true
 }
 
+function GibSystem_DeathAnimation_Think(ragdoll,DM)
+	if !IsValid(DM) or !IsValid(ragdoll) then return end
+	local AnmPos = DM:GetPos()
+	local RagPos = ragdoll:GetBonePosition(0)
+
+	if (RagPos) then
+		RagPos.z = AnmPos.z
+		if (GetConVar("gibsystem_deathanimation_movement"):GetBool()) then
+			DM:SetPos( RagPos )
+		end
+	end
+
+	for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
+		local bone = ragdoll:GetPhysicsObjectNum( i )
+		if ( IsValid( bone ) ) then 
+			local PhysToBone = ragdoll:TranslatePhysBoneToBone( i )
+			if PhysBones[ragdoll:GetBoneName(PhysToBone)] then
+				local pos, ang = DM:GetBonePosition( PhysToBone )
+				if ( pos ) then bone:SetPos( pos ) end
+				if ( ang ) then bone:SetAngles( ang ) end
+			end
+		end
+	end
+end
+
 function CreateDeathAnimationGib(ent)
 	if GetConVar("gibsystem_deathanimation_name"):GetString() == "random" then
 		anim = anims_table[math.random(1,#anims_table)]
@@ -167,13 +192,12 @@ function CreateDeathAnimationGib(ent)
 	end
 		
 	local DM = ents.Create("prop_dynamic")
-	
 	DM:SetModel( "models/gib_system/"..Model.."_headless.mdl" )
 	DM:SetPos( ent:GetPos() )
 	DM:SetAngles( ent:GetAngles() )
 	DM:Spawn()
 	DM:Fire("SetAnimation", anim)
-	DM:SetNoDraw(false)
+	DM:SetNoDraw(!GetConVar("gibsystem_deathanimation_hide_ragdoll"):GetBool())
 	DM:SetCollisionGroup(1)
 	print("Sequence Is: "..anim)
 	RandomBodyGroup(DM)
@@ -206,7 +230,7 @@ function CreateDeathAnimationGib(ent)
 
 	ragdoll:Spawn()
 	ragdoll:Activate()
-	ragdoll:SetNoDraw(true)
+	ragdoll:SetNoDraw(GetConVar("gibsystem_deathanimation_hide_ragdoll"):GetBool())
 	BloodEffect(ragdoll,2,"forward")
 	FingerRotation(ragdoll, Model)
 	table.insert(GibsCreated,ragdoll)
@@ -224,28 +248,22 @@ function CreateDeathAnimationGib(ent)
 	end
 
 	if GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt() > 0 then
-		timer.Create( "RemoveTimer"..head:EntIndex(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
+		timer.Create( "RemoveTimer"..engine.TickCount(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
 			if IsValid( head ) then
+				timer.Remove( "BloodImpactTimer"..head:EntIndex() )
 				head:Remove()
 			end
-			timer.Remove( "RemoveTimer"..head:EntIndex() )
-			timer.Remove( "BloodImpactTimer"..head:EntIndex() )
-		end)
-		timer.Create( "RemoveTimer"..ragdoll:EntIndex(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
 			if IsValid( ragdoll ) then
+				timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() )
 				ragdoll:Remove()
 			end
-			timer.Remove( "RemoveTimer"..ragdoll:EntIndex() )
-			timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() )
-		end)
-		timer.Create( "RemoveTimer"..DM:EntIndex(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
 			if IsValid( DM ) then
+				timer.Remove( "BloodImpactTimer"..DM:EntIndex() )
 				DM:Remove()
 			end
-			timer.Remove( "RemoveTimer"..DM:EntIndex() )
-			timer.Remove( "BloodImpactTimer"..DM:EntIndex() )
 		end)
 	end
+
 	head:CallOnRemove("RemoveGibTimer",function() timer.Remove( "BloodImpactTimer"..head:EntIndex() ) end)
 	ragdoll:CallOnRemove("RemoveGibTimer",function() timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() ) end)
 	DM:CallOnRemove("RemoveGibTimer",function() timer.Remove( "BloodImpactTimer"..DM:EntIndex() ) end)
@@ -265,25 +283,7 @@ function CreateDeathAnimationGib(ent)
 			hook.Remove( "Tick", "GibSystem_DeathAnimation_Think"..RagdollIndex )
 			return
 		end
-		local AnmPos = DM:GetPos()
-		local RagPos = ragdoll:GetBonePosition(0)
-		if (RagPos) then
-			RagPos.z = AnmPos.z
-			if (GetConVar("gibsystem_deathanimation_movement"):GetBool()) then
-				DM:SetPos( RagPos )
-			end
-		end
-		for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
-			local bone = ragdoll:GetPhysicsObjectNum( i )
-			if ( IsValid( bone ) ) then 
-				local PhysToBone = ragdoll:TranslatePhysBoneToBone( i )
-				if PhysBones[ragdoll:GetBoneName(PhysToBone)] then
-					local pos, ang = DM:GetBonePosition( PhysToBone )
-					if ( pos ) then bone:SetPos( pos ) end
-					if ( ang ) then bone:SetAngles( ang ) end
-				end
-			end
-		end
+		GibSystem_DeathAnimation_Think(ragdoll,DM)
 	end)
 
 	timer.Simple(DM:SequenceDuration(DM:LookupSequence( anim )), function()
@@ -309,5 +309,4 @@ function CreateDeathAnimationGib(ent)
 			end
 		end
 	end)
-	DM:CallOnRemove("RemoveHeadTimer",function(DM) timer.Remove( "BloodImpactTimer"..DM:EntIndex() ) end)
 end

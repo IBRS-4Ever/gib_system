@@ -75,9 +75,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			pnl:AddControl( "ComboBox", { Label = "#GS.GibGroup", Options = gibgroup } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.CategorizeModels", Command = "gibsystem_model_category" } )
 			
-			local Button = vgui.Create( "DButton", pnl ) // Create the button and parent it to the frame
-			Button:SetText( "#GS.GibName" )					// Set the text on the button		
-			Button:SetSize( 100, 25 )					// Set the size
+			local Button = vgui.Create( "DButton", pnl ) 	// 创建按钮，附加到面板上
+			Button:SetText( "#GS.GibName" )					// 设置按钮文本		
+			Button:SetSize( 100, 25 )						// 设置按钮大小
 			pnl:AddItem(Button)
 			Button.DoClick = function()
 				local frame = vgui.Create( "DFrame" )
@@ -106,7 +106,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 					end
 				end
 				
-				-- Categorize them
+				// 将模型分类
 				local Categories = {}
 				for k, v in pairs(EntList) do
 					local Category = v.Category or "#gs.category.uncategorized"
@@ -179,8 +179,10 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			pnl:AddControl( "CheckBox", { Label = "#GS.ExperimentsEnabled", Command = "gibsystem_experiment" } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation", Command = "gibsystem_deathanimation" } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation_Movement", Command = "gibsystem_deathanimation_movement" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation_HideRagdoll", Command = "gibsystem_deathanimation_hide_ragdoll" } )
 		end)
 	end
+
 	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System Addons", "#GS.Addons","","",function(pnl)
 		
 		local WorkshopLink = "https://steamcommunity.com/sharedfiles/filedetails/?id="
@@ -191,7 +193,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		
 		local AppList = vgui.Create( "DListView", pnl )
 		AppList:Dock( FILL )
-		AppList:SetSize(100, 307) -- Size
+		AppList:SetSize(100, 307) // 大小
 		AppList:SetMultiSelect( false )
 		AppList:AddColumn( "#gs.addon" ):SetWidth(200)
 		AppList:AddColumn( "#gs.addon.ID" )
@@ -221,7 +223,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		
 		local AppListExt = vgui.Create( "DListView", pnl )
 		AppListExt:Dock( FILL )
-		AppListExt:SetSize(100, 307) -- Size
+		AppListExt:SetSize(100, 307) // 大小
 		AppListExt:SetMultiSelect( false )
 		AppListExt:AddColumn( "#gs.addon" ):SetWidth(200)
 		AppListExt:AddColumn( "#gs.addon.ID" )
