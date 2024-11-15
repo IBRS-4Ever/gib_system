@@ -212,7 +212,8 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			["#gs.addon.extension.honkai_impact_3rd"] = 3277267079,
 			["#gs.addon.extension.extra_gibs"] = 3277262546,
 			["#gs.addon.extension.honkai_star_rail"] = 3343204403,
-			["#gs.addon.extension.vrc"] = 3343971543
+			["#gs.addon.extension.vrc"] = 3343971543,
+			["#gs.addon.extension.punishing_gray_raven"] = 3366315415
 		}
 		
 		local AppListExt = vgui.Create( "DListView", pnl )
