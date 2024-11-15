@@ -1,5 +1,5 @@
 
-include("autorun/gibbing_system/models.lua")
+GibSystem_LoadModels() 
 
 local Category = "#GS.Title"
 
@@ -12,7 +12,5 @@ hook.Add( "OnEntityCreated", "GibSystem_NPCRandomModel", function()
 				Weapons = { "weapon_ar2" , "weapon_smg1", "weapon_shotgun" },
 				Category = Category	}
 
-	list.Set( "NPC", "gs_headless_npc", NPC )
+	list.Set( "NPC", "gibsystem_headless_npc", NPC )
 end )
-
-

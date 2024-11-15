@@ -1,12 +1,6 @@
 
 AddCSLuaFile()
 
-local Fedhoria = false 
-
-if file.Exists( "fedhoria/modules.lua", "LUA" ) then
-	Fedhoria = true
-end
-
 local anims_table = {
 	"DIE_Simple_01",
 	"DIE_Simple_02",
@@ -212,6 +206,7 @@ function CreateDeathAnimationGib(ent)
 	ragdoll:SetAngles( DM:GetAngles() )
 	ragdoll:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
 	ragdoll:SetSkin( DM:GetSkin() )
+	ragdoll.RagHealth = 25
 	for i = 0, DM:GetNumBodyGroups() - 1 do ragdoll:SetBodygroup( i, DM:GetBodygroup( i ) ) end
 	for i = 0, DM:GetFlexNum() - 1 do ragdoll:SetFlexWeight( i, DM:GetFlexWeight( i ) ) end
 	for i = 0, DM:GetBoneCount() do
@@ -272,11 +267,14 @@ function CreateDeathAnimationGib(ent)
 
 	local RagdollIndex = ragdoll:EntIndex()
 	hook.Add( "EntityTakeDamage", "GibSystem_DeathAnimation_Ragdoll_DMG_Check"..RagdollIndex, function( target, dmginfo )
-		if target == ragdoll and ( dmginfo:GetDamageType() != 1 and dmginfo:GetDamage() > 10 ) then
-			SafeRemoveEntity(DM)
-			ragdoll:SetNoDraw(false)
-			hook.Remove( "EntityTakeDamage", "GibSystem_DeathAnimation_Ragdoll_DMG_Check"..RagdollIndex )
-			return
+		if target == ragdoll and dmginfo:GetAttacker() != head then
+			ragdoll.RagHealth = ragdoll.RagHealth - dmginfo:GetDamage()
+			if dmginfo:GetDamage() > ragdoll.RagHealth then
+				SafeRemoveEntity(DM)
+				ragdoll:SetNoDraw(false)
+				hook.Remove( "EntityTakeDamage", "GibSystem_DeathAnimation_Ragdoll_DMG_Check"..RagdollIndex )
+				return
+			end
 		end
 	end)
 	--[[
@@ -301,7 +299,7 @@ function CreateDeathAnimationGib(ent)
 		end
 		if IsValid(ragdoll) then
 			ragdoll:SetNoDraw(false)
-			if GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 2 and Fedhoria then
+			if GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 2 and CheckFedhoria() then
 				timer.Simple(1, function()
 				if !IsValid(ragdoll) then return end	
 					fedhoria.StartModule(ragdoll, "stumble_legs", phys_bone, lpos)
