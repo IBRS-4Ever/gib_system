@@ -1,7 +1,9 @@
 
-GibSystem_LoadModels() 
+include("autorun/gibbing_system/models.lua")
 
 local Category = "#GS.Title"
+
+GibSystem_LoadModels()
 
 hook.Add( "OnEntityCreated", "GibSystem_NPCRandomModel", function()
 	local RndModel = GibModels[math.random( #GibModels )]
