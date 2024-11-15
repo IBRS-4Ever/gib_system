@@ -179,11 +179,14 @@ function CreateDeathAnimationGib(ent)
 		if GetConVar("gibsystem_head_mass"):GetInt() > 0 then
 			phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt()/head:GetPhysicsObjectCount() )
 		end
-		
-		if ent:IsPlayer() then
-			phys:ApplyForceCenter( (DamageForce / head:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
+		if EntDamageForce[ent] then
+			if ent:IsPlayer() then
+				phys:ApplyForceCenter( (EntDamageForce[ent] / head:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
+			else
+				phys:ApplyForceCenter( (EntDamageForce[ent] / head:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )
+			end
 		else
-			phys:ApplyForceCenter( (DamageForce / head:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )
+			phys:ApplyForceCenter( (phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval()) )
 		end
 	end
 		
