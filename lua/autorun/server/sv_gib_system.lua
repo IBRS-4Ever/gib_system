@@ -265,7 +265,7 @@ function CreateGibs(ent)
 		end
 	end
 
-	function SpawnGib(mdl, AttachmentType, AttachmentPoint, Bodypart, FacePose, FingerPose, convulsion)
+	function SpawnGib(mdl, AttachmentType, AttachmentPoint, Bodypart, convulsion)
 		local Gib = nil
 		
 		if (util.IsValidRagdoll( mdl )) then
