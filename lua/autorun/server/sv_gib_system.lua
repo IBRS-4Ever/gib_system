@@ -95,7 +95,9 @@ local function GibSystem_Initialize()
 	LocalizedText("en","[Gibbing System] Loading Complete.\n")
 end
 
-GibSystem_Initialize()
+hook.Add( "Initialize", "GibSystem_Initialize", function() 
+	GibSystem_Initialize()
+end)
 
 concommand.Add( "GibSystem_ReloadModels", function() 
 	GibSystem_Initialize()
