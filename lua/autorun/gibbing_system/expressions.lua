@@ -18,6 +18,7 @@ function GibFacePose(ent)
 				["mouth_surprised"] = math.Rand(0.5,1),
 				["eyes_look_up"] = math.Rand(0.5,1),
 				["mouth_angry_teeth"] = math.Rand(0.25,0.5),
+				["mouth_teeth_angry"] = math.Rand(0.25,0.5),
 				["mouth_wide_open"] = math.Rand(0.1,0.3)
 			}
 		else 																					// 如果以上都不满足，则只调整 blink 的值。
