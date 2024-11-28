@@ -174,6 +174,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation", Command = "gibsystem_deathanimation" } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation_Movement", Command = "gibsystem_deathanimation_movement" } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation_HideRagdoll", Command = "gibsystem_deathanimation_hide_ragdoll" } )
+			pnl:AddControl( "Button", { Label = "#GS.Reload_Models", Command = "GibSystem_ReloadModels" } )
 		end)
 	end
 
