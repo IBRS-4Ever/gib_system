@@ -1,8 +1,8 @@
 
 AddCSLuaFile()
 
-include("autorun/gibbing_system/defaultnpcs.lua")
-include("autorun/gibbing_system/convars.lua")
+include("autorun/gibbing_system_module/defaultnpcs.lua")
+include("autorun/gibbing_system_module/convars.lua")
 
 hook.Add( "CreateClientsideRagdoll", "GibSystem_FadeOutCorpses", function( entity, ragdoll )
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and !(entity:IsPlayer()) and DefaultNPCs[entity:GetClass()] then

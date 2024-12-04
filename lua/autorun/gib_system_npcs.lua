@@ -1,6 +1,6 @@
 
 AddCSLuaFile()
-include("autorun/gibbing_system/models.lua")
+include("autorun/gibbing_system_module/models.lua")
 GibSystem_LoadModels()
 
 local Category = "#GS.Title"

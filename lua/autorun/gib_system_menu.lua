@@ -1,5 +1,5 @@
 
-include("autorun/gibbing_system/models.lua")
+include("autorun/gibbing_system_module/models.lua")
 
 local convulsionmode = {}
 convulsionmode["#gs.convulsionmode.none"] = {gibsystem_ragdoll_convulsion = "0"}

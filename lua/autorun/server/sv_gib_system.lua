@@ -1,13 +1,13 @@
 
 AddCSLuaFile()
 
-include("autorun/gibbing_system/convars.lua")
-include("autorun/gibbing_system/tables.lua")
-include("autorun/gibbing_system/defaultnpcs.lua")
-include("autorun/gibbing_system/models.lua")
-include("autorun/gibbing_system/expressions.lua")
-include("autorun/gibbing_system/finger_rotation.lua")
-include("autorun/gibbing_system/death_anims.lua")
+include("autorun/gibbing_system_module/convars.lua")
+include("autorun/gibbing_system_module/tables.lua")
+include("autorun/gibbing_system_module/defaultnpcs.lua")
+include("autorun/gibbing_system_module/models.lua")
+include("autorun/gibbing_system_module/expressions.lua")
+include("autorun/gibbing_system_module/finger_rotation.lua")
+include("autorun/gibbing_system_module/death_anims.lua")
 
 function LocalizedText(lang,text)
 	if string.lower(GetConVar("gmod_language"):GetString()) == lang then
@@ -17,7 +17,7 @@ end
 
 local function GibSystem_Initialize()
 	GibSystem_LoadModels()
-	local Model_Path = "autorun/gibbing_system/models/"
+	local Model_Path = "autorun/gibbing_system/"
 	local files, folders = file.Find(Model_Path.."*","LUA")
 	for k, v in pairs(files) do
 		if SERVER then
