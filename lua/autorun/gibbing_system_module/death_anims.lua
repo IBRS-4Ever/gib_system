@@ -94,8 +94,7 @@ local PhysBones = {
 	["ValveBiped.Bip01_L_Clavicle"] = true,
 	["ValveBiped.Bip01_L_UpperArm"] = true,
 	["ValveBiped.Bip01_L_Forearm"] 	= true,
-	["ValveBiped.Bip01_L_Hand"] 	= true,
-	["ValveBiped.Bip01_Head1"] 		= true
+	["ValveBiped.Bip01_L_Hand"] 	= true
 }
 
 function GibSystem_DeathAnimation_Think(ragdoll,DM)
@@ -203,6 +202,7 @@ function CreateDeathAnimationGib(ent)
 	
 	local ragdoll = ents.Create( "prop_ragdoll" )
 	ragdoll:SetModel( DM:GetModel() )
+	-- ragdoll:SetModel( "models/gib_system/"..Model.."_legs.mdl" )
 	ragdoll:SetPos( DM:GetPos() )
 	ragdoll:SetAngles( DM:GetAngles() )
 	ragdoll:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
@@ -215,6 +215,10 @@ function CreateDeathAnimationGib(ent)
 		ragdoll:ManipulateBoneAngles( i, DM:GetManipulateBoneAngles( i ) )
 		ragdoll:ManipulateBonePosition( i, DM:GetManipulateBonePosition( i ) )
 	end
+	ragdoll:Spawn()
+	ragdoll:Activate()
+	ragdoll:SetNoDraw(GetConVar("gibsystem_deathanimation_hide_ragdoll"):GetBool())
+
 	for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
 		local bone = ragdoll:GetPhysicsObjectNum( i )
 		if ( IsValid( bone ) ) then 
@@ -225,9 +229,6 @@ function CreateDeathAnimationGib(ent)
 		end
 	end
 
-	ragdoll:Spawn()
-	ragdoll:Activate()
-	ragdoll:SetNoDraw(GetConVar("gibsystem_deathanimation_hide_ragdoll"):GetBool())
 	BloodEffect(ragdoll,2,"forward")
 	FingerRotation(ragdoll, Model)
 	table.insert(GibsCreated,ragdoll)
@@ -242,6 +243,10 @@ function CreateDeathAnimationGib(ent)
 		elseif GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 1 then
 			ent:SpectateEntity(ragdoll)
 		end
+		net.Start("GibSystem_StartDeathCam")
+			net.WriteInt(head:EntIndex(), 32)
+			net.WriteInt(ragdoll:EntIndex(), 32)
+		net.Broadcast()
 	end
 
 	if GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt() > 0 then
@@ -272,6 +277,10 @@ function CreateDeathAnimationGib(ent)
 			if dmginfo:GetDamage() > ragdoll.RagHealth then
 				SafeRemoveEntity(DM)
 				ragdoll:SetNoDraw(false)
+				for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
+					local bone = ragdoll:GetPhysicsObjectNum( i )
+					bone:EnableCollisions(true)
+				end
 				hook.Remove( "EntityTakeDamage", "GibSystem_DeathAnimation_Ragdoll_DMG_Check"..RagdollIndex )
 				return
 			end
@@ -283,7 +292,7 @@ function CreateDeathAnimationGib(ent)
 		GibSystem_DeathAnimation_Think(ragdoll,DM)
 	end)
 	]]--
-	
+
 	hook.Add( "Tick", "GibSystem_DeathAnimation_Think"..RagdollIndex, function() 
 		if !IsValid(DM) or !IsValid(ragdoll) then 
 			hook.Remove( "Tick", "GibSystem_DeathAnimation_Think"..RagdollIndex )

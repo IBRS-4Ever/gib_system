@@ -9,6 +9,9 @@ include("autorun/gibbing_system_module/expressions.lua")
 include("autorun/gibbing_system_module/finger_rotation.lua")
 include("autorun/gibbing_system_module/death_anims.lua")
 
+util.AddNetworkString("GibSystem_StartDeathCam")
+util.AddNetworkString("GibSystem_PlayerSpawn")
+
 function LocalizedText(lang,text)
 	if string.lower(GetConVar("gmod_language"):GetString()) == lang then
 		MsgN(text)
@@ -158,6 +161,12 @@ hook.Add("PlayerDeath", "GibSystem_SpawnGibs_Player", function(player, attacker,
 			player:SpectateEntity(body)
 		end
 	end
+end)
+
+hook.Add("PlayerSpawn", "GibSystem_PlayerSpawn_D", function(ply)
+	net.Start("GibSystem_PlayerSpawn")
+		net.WriteBool(true)
+	net.Broadcast()
 end)
 
 function CreateRope(gib1,gib2,gib1phys,gib2phys,vec1,vec2)
@@ -682,6 +691,13 @@ function CreateGibs(ent)
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 	end
 	EntDamageForce[ent] = nil
+
+	if ent:IsPlayer() then
+		net.Start("GibSystem_StartDeathCam")
+			net.WriteInt(head:EntIndex(), 32)
+			net.WriteInt(body:EntIndex(), 32)
+		net.Broadcast()
+	end
 end
 
 local function CleanGibs()
