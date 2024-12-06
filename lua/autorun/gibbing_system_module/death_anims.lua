@@ -112,14 +112,12 @@ function GibSystem_DeathAnimation_Think(ragdoll,DM)
 		end
 
 		for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
-			local bone = ragdoll:GetPhysicsObjectNum( i )
-			if ( IsValid( bone ) ) then 
-				local PhysToBone = ragdoll:TranslatePhysBoneToBone( i )
-				if PhysBones[ragdoll:GetBoneName(PhysToBone)] then
-					local pos, ang = DM:GetBonePosition( PhysToBone )
-					if ( pos ) then bone:SetPos( pos ) end
-					if ( ang ) then bone:SetAngles( ang ) end
-				end
+			local phys = ragdoll:GetPhysicsObjectNum( i )
+			local Bone_name = ragdoll:GetBoneName(ragdoll:TranslatePhysBoneToBone( i ))
+			if PhysBones[Bone_name] then
+				local pos, ang = DM:GetBonePosition( DM:LookupBone(Bone_name) )
+				if ( pos ) then phys:SetPos( pos ) end
+				if ( ang ) then phys:SetAngles( ang ) end
 			end
 		end
 	--end)
@@ -216,7 +214,6 @@ function CreateDeathAnimationGib(ent)
 		ragdoll:ManipulateBoneScale( i, DM:GetManipulateBoneScale( i ) )
 		ragdoll:ManipulateBoneAngles( i, DM:GetManipulateBoneAngles( i ) )
 		ragdoll:ManipulateBonePosition( i, DM:GetManipulateBonePosition( i ) )
-		ragdoll:ManipulateBoneJiggle( i, DM:GetManipulateBoneJiggle( i ) )
 	end
 	for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
 		local bone = ragdoll:GetPhysicsObjectNum( i )

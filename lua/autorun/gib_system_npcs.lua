@@ -3,6 +3,8 @@ AddCSLuaFile()
 include("autorun/gibbing_system_module/models.lua")
 GibSystem_LoadModels()
 
+local GibModels = GibModels
+
 local Category = "#GS.Title"
 
 hook.Add( "OnEntityCreated", "GibSystem_NPCRandomModel", function()

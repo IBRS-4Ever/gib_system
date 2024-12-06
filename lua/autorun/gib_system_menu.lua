@@ -1,6 +1,40 @@
 
 include("autorun/gibbing_system_module/models.lua")
 
+local ConVarsDefault = {
+	gibsystem_enabled = "1",
+	gibsystem_gibbing_player = "1",
+	gibsystem_gibbing_npc = "1",
+	gibsystem_gib_base_on_model = "1",
+	gibsystem_random_finger_rotating = "1",
+	gibsystem_random_toe_rotating = "1",
+	gibsystem_random_gf2_toe_rotating = "0",
+	gibsystem_random_bodygroup = "1",
+	gibsystem_random_skin = "0",
+	gibsystem_death_express = "1",
+	gibsystem_ragdoll_convulsion = "0",
+	gibsystem_ragdoll_collisiongroup = "11",
+	gibsystem_deathcam_enable = "1",
+	gibsystem_deathcam_mode = "1",
+	gibsystem_gib_group = "headless",
+	gibsystem_model_category = "1",
+	gibsystem_gib_name = "random",
+	gibsystem_head_mass = "0",
+	gibsystem_body_mass = "0",
+	gibsystem_ragdoll_removetimer = "15",
+	gibsystem_rope = "0",
+	gibsystem_rope_strength = "1000",
+	gibsystem_blood_effect = "0",
+	gibsystem_blood_decal = "1",
+	gibsystem_blood_time = "5",
+	gibsystem_blood_time_body = "15",
+	gibsystem_experiment = "0",
+	gibsystem_deathanimation = "0",
+	gibsystem_deathanimation_movement = "0",
+	gibsystem_deathanimation_hide_ragdoll = "0",
+	gibsystem_deathanimation_name = "random"
+}
+
 local convulsionmode = {}
 convulsionmode["#gs.convulsionmode.none"] = {gibsystem_ragdoll_convulsion = "0"}
 convulsionmode["#gs.convulsionmode.default"] = {gibsystem_ragdoll_convulsion = "1"}
@@ -51,7 +85,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System", "#GS.Settings","","",function(pnl)
 			
 			pnl:ClearControls()
-			pnl:AddControl( "ComboBox", { MenuButton = 1, Folder = "gib_system" } )
+			pnl:AddControl( "ComboBox", { MenuButton = 1, Folder = "gib_system", Options = { [ "#preset.default" ] = ConVarsDefault }, CVars = table.GetKeys( ConVarsDefault ) } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.Enable", Command = "gibsystem_enabled" } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.Gib_Players", Command = "gibsystem_gibbing_player" } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.Gib_NPCs", Command = "gibsystem_gibbing_npc" } )
@@ -163,6 +197,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			pnl:AddControl( "Slider", { Label = "#GS.GibsRemoveTimer", Type = "Integer", Command = "gibsystem_ragdoll_removetimer", Min = "0", Max = "100" } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.Rope", Command = "gibsystem_rope" } )
 			pnl:AddControl( "Slider", { Label = "#GS.Rope_Strength", Type = "Integer", Command = "gibsystem_rope_strength", Min = "0", Max = "5000" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.BloodDecal", Command = "gibsystem_blood_decal" } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.BloodEffect", Command = "gibsystem_blood_effect" } )
 			pnl:AddControl( "Slider", { Label = "#GS.BloodEffectLength", Type = "Integer", Command = "gibsystem_blood_time", Min = "0", Max = "100" } )
 			pnl:AddControl( "Slider", { Label = "#GS.BodyBloodEffectLength", Type = "Integer", Command = "gibsystem_blood_time_body", Min = "0", Max = "100" } )

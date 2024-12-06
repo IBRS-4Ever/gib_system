@@ -217,11 +217,11 @@ end
 
 function RandomBodyGroup(ent)
 	if GetConVar( "gibsystem_random_bodygroup" ):GetBool() then
-		local BodygroupBlacklist = { "tail", "ears", "horns", "horn left", "horn right", "fox ears" }
+		local BodygroupBlacklist = { ["tail"] = true, ["ears"] = true, ["horns"] = true, ["horn left"] = true, ["horn right"] = true, ["fox ears"] = true }
 		local num_bodygroups = ent:GetNumBodyGroups()
 		for i = 0, num_bodygroups - 1 do
 			local bodygroup_name = ent:GetBodygroupName(i)
-			if !table.HasValue( BodygroupBlacklist,string.lower(bodygroup_name) ) then
+			if !BodygroupBlacklist[string.lower(bodygroup_name)] then
 				local num_choices = ent:GetBodygroupCount(i)
 				if num_choices > 1 then
 					local choice = math.random(0, num_choices - 1)
@@ -341,7 +341,27 @@ function CreateGibs(ent)
 				phys:ApplyForceCenter( (phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval()) )
 			end
 		end
-		
+
+		local function PhysCallback( ent, data ) -- Function that will be called whenever collision happends
+			if !GetConVar("gibsystem_blood_decal"):GetBool() then return end
+			local velSpeed = data.PhysObject:GetVelocity():Length()
+			if velSpeed > 72 then
+				local myPos = Gib:GetPos()
+				Gib:SetLocalPos(myPos + Gib:GetUp() * 4) -- Because the entity is too close to the ground
+				local tr = util.TraceLine({
+					start = myPos,
+					endpos = myPos - (data.HitNormal * -30),
+					filter = Gib
+				})
+				EmitSound( "physics/flesh/flesh_squishy_impact_hard4.wav", myPos )
+				util.Decal( "Blood", tr.HitPos + tr.HitNormal, tr.HitPos - tr.HitNormal)
+				local effect = EffectData() -- Create effect data
+				effect:SetOrigin( data.HitPos ) -- Set origin where collision point is
+				util.Effect( "BloodImpact", effect ) -- Spawn small sparky effect
+			end
+		end
+		Gib:AddCallback( "PhysicsCollide", PhysCallback ) -- Add Callback
+
 		if Bodypart == "head" then
 			head = Entity(Gib:EntIndex())
 		elseif Bodypart == "body" then
@@ -430,10 +450,10 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/torso.mdl", 2, "forward", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：碎块")
@@ -446,8 +466,8 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_legs.mdl", 2, "forward", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无双腿")
@@ -460,8 +480,8 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_arms.mdl", 2, "forward", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无双手")
@@ -474,8 +494,8 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_right_leg_left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无右腿左手")
@@ -488,8 +508,8 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_left_leg_right_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无左腿右手")
@@ -502,7 +522,7 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_left_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无左腿")
@@ -515,7 +535,7 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_right_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无右腿")
@@ -528,7 +548,7 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无左手")
@@ -541,7 +561,7 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_right_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无右手")
@@ -554,8 +574,8 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_right.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无右半")
@@ -568,8 +588,8 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_left.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无左半")
@@ -582,9 +602,9 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_right_no_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无右半无手臂")
@@ -597,9 +617,9 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无左半无手臂")
@@ -612,9 +632,9 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_right_no_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无右半无腿")
@@ -627,9 +647,9 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", true)
-		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
+		SpawnGib("models/gib_system/limbs/"..Model.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无左半无腿")
