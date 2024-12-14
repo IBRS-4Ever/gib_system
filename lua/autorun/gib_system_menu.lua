@@ -81,9 +81,8 @@ hook.Add("AddToolMenuTabs", "GIBBING_SYSTEM_ADDMENU", function()
 end)
 
 hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
-	if game.SinglePlayer() or LocalPlayer():IsAdmin() then
-		spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System", "#GS.Settings","","",function(pnl)
-			
+	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System", "#GS.Settings","","",function(pnl)
+		if game.SinglePlayer() or LocalPlayer():IsAdmin() then
 			pnl:ClearControls()
 			pnl:AddControl( "ComboBox", { MenuButton = 1, Folder = "gib_system", Options = { [ "#preset.default" ] = ConVarsDefault }, CVars = table.GetKeys( ConVarsDefault ) } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.Enable", Command = "gibsystem_enabled" } )
@@ -104,7 +103,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			pnl:AddControl( "ComboBox", { Label = "#GS.Deathcam.Mode", Options = cammode } )
 			pnl:AddControl( "ComboBox", { Label = "#GS.GibGroup", Options = gibgroup } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.CategorizeModels", Command = "gibsystem_model_category" } )
-			
+				
 			local Button = vgui.Create( "DButton", pnl ) 	// 创建按钮，附加到面板上
 			Button:SetText( "#GS.GibName" )					// 设置按钮文本		
 			Button:SetSize( 100, 25 )						// 设置按钮大小
@@ -129,13 +128,13 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 				PropPanel:Dock( FILL )
 
 				local EntList = list.Get("GIBSYSTEM_CATEGORY_INFO")
-				
+					
 				for _, Model in ipairs(GibModels) do
 					if !list.HasEntry("GIBSYSTEM_CATEGORY_INFO",Model) then
 						list.Set("GIBSYSTEM_CATEGORY_INFO", Model,{})
 					end
 				end
-				
+					
 				// 将模型分类
 				local Categories = {}
 				for k, v in pairs(EntList) do
@@ -144,11 +143,11 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 					Tab[k] = v
 					Categories[Category] = Tab
 				end
-				
+					
 				local DefaultHeader = vgui.Create( "ContentHeader", PropPanel )
 				DefaultHeader:SetText( "#gs.category.default" )
 				PropPanel:Add( DefaultHeader )
-					
+						
 				local icon = vgui.Create( "ContentIcon", PropPanel )
 				icon:SetMaterial( "gib_system/random.png" )
 				icon:SetName( "#gs.model.random" )
@@ -164,7 +163,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 						local Header = vgui.Create( "ContentHeader", PropPanel )
 						Header:SetText( CategoryName )
 						PropPanel:Add( Header )
-						
+							
 						for name, ent in SortedPairs(v) do
 							local icon = vgui.Create( "ContentIcon", PropPanel )
 							icon:SetMaterial( "gib_system/" .. name .. ".png" )
@@ -174,7 +173,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 								RunConsoleCommand( "gibsystem_gib_name", name )
 								frame:Close()
 							end
-							
+								
 							PropPanel:Add( icon )
 						end
 					end
@@ -193,7 +192,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 					end
 				end
 			end
-			
+				
 			pnl:AddControl( "textbox", { Label = "#GS.HeadMess", Command = "gibsystem_head_mass" } )
 			pnl:AddControl( "textbox", { Label = "#GS.BodyMess", Command = "gibsystem_body_mass" } )
 			pnl:AddControl( "Slider", { Label = "#GS.GibsRemoveTimer", Type = "Integer", Command = "gibsystem_ragdoll_removetimer", Min = "0", Max = "100" } )
@@ -212,8 +211,8 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation_Movement", Command = "gibsystem_deathanimation_movement" } )
 			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation_HideRagdoll", Command = "gibsystem_deathanimation_hide_ragdoll" } )
 			pnl:AddControl( "Button", { Label = "#GS.Reload_Models", Command = "GibSystem_ReloadModels" } )
-		end)
-	end
+		end
+	end)
 
 	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System Addons", "#GS.Addons","","",function(pnl)
 		

@@ -27,7 +27,7 @@ net.Receive("GibSystem_StartDeathCam", function()
 	set0 = 0
 	set1 = 0
 
-	timer.Simple(FrameTime(), function()
+	timer.Simple(0, function()
 		if GetConVar("gibsystem_deathcam_mode"):GetBool() then
 			Gib = Entity(body)
 		else
@@ -37,7 +37,6 @@ net.Receive("GibSystem_StartDeathCam", function()
 		if Gib:LookupAttachment('eyes') > 0 then
 			Gib.att 		= Gib:GetAttachment(Gib:LookupAttachment('eyes'))
 			Gib.ang_smooth_last 	= Gib.att.Ang
-			Gib.ang_mix_last = 1
 		end
 	end)
 end)
@@ -67,7 +66,6 @@ hook.Add("CalcView", "GibSystem_FirstDeathCam", function(ply, pos_ply, ang_ply)
 	if LocalPlayer():Alive() then return end
 
 	local view = {}
-
 	if CVAR_GibSystem_cam_enable:GetBool() then
 
 		------------------------------------
