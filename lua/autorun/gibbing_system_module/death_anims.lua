@@ -100,14 +100,12 @@ local PhysBones = {
 function GibSystem_DeathAnimation_Think(ragdoll,DM)
 	--timer.Simple( CurTime() + FrameTime(), function() 
 		if !IsValid(DM) or !IsValid(ragdoll) then return end
-		local AnmPos = DM:GetPos()
-		local RagPos = ragdoll:GetBonePosition(0)
 
-		if (RagPos) then
+		if (RagPos) and (GetConVar("gibsystem_deathanimation_movement"):GetBool()) then
+			local AnmPos = DM:GetPos()
+			local RagPos = ragdoll:GetBonePosition(0)
 			RagPos.z = AnmPos.z
-			if (GetConVar("gibsystem_deathanimation_movement"):GetBool()) then
-				DM:SetPos( RagPos )
-			end
+			DM:SetPos( RagPos )
 		end
 
 		for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
@@ -173,15 +171,12 @@ function CreateDeathAnimationGib(ent)
 	for i = 0, head:GetPhysicsObjectCount() - 1 do
 		local phys = head:GetPhysicsObjectNum( i )
 		
-		if GetConVar("gibsystem_head_mass"):GetInt() > 0 then
+		if GetConVar("gibsystem_head_mass"):GetBool() then
 			phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt()/head:GetPhysicsObjectCount() )
 		end
 		if EntDamageForce[ent] then
-			if ent:IsPlayer() then
-				phys:ApplyForceCenter( (EntDamageForce[ent] / head:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
-			else
-				phys:ApplyForceCenter( (EntDamageForce[ent] / head:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )
-			end
+			if ent:IsPlayer() then phys:ApplyForceCenter( (EntDamageForce[ent] / head:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() ) end
+			if ent:IsNPC() then phys:ApplyForceCenter( (EntDamageForce[ent] / head:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) ) end
 		else
 			phys:ApplyForceCenter( (phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval()) )
 		end

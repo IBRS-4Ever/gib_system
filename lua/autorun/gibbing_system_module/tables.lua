@@ -14,6 +14,5 @@ LeftAndRight = {}
 CompletedModels = {}
 BlackListedModels = {}
 
-last_dmgpos = {}
 timers = {}
 GibsCreated = {}

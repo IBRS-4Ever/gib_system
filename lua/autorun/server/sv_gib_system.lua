@@ -53,21 +53,6 @@ local function GibSystem_Initialize()
 		LocalizedText("en","[Gibbing System] Loaded file "..Model)
 		util.PrecacheModel("models/gib_system/"..Model.."_headless.mdl")
 		util.PrecacheModel("models/gib_system/"..Model.."_head.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_legs.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_arms.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_leg_left_arm.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_leg_right_arm.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_leg.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_leg.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_arm.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_arms.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_arm.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_no_arm.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_arm.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_no_leg.mdl")
-		util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_leg.mdl")
 		if file.Exists( "models/gib_system/"..Model.."_legs.mdl", "GAME" ) and file.Exists( "models/gib_system/"..Model.."_torso.mdl", "GAME" ) then
 			table.insert(UpperAndLower, Model)
 			util.PrecacheModel("models/gib_system/"..Model.."_legs.mdl")
@@ -82,6 +67,21 @@ local function GibSystem_Initialize()
 			util.PrecacheModel("models/gib_system/limbs/"..Model.."/torso.mdl")
 			if file.Exists( "models/gib_system/limbs/"..Model.."/no_limb/no_right_leg.mdl", "GAME" ) then
 				table.insert(CompletedModels, Model)
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_legs.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_arms.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_leg_left_arm.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_leg_right_arm.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_leg.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_leg.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_arm.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_arms.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_arm.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_no_arm.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_arm.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_no_leg.mdl")
+				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_leg.mdl")
 			end
 		end
 		if file.Exists( "models/gib_system/"..Model.."_half_left.mdl", "GAME" ) and file.Exists( "models/gib_system/"..Model.."_half_right.mdl", "GAME" ) then
@@ -98,7 +98,7 @@ local function GibSystem_Initialize()
 	LocalizedText("en","[Gibbing System] Loading Complete.\n")
 end
 
-hook.Add( "Initialize", "GibSystem_Initialize", function() 
+hook.Add( "InitPostEntity", "GibSystem_Initialize", function() 
 	GibSystem_Initialize()
 end)
 
@@ -113,29 +113,24 @@ local function RemoveTimers()
 end
 
 EntDamageForce = {}
+EntDamagePosition = {}
 
 hook.Add( "ScaleNPCDamage", "GibSystem_DamageInfo_NPC", function( npc, hitgroup, dmginfo )
 	if !(dmginfo:GetDamage() >= npc:Health()) then return end
 	EntDamageForce[npc] = dmginfo:GetDamageForce()
-	if CheckFedhoria() then
-		last_dmgpos[npc] = dmginfo:GetDamagePosition()
-	end
+	EntDamagePosition[npc] = dmginfo:GetDamagePosition()
 end )
 
 hook.Add( "ScalePlayerDamage", "GibSystem_DamageInfo_Player", function( plr, hitgroup, dmginfo )
 	if !(dmginfo:GetDamage() >= plr:Health()) then return end
 	EntDamageForce[plr] = dmginfo:GetDamageForce()
-	if CheckFedhoria() then
-		last_dmgpos[plr] = dmginfo:GetDamagePosition()
-	end
+	EntDamagePosition[plr] = dmginfo:GetDamagePosition()
 end )
 
 hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
-
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and DefaultNPCs[npc:GetClass()] then
-			
-		SafeRemoveEntity(npc)
 		npc:EmitSound( "Gib_System.Headshot_Fleshy" )
+		SafeRemoveEntity(npc)
 		if GetConVar( "gibsystem_experiment" ):GetBool() and GetConVar( "gibsystem_deathanimation" ):GetBool() then
 			CreateDeathAnimationGib(npc)
 		else
@@ -256,14 +251,14 @@ function GibConvulsion(ent)
 		timer.Simple(0, function()
 		if !IsValid(ent) then return end	
 			fedhoria.StartModule(ent, "stumble_legs", phys_bone, lpos)
-			last_dmgpos[ent] = nil		
+			EntDamagePosition[ent] = nil		
 		end)
 	end
 end
 
 function CreateGibs(ent)
 	if CheckFedhoria() then
-		local dmgpos = last_dmgpos[ent]
+		local dmgpos = EntDamagePosition[ent]
 		local phys_bone, lpos
 
 		if dmgpos then
@@ -279,11 +274,8 @@ function CreateGibs(ent)
 	function SpawnGib(mdl, AttachmentType, AttachmentPoint, Bodypart, convulsion)
 		local Gib = nil
 		
-		if (util.IsValidRagdoll( mdl )) then
-			Gib = ents.Create("prop_ragdoll")
-		elseif (util.IsValidProp( mdl )) then
-			Gib = ents.Create("prop_physics")
-		end
+		if (util.IsValidRagdoll( mdl )) then Gib = ents.Create("prop_ragdoll") end
+		if (util.IsValidProp( mdl )) then Gib = ents.Create("prop_physics") end
 
 		if !file.Exists( mdl, "GAME" ) then
 			LocalizedText("zh-cn","[碎尸系统] 模型 "..mdl.." 不存在。")
@@ -294,7 +286,7 @@ function CreateGibs(ent)
 		Gib:SetModel( mdl )
 		Gib.BodyPart = Bodypart
 
-		if Bodypart == "head" and !util.IsValidRagdoll( mdl ) then
+		if Gib.BodyPart == "head" and !util.IsValidRagdoll( mdl ) then
 			local HeadPos = ent:LookupBone("ValveBiped.Bip01_Head1") or ent:LookupBone("ValveBiped.HC_Body_Bone") or ent:LookupBone("ValveBiped.Headcrab_Cube1") or false
 
 			if HeadPos then
@@ -308,7 +300,7 @@ function CreateGibs(ent)
 		Gib:SetAngles( ent:GetAngles() )
 		Gib:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
 		Gib:Spawn()
-		Gib:SetName("Gib"..Bodypart.."Index"..Gib:EntIndex())
+		Gib:SetName("Gib"..Gib.BodyPart.."Index"..Gib:EntIndex())
 		Gib:Activate()
 
 		if convulsion then
@@ -331,21 +323,14 @@ function CreateGibs(ent)
 			end
 
 			if Gib.BodyPart == "head" then
-				if GetConVar("gibsystem_head_mass"):GetInt() > 0 then
-					phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
-				end
+				if !GetConVar("gibsystem_head_mass"):GetBool() then phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() / Gib:GetPhysicsObjectCount() ) end
 			else
-				if GetConVar("gibsystem_body_mass"):GetInt() > 0 then
-					phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() / Gib:GetPhysicsObjectCount() )
-				end
+				if !GetConVar("gibsystem_body_mass"):GetBool() then phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() / Gib:GetPhysicsObjectCount() ) end
 			end
 
 			if EntDamageForce[ent] then
-				if ent:IsPlayer() then
-					phys:ApplyForceCenter( (EntDamageForce[ent] / Gib:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
-				else
-					phys:ApplyForceCenter( (EntDamageForce[ent] / Gib:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )
-				end
+				if ent:IsPlayer() then phys:ApplyForceCenter( (EntDamageForce[ent] / Gib:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() ) end
+				if ent:IsNPC() then phys:ApplyForceCenter( (EntDamageForce[ent] / Gib:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )end
 			else
 				phys:ApplyForceCenter( (phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval()) )
 			end
@@ -371,15 +356,15 @@ function CreateGibs(ent)
 		end
 		Gib:AddCallback( "PhysicsCollide", PhysCallback ) -- Add Callback
 
-		if Bodypart == "head" then
+		if Gib.BodyPart == "head" then
 			head = Entity(Gib:EntIndex())
-		elseif Bodypart == "body" then
+		elseif Gib.BodyPart == "body" then
 			body = Entity(Gib:EntIndex())
 		end
 		
 		--[[
 		
-		local dmgpos = last_dmgpos[ent]
+		local dmgpos = EntDamagePosition[ent]
 		local phys_bone, lpos
 
 		if dmgpos then
@@ -397,17 +382,15 @@ function CreateGibs(ent)
 			timer.Simple(0, function()
 			if !IsValid(Gib) then return end	
 				fedhoria.StartModule(Gib, "stumble_legs", phys_bone, lpos)
-				last_dmgpos[ent] = nil		
+				EntDamagePosition[ent] = nil		
 			end)
 		end
 
 		]]--
 
-		if GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt() > 0 then
+		if GetConVar( "gibsystem_ragdoll_removetimer" ):GetBool() then
 			timer.Create( "RemoveTimer"..Gib:EntIndex(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
-				if IsValid( Gib ) then
-					Gib:Remove()
-				end
+				if IsValid( Gib ) then Gib:Remove() end
 				timer.Remove( "RemoveTimer"..Gib:EntIndex() )
 				timer.Remove( "BloodImpactTimer"..Gib:EntIndex() )
 			end)
