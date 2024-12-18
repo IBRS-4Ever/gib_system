@@ -70,7 +70,7 @@ hook.Add("CalcView", "GibSystem_FirstDeathCam", function(ply, pos_ply, ang_ply)
 
 		------------------------------------
 		--开关死亡时隐藏头发
-		if CVAR_GibSystem_cam_hair:GetBool() then
+		if CVAR_GibSystem_cam_hair:GetBool() and !GetConVar("gibsystem_deathcam_mode"):GetBool() then
 			if set0 == 0 and Gib:LookupBone("ValveBiped.Bip01_Head1") then
 				ScaleBone_0(Gib:LookupBone("ValveBiped.Bip01_Head1"))
 				set0 = 1

@@ -171,9 +171,7 @@ function CreateDeathAnimationGib(ent)
 	for i = 0, head:GetPhysicsObjectCount() - 1 do
 		local phys = head:GetPhysicsObjectNum( i )
 		
-		if GetConVar("gibsystem_head_mass"):GetBool() then
-			phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt()/head:GetPhysicsObjectCount() )
-		end
+		if GetConVar("gibsystem_head_mass"):GetBool() then phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt()/head:GetPhysicsObjectCount() ) end
 		if EntDamageForce[ent] then
 			if ent:IsPlayer() then phys:ApplyForceCenter( (EntDamageForce[ent] / head:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() ) end
 			if ent:IsNPC() then phys:ApplyForceCenter( (EntDamageForce[ent] / head:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) ) end
@@ -227,7 +225,6 @@ function CreateDeathAnimationGib(ent)
 	BloodEffect(ragdoll,2,"forward")
 	FingerRotation(ragdoll, Model)
 	table.insert(GibsCreated,ragdoll)
-
 	CreateRope(head, ragdoll)
 
 	if ent:IsPlayer() then
@@ -244,20 +241,11 @@ function CreateDeathAnimationGib(ent)
 		net.Broadcast()
 	end
 
-	if GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt() > 0 then
+	if GetConVar( "gibsystem_ragdoll_removetimer" ):GetBool() then
 		timer.Create( "RemoveTimer"..ent:EntIndex(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
-			if IsValid( head ) then
-				timer.Remove( "BloodImpactTimer"..head:EntIndex() )
-				head:Remove()
-			end
-			if IsValid( ragdoll ) then
-				timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() )
-				ragdoll:Remove()
-			end
-			if IsValid( DM ) then
-				timer.Remove( "BloodImpactTimer"..DM:EntIndex() )
-				DM:Remove()
-			end
+			if IsValid( head ) then head:Remove() end
+			if IsValid( ragdoll ) then ragdoll:Remove() end
+			if IsValid( DM ) then DM:Remove() end
 		end)
 	end
 

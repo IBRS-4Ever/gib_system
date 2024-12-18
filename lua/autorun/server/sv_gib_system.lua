@@ -386,8 +386,6 @@ function CreateGibs(ent)
 		if GetConVar( "gibsystem_ragdoll_removetimer" ):GetBool() then
 			timer.Create( "RemoveTimer"..Gib:EntIndex(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
 				if IsValid( Gib ) then Gib:Remove() end
-				timer.Remove( "RemoveTimer"..Gib:EntIndex() )
-				timer.Remove( "BloodImpactTimer"..Gib:EntIndex() )
 			end)
 		end
 		Gib:CallOnRemove("RemoveGibTimer",function(Gib) timer.Remove( "BloodImpactTimer"..Gib:EntIndex() ) end)
