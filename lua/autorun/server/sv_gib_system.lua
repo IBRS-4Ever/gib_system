@@ -175,45 +175,42 @@ function CreateRope(gib1,gib2,gib1phys,gib2phys,vec1,vec2)
 	end
 end
 
-function BloodEffect(ent,Type,AttachmentPoint,BonusTime)
-	if GetConVar( "gibsystem_blood_effect" ):GetBool() then
-		local AP = ent:LookupAttachment( AttachmentPoint )
-		if BonusTime == nil then
-			BonusTime = 0
-		end
-		if Type == 2 and AP != nil then
-			local timerDuration = GetConVar( "gibsystem_blood_time_body" ):GetInt()-BonusTime 	// 定时器持续时间（秒）
-			local timerInterval = 1 															// 定时器间隔时间（秒）
-			local timerCount = timerDuration / timerInterval 									// 重复次数
-			local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
+function BloodEffect(ent,Type,AttachmentPoint)
+	if !GetConVar( "gibsystem_blood_effect" ):GetBool() then return end
+	local AP = ent:LookupAttachment( AttachmentPoint )
+
+	if Type == 2 and AP != nil then
+		local timerDuration = GetConVar( "gibsystem_blood_time_body" ):GetInt() 			// 定时器持续时间（秒）
+		local timerInterval = 1 															// 定时器间隔时间（秒）
+		local timerCount = timerDuration / timerInterval 									// 重复次数
+		local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
 			
-			if timerDuration > 0 then
+		if timerDuration > 0 then
+			timer.Create(timerBodyName, timerInterval, timerCount, function()
+				ParticleEffectAttach( "blood_advisor_pierce_spray", 4, ent, AP )
+			end)
+			table.insert(timers, timerBodyName)
+		end
+	else
+		local timerDuration = GetConVar( "gibsystem_blood_time" ):GetInt() 				// 定时器持续时间（秒）
+		local timerInterval = 0.1 														// 定时器间隔时间（秒）
+		local timerCount = timerDuration / timerInterval 								// 重复次数
+		local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
+			
+		if timerDuration > 0 then
+			if AttachmentPoint != nil then
 				timer.Create(timerBodyName, timerInterval, timerCount, function()
-					ParticleEffectAttach( "blood_advisor_pierce_spray", 4, ent, AP )
+					local boneIndex = ent:LookupBone( AttachmentPoint )
+					local bonePos = ent:GetBonePosition(boneIndex or 0)
+					local effectData = EffectData()
+						
+					effectData:SetOrigin(bonePos)
+					effectData:SetMagnitude(1)
+					effectData:SetScale(1)
+					effectData:SetRadius(1)
+					util.Effect("BloodImpact", effectData)
 				end)
 				table.insert(timers, timerBodyName)
-			end
-		else
-			local timerDuration = GetConVar( "gibsystem_blood_time" ):GetInt()-BonusTime 	// 定时器持续时间（秒）
-			local timerInterval = 0.1 														// 定时器间隔时间（秒）
-			local timerCount = timerDuration / timerInterval 								// 重复次数
-			local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
-			
-			if timerDuration > 0 then
-				if AttachmentPoint != nil then
-					timer.Create(timerBodyName, timerInterval, timerCount, function()
-						local boneIndex = ent:LookupBone( AttachmentPoint )
-						local bonePos = ent:GetBonePosition(boneIndex or 0)
-						local effectData = EffectData()
-						
-						effectData:SetOrigin(bonePos)
-						effectData:SetMagnitude(1)
-						effectData:SetScale(1)
-						effectData:SetRadius(1)
-						util.Effect("BloodImpact", effectData)
-					end)
-					table.insert(timers, timerBodyName)
-				end
 			end
 		end
 	end
@@ -303,9 +300,7 @@ function CreateGibs(ent)
 		Gib:SetName("Gib"..Gib.BodyPart.."Index"..Gib:EntIndex())
 		Gib:Activate()
 
-		if convulsion then
-			GibConvulsion(Gib)
-		end
+		if convulsion then GibConvulsion(Gib) end
 
 		BloodEffect(Gib,AttachmentType,AttachmentPoint)
 		GibFacePose(Gib)
@@ -323,9 +318,9 @@ function CreateGibs(ent)
 			end
 
 			if Gib.BodyPart == "head" then
-				if !GetConVar("gibsystem_head_mass"):GetBool() then phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() / Gib:GetPhysicsObjectCount() ) end
+				if GetConVar("gibsystem_head_mass"):GetBool() then phys:SetMass( GetConVar("gibsystem_head_mass"):GetInt() / Gib:GetPhysicsObjectCount() ) end
 			else
-				if !GetConVar("gibsystem_body_mass"):GetBool() then phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() / Gib:GetPhysicsObjectCount() ) end
+				if GetConVar("gibsystem_body_mass"):GetBool() then phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() / Gib:GetPhysicsObjectCount() ) end
 			end
 
 			if EntDamageForce[ent] then
