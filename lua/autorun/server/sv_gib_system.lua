@@ -2,7 +2,6 @@
 AddCSLuaFile()
 
 include("autorun/gibbing_system_module/convars.lua")
-include("autorun/gibbing_system_module/tables.lua")
 include("autorun/gibbing_system_module/defaultnpcs.lua")
 include("autorun/gibbing_system_module/models.lua")
 include("autorun/gibbing_system_module/expressions.lua")
@@ -11,6 +10,18 @@ include("autorun/gibbing_system_module/death_anims.lua")
 
 util.AddNetworkString("GibSystem_StartDeathCam")
 util.AddNetworkString("GibSystem_PlayerSpawn")
+
+// 全局列表
+Expressions_Table = {}
+Model_Link_Materials = {}
+GIRLS_FRONTLINE_2_MODELS = {}
+UpperAndLower = {}
+Limbs = {}
+LeftAndRight = {}
+CompletedModels = {}
+BlackListedModels = {}
+timers = {}
+GibsCreated = {}
 
 function LocalizedText(lang,text)
 	if string.lower(GetConVar("gmod_language"):GetString()) == lang then

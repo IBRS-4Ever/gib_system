@@ -166,7 +166,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 							
 						for name, ent in SortedPairs(v) do
 							local icon = vgui.Create( "ContentIcon", PropPanel )
-							icon:SetMaterial( "gib_system/" .. name .. ".png" )
+							icon:SetMaterial( "gib_system/" .. name .. ".png" ) 
 							icon:SetName( "#gs.model." .. name )
 
 							icon.DoClick = function()
@@ -178,15 +178,15 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 						end
 					end
 				else
-					for _, Model in ipairs(GibModels) do
+					for _, Character in ipairs(GibModels) do
 
 						local icon = vgui.Create( "ContentIcon", PropPanel )
-						icon:SetMaterial( "gib_system/" .. Model .. ".png" )
-						icon:SetName( "#gs.model." .. Model )
+						icon:SetMaterial( "gib_system/" .. Character .. ".png" ) 
+						icon:SetName( "#gs.model." .. Character )
 
 						icon.DoClick = function()
-							RunConsoleCommand( "gibsystem_gib_name", Model )
-						frame:Close()
+							RunConsoleCommand( "gibsystem_gib_name", Character )
+							frame:Close()
 						end
 						PropPanel:Add( icon )
 					end
