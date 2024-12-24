@@ -98,26 +98,25 @@ local PhysBones = {
 }
 
 function GibSystem_DeathAnimation_Think(ragdoll,DM)
-	--timer.Simple( CurTime() + FrameTime(), function() 
-		if !IsValid(DM) or !IsValid(ragdoll) then return end
+	if !IsValid(DM) or !IsValid(ragdoll) then return end
 
-		if (RagPos) and (GetConVar("gibsystem_deathanimation_movement"):GetBool()) then
-			local AnmPos = DM:GetPos()
-			local RagPos = ragdoll:GetBonePosition(0)
-			RagPos.z = AnmPos.z
-			DM:SetPos( RagPos )
-		end
+	local AnmPos = DM:GetPos()
+	local RagPos = ragdoll:GetBonePosition(0)
+	
+	if (RagPos) and (GetConVar("gibsystem_deathanimation_movement"):GetBool()) then
+		RagPos.z = AnmPos.z
+		DM:SetPos( RagPos )
+	end
 
-		for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
-			local phys = ragdoll:GetPhysicsObjectNum( i )
-			local Bone_name = ragdoll:GetBoneName(ragdoll:TranslatePhysBoneToBone( i ))
-			if PhysBones[Bone_name] then
-				local pos, ang = DM:GetBonePosition( DM:LookupBone(Bone_name) )
-				if ( pos ) then phys:SetPos( pos ) end
-				if ( ang ) then phys:SetAngles( ang ) end
-			end
+	for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
+		local phys = ragdoll:GetPhysicsObjectNum( i )
+		local Bone_name = ragdoll:GetBoneName(ragdoll:TranslatePhysBoneToBone( i ))
+		if PhysBones[Bone_name] then
+			local pos, ang = DM:GetBonePosition( DM:LookupBone(Bone_name) )
+			if ( pos ) then phys:SetPos( pos ) end
+			if ( ang ) then phys:SetAngles( ang ) end
 		end
-	--end)
+	end
 end
 
 function CreateDeathAnimationGib(ent)
@@ -248,10 +247,8 @@ function CreateDeathAnimationGib(ent)
 			if IsValid( DM ) then DM:Remove() end
 		end)
 	end
-
-	head:CallOnRemove("RemoveGibTimer",function() timer.Remove( "BloodImpactTimer"..head:EntIndex() ) end)
-	ragdoll:CallOnRemove("RemoveGibTimer",function() timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() ) end)
-	DM:CallOnRemove("RemoveGibTimer",function() timer.Remove( "BloodImpactTimer"..DM:EntIndex() ) end)
+	head:CallOnRemove("RemoveGibTimer",function(head) timer.Remove( "BloodImpactTimer"..head:EntIndex() ) end)
+	ragdoll:CallOnRemove("RemoveGibTimer",function(ragdoll) timer.Remove( "BloodImpactTimer"..ragdoll:EntIndex() ) end)
 
 	local RagdollIndex = ragdoll:EntIndex()
 	hook.Add( "EntityTakeDamage", "GibSystem_DeathAnimation_Ragdoll_DMG_Check"..RagdollIndex, function( target, dmginfo )
