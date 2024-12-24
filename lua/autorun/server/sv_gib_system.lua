@@ -293,6 +293,7 @@ function CreateGibs(ent)
 		
 		Gib:SetModel( mdl )
 		Gib.BodyPart = Bodypart
+		Gib.Model = Model
 
 		if Gib.BodyPart == "head" and !util.IsValidRagdoll( mdl ) then
 			local HeadPos = ent:LookupBone("ValveBiped.Bip01_Head1") or ent:LookupBone("ValveBiped.HC_Body_Bone") or ent:LookupBone("ValveBiped.Headcrab_Cube1") or false
@@ -315,7 +316,7 @@ function CreateGibs(ent)
 
 		BloodEffect(Gib,AttachmentType,AttachmentPoint)
 		GibFacePose(Gib)
-		FingerRotation(Gib,Model)
+		FingerRotation(Gib)
 		RandomBodyGroup(Gib)
 		RandomSkin(Gib)
 

@@ -1,7 +1,7 @@
 
 AddCSLuaFile()
 
-function FingerRotation(ent,Model)
+function FingerRotation(ent)
 	if GetConVar( "gibsystem_random_finger_rotating" ):GetBool() then
 		local Fingers = {
 			["ValveBiped.Bip01_L_Finger1"] = Angle(math.Rand(-5,5),-25-math.Rand(0,4),0),
@@ -49,7 +49,7 @@ function FingerRotation(ent,Model)
 		}
 		for bonename = 0 , ent:GetBoneCount() do 
 			if Toes_Bones[ ent:GetBoneName(bonename) ] then
-				if GIRLS_FRONTLINE_2_MODELS[Model] then
+				if GIRLS_FRONTLINE_2_MODELS[ent.Model] then
 					ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 0),0))
 				else
 					ent:ManipulateBoneAngles(bonename,Angle(0,math.Rand(-30, 45),0))
