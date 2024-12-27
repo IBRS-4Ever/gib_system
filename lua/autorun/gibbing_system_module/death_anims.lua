@@ -210,7 +210,8 @@ function CreateDeathAnimationGib(ent)
 	ragdoll:Spawn()
 	ragdoll:Activate()
 	ragdoll:SetNoDraw(GetConVar("gibsystem_deathanimation_hide_ragdoll"):GetBool())
-
+	ragdoll.Model = Model
+	
 	for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
 		local bone = ragdoll:GetPhysicsObjectNum( i )
 		if ( IsValid( bone ) ) then 
@@ -222,7 +223,7 @@ function CreateDeathAnimationGib(ent)
 	end
 
 	BloodEffect(ragdoll,2,"forward")
-	FingerRotation(ragdoll, Model)
+	FingerRotation(ragdoll)
 	table.insert(GibsCreated,ragdoll)
 	CreateRope(head, ragdoll)
 
@@ -241,7 +242,7 @@ function CreateDeathAnimationGib(ent)
 	end
 
 	if GetConVar( "gibsystem_ragdoll_removetimer" ):GetBool() then
-		timer.Create( "RemoveTimer"..ent:EntIndex(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
+		timer.Create( "RemoveTimer"..ent:EntIndex()..CurTime(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
 			if IsValid( head ) then head:Remove() end
 			if IsValid( ragdoll ) then ragdoll:Remove() end
 			if IsValid( DM ) then DM:Remove() end

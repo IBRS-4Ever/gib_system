@@ -270,5 +270,13 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		
 		pnl:AddItem(AppListExt)
 		
+		pnl:AddControl( "label", { Text = "#gs.OpenURL_GitHub.Title" } )
+		local GitHub = vgui.Create( "DButton", pnl ) 			// 创建按钮，附加到面板上
+		GitHub:SetText( "#GS.OpenURL_GitHub" )					// 设置按钮文本		
+		GitHub:SetSize( 100, 25 )								// 设置按钮大小
+		pnl:AddItem(GitHub)
+		GitHub.DoClick = function()
+			gui.OpenURL( "https://github.com/IBRS-4Ever/gib_system" )
+		end
 	end)
 end)
