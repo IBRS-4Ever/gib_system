@@ -53,6 +53,7 @@ function TOOL:RightClick( trace )
 	if ( CLIENT ) then return false end
 	
 	table.Empty(Bones)
+	table.Empty(Phys)
 	
 	for i = 0, ent:GetBoneCount() do
 		local Bone = ent:GetBoneName(i)

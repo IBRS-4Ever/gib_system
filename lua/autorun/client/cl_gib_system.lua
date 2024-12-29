@@ -47,6 +47,25 @@ net.Receive("GibSystem_PlayerSpawn", function()
 	end
 end)
 
+----------------------------------------------------------------------------------------
+--将头部以及其所有子骨骼缩放为0（用于隐藏头部模型）
+local function ScaleBone_0(parent)	
+	Gib:ManipulateBoneScale(parent, Vector(0,0,0))
+	for _, child in pairs(Gib:GetChildBones(parent)) do
+		ScaleBone_0(child)
+	end
+end
+
+
+----------------------------------------------------------------------------------------
+--将头部以及其所有子骨骼缩放为1
+local function ScaleBone_1(parent)
+	Gib:ManipulateBoneScale(parent, Vector(1,1,1))
+	for _, child in pairs(Gib:GetChildBones(parent)) do
+		ScaleBone_1(child)
+	end
+end
+
 hook.Add("CalcView", "GibSystem_FirstDeathCam", function(ply, pos_ply, ang_ply)
 
 	if not IsValid(Gib) or GetViewEntity() != LocalPlayer() then return end
