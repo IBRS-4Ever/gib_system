@@ -15,12 +15,12 @@ util.AddNetworkString("GibSystem_PlayerSpawn")
 Expressions_Table = {}
 Model_Link_Materials = {}
 GIRLS_FRONTLINE_2_MODELS = {}
-UpperAndLower = {}
-Limbs = {}
-LeftAndRight = {}
-CompletedModels = {}
-BlackListedModels = {}
-timers = {}
+local UpperAndLower = {}
+local Limbs = {}
+local LeftAndRight = {}
+local CompletedModels = {}
+local BlackListedModels = {}
+local timers = {}
 GibsCreated = {}
 
 function LocalizedText(lang,text)
@@ -198,9 +198,9 @@ function BloodEffect(ent,Type,AttachmentPoint)
 			
 		if timerDuration > 0 then
 			timer.Create(timerBodyName, timerInterval, timerCount, function()
+				if !ent:IsValid() then timer.Remove(timerBodyName) return end
 				ParticleEffectAttach( "blood_advisor_pierce_spray", 4, ent, AP )
 			end)
-			table.insert(timers, timerBodyName)
 		end
 	else
 		local timerDuration = GetConVar( "gibsystem_blood_time" ):GetInt() 				// 定时器持续时间（秒）
@@ -211,6 +211,7 @@ function BloodEffect(ent,Type,AttachmentPoint)
 		if timerDuration > 0 then
 			if AttachmentPoint != nil then
 				timer.Create(timerBodyName, timerInterval, timerCount, function()
+					if !ent:IsValid() then timer.Remove(timerBodyName) return end
 					local boneIndex = ent:LookupBone( AttachmentPoint )
 					local bonePos = ent:GetBonePosition(boneIndex or 0)
 					local effectData = EffectData()
@@ -221,7 +222,6 @@ function BloodEffect(ent,Type,AttachmentPoint)
 					effectData:SetRadius(1)
 					util.Effect("BloodImpact", effectData)
 				end)
-				table.insert(timers, timerBodyName)
 			end
 		end
 	end
@@ -257,7 +257,7 @@ function GibConvulsion(ent)
 		ent:Input( "StartRagdollBoogie", ent, ent, "" )
 	elseif GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 2 and CheckFedhoria() then
 		timer.Simple(0, function()
-		if !IsValid(ent) then return end	
+			if !IsValid(ent) then return end	
 			fedhoria.StartModule(ent, "stumble_legs", phys_bone, lpos)
 			EntDamagePosition[ent] = nil		
 		end)
@@ -345,9 +345,9 @@ function CreateGibs(ent)
 
 		local function PhysCallback( ent, data ) -- Function that will be called whenever collision happends
 			if !GetConVar("gibsystem_blood_decal"):GetBool() then return end
-			local velSpeed = data.PhysObject:GetVelocity():Length()
-			if velSpeed > 72 then
-				local myPos = Gib:GetPos()
+			local velSpeed = data.Speed
+			if velSpeed > 150 then
+				local myPos = data.PhysObject:GetPos()
 				Gib:SetLocalPos(myPos + Gib:GetUp() * 4) -- Because the entity is too close to the ground
 				local tr = util.TraceLine({
 					start = myPos,
@@ -396,11 +396,10 @@ function CreateGibs(ent)
 		]]--
 
 		if GetConVar( "gibsystem_ragdoll_removetimer" ):GetBool() then
-			timer.Create( "RemoveTimer"..Gib:EntIndex(), GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), 1, function()
+			timer.Simple( GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), function()
 				if IsValid( Gib ) then Gib:Remove() end
 			end)
 		end
-		Gib:CallOnRemove("RemoveGibTimer",function(Gib) timer.Remove( "BloodImpactTimer"..Gib:EntIndex() ) end)
 		table.insert(GibsCreated,Gib)
 	end
 	

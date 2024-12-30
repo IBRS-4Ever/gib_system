@@ -31,5 +31,6 @@ CreateConVar( "gibsystem_deathanimation", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_E
 CreateConVar( "gibsystem_deathanimation_movement", 0 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Enable death animations movements.")
 CreateConVar( "gibsystem_deathanimation_name", "random" , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Set death animation.")
 CreateConVar( "gibsystem_deathanimation_hide_ragdoll", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Hide ragdoll during animation.")
+CreateConVar( "gibsystem_deathanimation_body_health", 25 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Body's Health.")
 CreateClientConVar( "gibsystem_model_category", 1 , true, false )
 CreateConVar( "gibsystem_gib_base_on_model", 1 , FCVAR_ARCHIVE + FCVAR_SERVER_CAN_EXECUTE + FCVAR_REPLICATED, "[Gib System] Choose Model Base on materials.")
