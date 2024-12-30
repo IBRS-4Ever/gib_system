@@ -34,9 +34,11 @@ function TOOL:LeftClick( trace )
 			local Bone_name = ent:GetBoneName(ent:TranslatePhysBoneToBone( i ))
 			if Phys[Bone_name] != nil then
 				local PhyInfo = Phys[Bone_name]
-				phys:EnableMotion(false)
 				phys:SetPos( Phys[Bone_name].Position )
 				phys:SetAngles( Phys[Bone_name].Angle )
+				phys:EnableCollisions(false)
+				phys:EnableMotion(false)
+				phys:Wake()
 			end
 		end
 	end
