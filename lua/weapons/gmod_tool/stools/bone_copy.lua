@@ -36,7 +36,6 @@ function TOOL:LeftClick( trace )
 				local PhyInfo = Phys[Bone_name]
 				phys:SetPos( Phys[Bone_name].Position )
 				phys:SetAngles( Phys[Bone_name].Angle )
-				phys:EnableCollisions(false)
 				phys:EnableMotion(false)
 				phys:Wake()
 			end

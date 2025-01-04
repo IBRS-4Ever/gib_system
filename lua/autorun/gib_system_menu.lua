@@ -173,7 +173,10 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 								RunConsoleCommand( "gibsystem_gib_name", name )
 								frame:Close()
 							end
-								
+							icon.DoRightClick = function()
+								RunConsoleCommand( "gibsystem_blacklist_add", name )
+							end
+
 							PropPanel:Add( icon )
 						end
 					end
@@ -187,6 +190,9 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 						icon.DoClick = function()
 							RunConsoleCommand( "gibsystem_gib_name", Character )
 							frame:Close()
+						end
+						icon.DoRightClick = function()
+							RunConsoleCommand( "gibsystem_blacklist_add", Character )
 						end
 						PropPanel:Add( icon )
 					end

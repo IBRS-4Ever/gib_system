@@ -20,8 +20,13 @@ local Limbs = {}
 local LeftAndRight = {}
 local CompletedModels = {}
 local BlackListedModels = {}
+if file.Open("gib_system/blacklist.txt", "r", "DATA") then
+	BlackListedModels = util.JSONToTable( file.Read("gib_system/blacklist.txt", "DATA") )
+end
 local timers = {}
 GibsCreated = {}
+
+file.CreateDir("gib_system")
 
 function LocalizedText(lang,text)
 	if string.lower(GetConVar("gmod_language"):GetString()) == lang then
@@ -186,6 +191,27 @@ function CreateRope(gib1,gib2,gib1phys,gib2phys,vec1,vec2)
 	end
 end
 
+concommand.Add("gibsystem_blacklist_add", function(ply, cmd, arg)
+	if !BlackListedModels[tostring(table.concat(arg, " "))] then
+		BlackListedModels[tostring(table.concat(arg, " "))] = true
+		file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
+		LocalizedText("zh-cn","[碎尸系统] 将 "..mdl.." 加入黑名单。")
+		LocalizedText("en","[Gibbing System] Added "..mdl.." to blacklist.")
+	else
+		BlackListedModels[tostring(table.concat(arg, " "))] = nil
+		file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
+		LocalizedText("zh-cn","[碎尸系统] 将 "..mdl.." 移出黑名单。")
+		LocalizedText("en","[Gibbing System] Removed "..mdl.." from blacklist.")
+	end
+end)
+
+concommand.Add("gibsystem_blacklist_clear", function(ply, cmd, arg)
+	BlackListedModels = {}
+	file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
+	LocalizedText("zh-cn","[碎尸系统] 已清除黑名单。")
+	LocalizedText("en","[Gibbing System] Cleared blacklist.")
+end)
+
 function BloodEffect(ent,Type,AttachmentPoint)
 	if !GetConVar( "gibsystem_blood_effect" ):GetBool() then return end
 	local AP = ent:LookupAttachment( AttachmentPoint )
@@ -262,6 +288,29 @@ function GibConvulsion(ent)
 			EntDamagePosition[ent] = nil		
 		end)
 	end
+end
+
+function GibGetModel(ent,Recall)
+	local Tbl = util.JSONToTable( file.Read("gib_system/blacklist.txt", "DATA") )
+	local Materials = ent:GetMaterials()
+	
+	if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
+		Model = GetConVar("gibsystem_gib_name"):GetString()
+		if Tbl[Model] and !Recall then GibGetModel(ent,true) end
+	elseif GetConVar("gibsystem_gib_base_on_model"):GetBool() then
+		Model = GibModels[math.random( #GibModels )]
+		for i = 1, table.Count(Materials) do
+			if Model_Link_Materials[Materials[i]] then
+				Model = Model_Link_Materials[Materials[i]]
+				break
+			end
+		end
+	else
+		Model = GibModels[math.random( #GibModels )]
+		if Tbl[Model] and !Recall then GibGetModel(ent,true) end
+	end
+	
+	
 end
 
 function CreateGibs(ent)
@@ -411,24 +460,8 @@ function CreateGibs(ent)
 		ConditionGib = Conditions[math.random( #Conditions )]
 	end
 	
-	local Materials = ent:GetMaterials()
-		
-	if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-		Model = GetConVar("gibsystem_gib_name"):GetString()
-	elseif string.find(ent:GetModel(), "klukai_astral_luminous") then
-		Model = "klukai_astral_luminous"
-	elseif GetConVar("gibsystem_gib_base_on_model"):GetBool() then
-		Model = GibModels[math.random( #GibModels )]
-		for i = 1, table.Count(Materials) do
-			if Model_Link_Materials[Materials[i]] then
-				Model = Model_Link_Materials[Materials[i]]
-				break
-			end
-		end
-	else
-		Model = GibModels[math.random( #GibModels )]
-	end
-	
+	GibGetModel(ent)
+
 	if ConditionGib == "headless" then
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)

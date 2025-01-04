@@ -23,6 +23,21 @@ local anims_table = {
 	"DIE_Simple_19",
 	"DIE_Simple_20",
 	"DIE_Simple_21",
+	"shove_backward_01",
+	"shove_backward_02",
+	"shove_backward_03",
+	"shove_backward_04",
+	"shove_backward_05",
+	"shove_backward_06",
+	"shove_backward_07",
+	"shove_backward_08",
+	"shove_backward_09",
+	"shove_backward_10",
+	"shove_backward_10",
+	"shove_backward_10",
+	"shove_forward_01",
+	"shove_leftward_01",
+	"shove_rightward_01",
 	"DIE_Headshot_FFront_01",
 	"DIE_Headshot_FFront_02",
 	"DIE_Headshot_FFront_03",
@@ -126,23 +141,7 @@ function CreateDeathAnimationGib(ent)
 		anim = GetConVar("gibsystem_deathanimation_name"):GetString()
 	end
 	
-	local Materials = ent:GetMaterials()
-	
-	if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
-		Model = GetConVar("gibsystem_gib_name"):GetString()
-	elseif string.find(ent:GetModel(), "klukai_astral_luminous") then
-		Model = "klukai_astral_luminous"
-	elseif GetConVar("gibsystem_gib_base_on_model"):GetBool() then
-		Model = GibModels[math.random( #GibModels )]
-		for i = 1, table.Count(Materials) do
-			if Model_Link_Materials[Materials[i]] then
-				Model = Model_Link_Materials[Materials[i]]
-				break
-			end
-		end
-	else
-		Model = GibModels[math.random( #GibModels )]
-	end
+	GibGetModel(ent)
 		
 	local head = nil
 	local HeadPos = ent:LookupBone("ValveBiped.Bip01_Head1") or ent:LookupBone("ValveBiped.HC_Body_Bone") or ent:LookupBone("ValveBiped.Headcrab_Cube1") or 0
@@ -187,7 +186,9 @@ function CreateDeathAnimationGib(ent)
 	DM:Fire("SetAnimation", anim)
 	DM:SetNoDraw(!GetConVar("gibsystem_deathanimation_hide_ragdoll"):GetBool())
 	DM:SetCollisionGroup(1)
-	print("Sequence Is: "..anim)
+	LocalizedText("zh-cn","[碎尸系统] 动作："..anim)
+	LocalizedText("en","[Gibbing System] Sequence Is: "..anim)
+	print()
 	RandomBodyGroup(DM)
 	RandomSkin(DM)
 	table.insert(GibsCreated,DM)
