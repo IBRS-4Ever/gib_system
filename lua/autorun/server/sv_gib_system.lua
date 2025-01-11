@@ -11,7 +11,7 @@ include("autorun/gibbing_system_module/death_anims.lua")
 util.AddNetworkString("GibSystem_StartDeathCam")
 util.AddNetworkString("GibSystem_PlayerSpawn")
 
-// 全局列表
+-- 全局列表
 Expressions_Table = {}
 Model_Link_Materials = {}
 GIRLS_FRONTLINE_2_MODELS = {}
@@ -20,7 +20,9 @@ local Limbs = {}
 local LeftAndRight = {}
 local CompletedModels = {}
 local BlackListedModels = {}
-if file.Open("gib_system/blacklist.txt", "r", "DATA") then
+if !file.Exists("gib_system/blacklist.txt", "DATA") then
+	file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
+else
 	BlackListedModels = util.JSONToTable( file.Read("gib_system/blacklist.txt", "DATA") )
 end
 local timers = {}
@@ -192,16 +194,17 @@ function CreateRope(gib1,gib2,gib1phys,gib2phys,vec1,vec2)
 end
 
 concommand.Add("gibsystem_blacklist_add", function(ply, cmd, arg)
-	if !BlackListedModels[tostring(table.concat(arg, " "))] then
-		BlackListedModels[tostring(table.concat(arg, " "))] = true
+	local Character = tostring(table.concat(arg, " "))
+	if !BlackListedModels[Character] then
+		BlackListedModels[Character] = true
 		file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
-		LocalizedText("zh-cn","[碎尸系统] 将 "..mdl.." 加入黑名单。")
-		LocalizedText("en","[Gibbing System] Added "..mdl.." to blacklist.")
+		LocalizedText("zh-cn","[碎尸系统] 将 "..Character.." 加入黑名单。")
+		LocalizedText("en","[Gibbing System] Added "..Character.." to blacklist.")
 	else
-		BlackListedModels[tostring(table.concat(arg, " "))] = nil
+		BlackListedModels[Character] = nil
 		file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
-		LocalizedText("zh-cn","[碎尸系统] 将 "..mdl.." 移出黑名单。")
-		LocalizedText("en","[Gibbing System] Removed "..mdl.." from blacklist.")
+		LocalizedText("zh-cn","[碎尸系统] 将 "..Character.." 移出黑名单。")
+		LocalizedText("en","[Gibbing System] Removed "..Character.." from blacklist.")
 	end
 end)
 
@@ -291,7 +294,7 @@ function GibConvulsion(ent)
 end
 
 function GibGetModel(ent,Recall)
-	local Tbl = util.JSONToTable( file.Read("gib_system/blacklist.txt", "DATA") )
+	local Tbl = util.JSONToTable( file.Read("gib_system/blacklist.txt", "DATA") ) or {}
 	local Materials = ent:GetMaterials()
 	
 	if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
