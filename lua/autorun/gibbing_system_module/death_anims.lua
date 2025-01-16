@@ -294,12 +294,10 @@ function CreateDeathAnimationGib(ent)
 		end
 		if IsValid(ragdoll) then
 			ragdoll:SetNoDraw(false)
-			if GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 2 and CheckFedhoria() then
-				timer.Simple(1, function()
-				if !IsValid(ragdoll) then return end	
-					fedhoria.StartModule(ragdoll, "stumble_legs", phys_bone, lpos)
-				end)
-			end
+			timer.Simple(1, function()
+				if !IsValid(ragdoll) then return end
+				GibConvulsion(ragdoll)
+			end)
 			for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
 				local bone = ragdoll:GetPhysicsObjectNum( i )
 				if ( IsValid( bone ) ) then 
