@@ -5,6 +5,11 @@ TOOL.ClientConVar[ "fingers" ] = 1
 TOOL.ClientConVar[ "toes" ] = 1
 TOOL.ClientConVar[ "gf2_toes" ] = 0
 
+TOOL.Information = {
+	{ name = "left" },
+	{ name = "right" }
+}
+
 function TOOL:Click( tr )
 	if CLIENT then return true end
 	if ( IsValid( tr.Entity ) ) then
