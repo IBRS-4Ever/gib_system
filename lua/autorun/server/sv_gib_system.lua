@@ -25,6 +25,7 @@ if !file.Exists("gib_system/blacklist.txt", "DATA") then
 else
 	BlackListedModels = util.JSONToTable( file.Read("gib_system/blacklist.txt", "DATA") )
 end
+local Characters = {}
 local timers = {}
 GibsCreated = {}
 
@@ -65,7 +66,15 @@ local function GibSystem_Initialize()
 	table.Empty(Limbs)
 	table.Empty(CompletedModels)
 	table.Empty(LeftAndRight)
-	
+	Characters = table.Copy(GibModels)
+	for k, black in pairs(table.GetKeys(BlackListedModels)) do
+		for i = #Characters, 1, -1 do
+			if Characters[i] == black then
+				table.remove(Characters, i)
+				continue 
+			end
+		end
+	end
 	for _, Model in ipairs(GibModels) do
 		LocalizedText("zh-cn","[碎尸系统] 已加载文件 "..Model)
 		LocalizedText("en","[Gibbing System] Loaded file "..Model)
@@ -109,8 +118,8 @@ local function GibSystem_Initialize()
 		end
 	end
 
-	LocalizedText("zh-cn","[碎尸系统] 已加载 "..table.Count(GibModels).." 个模型。")
-	LocalizedText("en","[Gibbing System] Loaded "..table.Count(GibModels).." Model(s). ")
+	LocalizedText("zh-cn","[碎尸系统] 已加载 "..table.Count(GibModels).." 个文件。"..table.Count(Characters).." 个在黑名单中。")
+	LocalizedText("en","[Gibbing System] Loaded "..table.Count(GibModels).." File(s). "..table.Count(Characters).." in blacklist.")
 
 	LocalizedText("zh-cn","[碎尸系统] 加载完成。\n")
 	LocalizedText("en","[Gibbing System] Loading Complete.\n")
@@ -213,6 +222,7 @@ concommand.Add("gibsystem_blacklist_clear", function(ply, cmd, arg)
 	file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
 	LocalizedText("zh-cn","[碎尸系统] 已清除黑名单。")
 	LocalizedText("en","[Gibbing System] Cleared blacklist.")
+	RunConsoleCommand( "GibSystem_ReloadModels" )
 end)
 
 function BloodEffect(ent,Type,AttachmentPoint)
@@ -288,20 +298,18 @@ function GibConvulsion(ent)
 		timer.Simple(0, function()
 			if !IsValid(ent) then return end	
 			fedhoria.StartModule(ent, "stumble_legs", phys_bone, lpos)
-			EntDamagePosition[ent] = nil		
+			EntDamagePosition[ent] = nil
 		end)
 	end
 end
 
-function GibGetModel(ent,Recall)
-	local Tbl = util.JSONToTable( file.Read("gib_system/blacklist.txt", "DATA") ) or {}
+function GibGetModel(ent)
 	local Materials = ent:GetMaterials()
 	
 	if table.HasValue( GibModels, GetConVar("gibsystem_gib_name"):GetString() ) then
 		Model = GetConVar("gibsystem_gib_name"):GetString()
-		if Tbl[Model] and !Recall then GibGetModel(ent,true) end
 	elseif GetConVar("gibsystem_gib_base_on_model"):GetBool() then
-		Model = GibModels[math.random( #GibModels )]
+		Model = Characters[math.random( #Characters )]
 		for i = 1, table.Count(Materials) do
 			if Model_Link_Materials[Materials[i]] then
 				Model = Model_Link_Materials[Materials[i]]
@@ -309,30 +317,14 @@ function GibGetModel(ent,Recall)
 			end
 		end
 	else
-		Model = GibModels[math.random( #GibModels )]
-		if Tbl[Model] and !Recall then GibGetModel(ent,true) end
+		Model = Characters[math.random( #Characters )]
 	end
-	
-	
 end
 
 function CreateGibs(ent)
-	if CheckFedhoria() then
-		local dmgpos = EntDamagePosition[ent]
-		local phys_bone, lpos
-
-		if dmgpos then
-			phys_bone = ent:GetClosestPhysBone(dmgpos)
-			if phys_bone then
-				local phys = ent:GetPhysicsObjectNum(phys_bone)
-				
-				lpos = phys:WorldToLocal(dmgpos)
-			end
-		end
-	end
 
 	function SpawnGib(mdl, AttachmentType, AttachmentPoint, Bodypart, convulsion)
-		local Gib = nil
+		local Gib
 		
 		if (util.IsValidRagdoll( mdl )) then Gib = ents.Create("prop_ragdoll") end
 		if (util.IsValidProp( mdl )) then Gib = ents.Create("prop_physics") end
@@ -363,8 +355,6 @@ function CreateGibs(ent)
 		Gib:Spawn()
 		Gib:SetName("Gib"..Gib.BodyPart.."Index"..Gib:EntIndex())
 		Gib:Activate()
-
-		if convulsion then GibConvulsion(Gib) end
 
 		BloodEffect(Gib,AttachmentType,AttachmentPoint)
 		GibFacePose(Gib)
@@ -415,37 +405,21 @@ function CreateGibs(ent)
 		end
 		Gib:AddCallback( "PhysicsCollide", PhysCallback ) -- Add Callback
 
-		if Gib.BodyPart == "head" then
-			head = Entity(Gib:EntIndex())
-		elseif Gib.BodyPart == "body" then
-			body = Entity(Gib:EntIndex())
-		end
-		
-		--[[
-		
+		if Gib.BodyPart == "head" then head = Entity(Gib:EntIndex()) end
+		if Gib.BodyPart == "body" then body = Entity(Gib:EntIndex()) end
+
 		local dmgpos = EntDamagePosition[ent]
-		local phys_bone, lpos
 
 		if dmgpos then
 			phys_bone = Gib:GetClosestPhysBone(dmgpos)
 			if phys_bone then
 				local phys = Gib:GetPhysicsObjectNum(phys_bone)
-				print(Gib:GetBoneName(Gib:TranslatePhysBoneToBone(phys_bone)))
+				
 				lpos = phys:WorldToLocal(dmgpos)
 			end
 		end
 
-		if GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 1 then
-			Gib:Input( "StartRagdollBoogie", Gib, Gib, "" )
-		elseif GetConVar( "gibsystem_ragdoll_convulsion" ):GetInt() == 2 then
-			timer.Simple(0, function()
-			if !IsValid(Gib) then return end	
-				fedhoria.StartModule(Gib, "stumble_legs", phys_bone, lpos)
-				EntDamagePosition[ent] = nil		
-			end)
-		end
-
-		]]--
+		if convulsion then GibConvulsion(Gib) end
 
 		if GetConVar( "gibsystem_ragdoll_removetimer" ):GetBool() then
 			timer.Simple( GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), function()
@@ -694,8 +668,8 @@ function CreateGibs(ent)
 		end
 
 		SpawnGib("models/gib_system/"..Model.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/"..Model.."_torso.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
 		SpawnGib("models/gib_system/"..Model.."_legs.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
+		SpawnGib("models/gib_system/"..Model.."_torso.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
 		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：上/下半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)

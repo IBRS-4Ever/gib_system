@@ -197,6 +197,21 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 						PropPanel:Add( icon )
 					end
 				end
+				local NoteFrame = vgui.Create( "Panel", frame )
+				NoteFrame:SetHeight( 75 )
+				NoteFrame:Dock( BOTTOM )
+				NoteFrame:DockMargin( 0, 5, 0, 0 )
+				function NoteFrame:Paint( w, h )
+					draw.RoundedBox( 0, 0, 0, w, h, Color( 0, 0, 0) )
+				end
+		
+				local Note = vgui.Create( "DLabel", NoteFrame )
+				Note:Dock( FILL )
+				Note:SetHeight( 35 )
+				Note:SetContentAlignment( 5 )
+				Note:SetTextColor( color_white )
+				Note:SetFont( "DermaLarge" )
+				Note:SetText( "#gs.character_selector.blacklist_help" )
 			end
 				
 			pnl:AddControl( "textbox", { Label = "#GS.HeadMess", Command = "gibsystem_head_mass" } )
