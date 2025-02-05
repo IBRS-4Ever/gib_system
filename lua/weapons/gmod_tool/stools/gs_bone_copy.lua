@@ -61,6 +61,8 @@ function TOOL:RightClick( trace )
 		local Angle = ent:GetManipulateBoneAngles(i)
 		Bones[Bone] = Angle
 	end
+
+	if ent:GetPhysicsObjectCount() == 1 then return end
 	
 	for i = 0, ent:GetPhysicsObjectCount() - 1 do
 		local phys = ent:GetPhysicsObjectNum( i )
