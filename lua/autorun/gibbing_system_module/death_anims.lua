@@ -91,6 +91,8 @@ local anims_table = {
 
 local Ragdolls = {}
 
+local Phys = {}
+
 local PhysBones = {
 	["ValveBiped.Bip01_Pelvis"] 	= true,
 	["ValveBiped.Bip01_Spine1"] 	= true,
@@ -114,26 +116,45 @@ local PhysBones = {
 	["ValveBiped.Bip01_L_Hand"] 	= true
 }
 
+local CSC = {		
+	secondstoarrive = 0.01,
+	pos = Vector(0, 0, 0),
+	angle = Angle(0, 0, 0),
+	maxangular = 400,
+	maxangulardamp = 200,
+	maxspeed = 400,
+	maxspeeddamp = 300,
+	teleportdistance = 0
+}
+
 function GibSystem_DeathAnimation_Think(ragdoll)
 	if !IsValid(ragdoll.DM) or !IsValid(ragdoll) then return end
-	if CurTime() >= ragdoll.Next then 
-		local AnmPos = ragdoll.DM:GetPos()
-		local RagPos = ragdoll:GetBonePosition(0)
-		ragdoll.Next = CurTime() + 0.1
-		
-		if (RagPos) and (GetConVar("gibsystem_deathanimation_movement"):GetBool()) then
-			RagPos.z = AnmPos.z
-			ragdoll.DM:SetPos( RagPos )
-		end
+	local AnmPos = ragdoll.DM:GetPos()
+	local RagPos = ragdoll:GetBonePosition(0)
 
-		for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
-			local phys = ragdoll:GetPhysicsObjectNum( i )
-			local Bone_name = ragdoll:GetBoneName(ragdoll:TranslatePhysBoneToBone( i ))
-			if PhysBones[Bone_name] then
-				local pos, ang = ragdoll.DM:GetBonePosition( ragdoll.DM:LookupBone(Bone_name) )
-				if ( pos ) then phys:SetPos( pos ) end
-				if ( ang ) then phys:SetAngles( ang ) end
-			end
+	if (RagPos) and (GetConVar("gibsystem_deathanimation_movement"):GetBool()) then
+		RagPos.z = AnmPos.z
+		ragdoll.DM:SetPos( RagPos )
+	end
+
+	for i = 0, ragdoll.DM:GetBoneCount() - 1 do
+		local Bone_name = ragdoll.DM:GetBoneName(i)
+		local pos, ang = ragdoll.DM:GetBonePosition(i)
+		if PhysBones[Bone_name] then
+			Phys[Bone_name] = { Position = pos, Angle = ang }
+		end
+	end
+
+	for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
+		local phys = ragdoll:GetPhysicsObjectNum( i )
+		local Bone_name = ragdoll:GetBoneName(ragdoll:TranslatePhysBoneToBone( i ))
+		
+		if PhysBones[Bone_name] then
+			CSC.pos = Phys[Bone_name].Position
+			CSC.angle = Phys[Bone_name].Angle
+
+			phys:Wake()
+			phys:ComputeShadowControl(CSC)
 		end
 	end
 end
@@ -142,22 +163,6 @@ function RagdollTimer(Ragdoll)
 	timer.Simple(Ragdoll.DM:SequenceDuration(Ragdoll.DM:LookupSequence( anim )), function()
 		if IsValid(Ragdoll.DM) then
 			SafeRemoveEntity(Ragdoll.DM)
-		end
-		if IsValid(Ragdoll) then
-			Ragdoll:SetNoDraw(false)
-			timer.Simple(1, function()
-				if !IsValid(Ragdoll) then return end
-				GibConvulsion(Ragdoll)
-			end)
-			for i = 0, Ragdoll:GetPhysicsObjectCount() - 1 do
-				local bone = Ragdoll:GetPhysicsObjectNum( i )
-				if ( IsValid( bone ) ) then 
-					local PhysToBone = Ragdoll:TranslatePhysBoneToBone( i )
-					if PhysBones[Ragdoll:GetBoneName(PhysToBone)] then
-						bone:EnableMotion(true)
-					end
-				end
-			end
 		end
 	end)
 end
@@ -213,7 +218,7 @@ function CreateDeathAnimationGib(ent)
 	DM:SetAngles( ent:GetAngles() )
 	DM:Spawn()
 	DM:Fire("SetAnimation", anim)
-	DM:SetNoDraw(!GetConVar("gibsystem_deathanimation_hide_ragdoll"):GetBool())
+	DM:SetNoDraw( true )
 	DM:SetCollisionGroup(1)
 	LocalizedText("zh-cn","[碎尸系统] 角色："..Model.." 动作："..anim)
 	LocalizedText("en","[Gibbing System] Character: "..Model.." Sequence: "..anim)
@@ -240,19 +245,8 @@ function CreateDeathAnimationGib(ent)
 	end
 	ragdoll:Spawn()
 	ragdoll:Activate()
-	ragdoll:SetNoDraw(GetConVar("gibsystem_deathanimation_hide_ragdoll"):GetBool())
 	ragdoll.Model = Model
 	
-	for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
-		local bone = ragdoll:GetPhysicsObjectNum( i )
-		if ( IsValid( bone ) ) then 
-			local PhysToBone = ragdoll:TranslatePhysBoneToBone( i )
-			if PhysBones[ragdoll:GetBoneName(PhysToBone)] then
-				bone:EnableMotion(false)
-			end
-		end
-	end
-
 	BloodEffect(ragdoll,2,"forward")
 	FingerRotation(ragdoll)
 	table.insert(GibsCreated,ragdoll)
@@ -284,6 +278,7 @@ function CreateDeathAnimationGib(ent)
 
 	hook.Add( "EntityTakeDamage", "GibSystem_DeathAnimation_Ragdoll_DMG_Check", function( target, dmginfo )
 		for k, Rag in pairs(Ragdolls) do
+			--if dmginfo:IsDamageType(DMG_CRUSH) then return end
 			if target == Rag and dmginfo:GetAttacker() != head and dmginfo:GetAttacker() != Rag then
 
 				local effect = EffectData() -- Create effect data
@@ -293,11 +288,6 @@ function CreateDeathAnimationGib(ent)
 				Rag.RagHealth = Rag.RagHealth - dmginfo:GetDamage()
 				if dmginfo:GetDamage() > Rag.RagHealth then
 					SafeRemoveEntity(Rag.DM)
-					Rag:SetNoDraw(false)
-					for i = 0, Rag:GetPhysicsObjectCount() - 1 do
-						local bone = Rag:GetPhysicsObjectNum( i )
-						bone:EnableMotion(true)
-					end
 					return
 				end
 			end
