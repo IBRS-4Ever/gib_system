@@ -91,8 +91,6 @@ local anims_table = {
 
 local Ragdolls = {}
 
-local Phys = {}
-
 local PhysBones = {
 	["ValveBiped.Bip01_Pelvis"] 	= true,
 	["ValveBiped.Bip01_Spine1"] 	= true,
@@ -129,6 +127,7 @@ local CSC = {
 
 function GibSystem_DeathAnimation_Think(ragdoll)
 	if !IsValid(ragdoll.DM) or !IsValid(ragdoll) then return end
+	local Phys = {}
 	local AnmPos = ragdoll.DM:GetPos()
 	local RagPos = ragdoll:GetBonePosition(0)
 
@@ -149,7 +148,7 @@ function GibSystem_DeathAnimation_Think(ragdoll)
 		local phys = ragdoll:GetPhysicsObjectNum( i )
 		local Bone_name = ragdoll:GetBoneName(ragdoll:TranslatePhysBoneToBone( i ))
 		
-		if PhysBones[Bone_name] then
+		if Phys[Bone_name] then
 			CSC.pos = Phys[Bone_name].Position
 			CSC.angle = Phys[Bone_name].Angle
 
