@@ -16,6 +16,7 @@ local PhysBones = {
 	["ValveBiped.Bip01_Spine1"] 	= true,
 	["ValveBiped.Bip01_Spine2"] 	= true,
 	["ValveBiped.Bip01_Spine4"] 	= true,
+	["ValveBiped.Bip01_Head1"] 	= true,
 	["ValveBiped.Bip01_R_Thigh"] 	= true,
 	["ValveBiped.Bip01_R_Calf"] 	= true,
 	["ValveBiped.Bip01_R_Foot"] 	= true,

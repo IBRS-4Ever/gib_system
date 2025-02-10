@@ -162,6 +162,10 @@ function RagdollTimer(Ragdoll)
 	timer.Simple(Ragdoll.DM:SequenceDuration(Ragdoll.DM:LookupSequence( anim )), function()
 		if IsValid(Ragdoll.DM) then
 			SafeRemoveEntity(Ragdoll.DM)
+			if !Ragdoll.IsConvulsing then
+				GibConvulsion(Ragdoll)
+				Ragdoll.IsConvulsing = true
+			end
 		end
 	end)
 end
@@ -287,6 +291,10 @@ function CreateDeathAnimationGib(ent)
 				Rag.RagHealth = Rag.RagHealth - dmginfo:GetDamage()
 				if dmginfo:GetDamage() > Rag.RagHealth then
 					SafeRemoveEntity(Rag.DM)
+					if !Rag.IsConvulsing then
+						GibConvulsion(Rag)
+						Rag.IsConvulsing = true
+					end
 					return
 				end
 			end

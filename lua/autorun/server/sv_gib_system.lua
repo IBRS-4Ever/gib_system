@@ -118,8 +118,8 @@ local function GibSystem_Initialize()
 		end
 	end
 
-	LocalizedText("zh-cn","[碎尸系统] 已加载 "..table.Count(GibModels).." 个文件。"..table.Count(Characters).." 个在黑名单中。")
-	LocalizedText("en","[Gibbing System] Loaded "..table.Count(GibModels).." File(s). "..table.Count(Characters).." in blacklist.")
+	LocalizedText("zh-cn","[碎尸系统] 已加载 "..table.Count(GibModels).." 个文件。"..table.Count(GibModels) - table.Count(Characters).." 个在黑名单中。")
+	LocalizedText("en","[Gibbing System] Loaded "..table.Count(GibModels).." File(s). "..table.Count(GibModels) - table.Count(Characters).." in blacklist.")
 
 	LocalizedText("zh-cn","[碎尸系统] 加载完成。\n")
 	LocalizedText("en","[Gibbing System] Loading Complete.\n")
