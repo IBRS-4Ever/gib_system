@@ -271,7 +271,7 @@ function BodyPee(ent)
 	local timerDuration = GetConVar( "gibsystem_pee_time" ):GetInt() 					// 定时器持续时间（秒）
 	local timerInterval = 1 															// 定时器间隔时间（秒）
 	local timerCount = timerDuration / timerInterval 									// 重复次数
-	local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
+	local timerBodyName = "PeeTimer".. ent:EntIndex()
 		
 	if timerDuration > 0 then
 		timer.Create(timerBodyName, timerInterval, timerCount, function()
