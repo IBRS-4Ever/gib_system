@@ -143,13 +143,13 @@ EntDamageForce = {}
 EntDamagePosition = {}
 
 hook.Add( "ScaleNPCDamage", "GibSystem_DamageInfo_NPC", function( npc, hitgroup, dmginfo )
-	if !(dmginfo:GetDamage() >= npc:Health()) then return end
+	if (dmginfo:GetDamage() < npc:Health()) then return end
 	EntDamageForce[npc] = dmginfo:GetDamageForce()
 	EntDamagePosition[npc] = dmginfo:GetDamagePosition()
 end )
 
 hook.Add( "ScalePlayerDamage", "GibSystem_DamageInfo_Player", function( plr, hitgroup, dmginfo )
-	if !(dmginfo:GetDamage() >= plr:Health()) then return end
+	if (dmginfo:GetDamage() < plr:Health()) then return end
 	EntDamageForce[plr] = dmginfo:GetDamageForce()
 	EntDamagePosition[plr] = dmginfo:GetDamagePosition()
 end )
@@ -158,7 +158,7 @@ hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and DefaultNPCs[npc:GetClass()] then
 		npc:EmitSound( "Gib_System.Headshot_Fleshy" )
 		SafeRemoveEntity(npc)
-		if GetConVar( "gibsystem_experiment" ):GetBool() and GetConVar( "gibsystem_deathanimation" ):GetBool() then
+		if GetConVar( "gibsystem_deathanimation" ):GetBool() then
 			CreateDeathAnimationGib(npc)
 		else
 			CreateGibs(npc)
@@ -170,7 +170,7 @@ hook.Add("PlayerDeath", "GibSystem_SpawnGibs_Player", function(player, attacker,
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_player" ):GetBool() then
 		SafeRemoveEntity(player:GetRagdollEntity())
 		player:EmitSound( "Gib_System.Headshot_Fleshy" )
-		if GetConVar( "gibsystem_experiment" ):GetBool() and GetConVar( "gibsystem_deathanimation" ):GetBool() then
+		if GetConVar( "gibsystem_deathanimation" ):GetBool() then
 			CreateDeathAnimationGib(player)
 		else
 			CreateGibs(player)
@@ -263,6 +263,21 @@ function BloodEffect(ent,Type,AttachmentPoint)
 				end)
 			end
 		end
+	end
+end
+
+function BodyPee(ent)
+	if !GetConVar( "gibsystem_pee" ):GetBool() then return end
+	local timerDuration = GetConVar( "gibsystem_pee_time" ):GetInt() 					// 定时器持续时间（秒）
+	local timerInterval = 1 															// 定时器间隔时间（秒）
+	local timerCount = timerDuration / timerInterval 									// 重复次数
+	local timerBodyName = "BloodImpactTimer".. ent:EntIndex()
+		
+	if timerDuration > 0 then
+		timer.Create(timerBodyName, timerInterval, timerCount, function()
+			if !ent:IsValid() then timer.Remove(timerBodyName) return end
+			ParticleEffectAttach( "blood_advisor_shrapnel_spray_2", 4, ent, 0 )
+		end)
 	end
 end
 
@@ -445,7 +460,8 @@ function CreateGibs(ent)
 		SpawnGib("models/gib_system/"..Model.."_headless.mdl", 2, "forward", "body", true)
 		
 		CreateRope(head, body)
-		
+		BodyPee(body)
+
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：无头")
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 	

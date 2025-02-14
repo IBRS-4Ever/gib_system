@@ -256,6 +256,7 @@ function CreateDeathAnimationGib(ent)
 	CreateRope(head, ragdoll)
 	table.insert(Ragdolls, ragdoll)
 	RagdollTimer(ragdoll)
+	BodyPee(ragdoll)
 
 	if ent:IsPlayer() then
 		ent:Spectate(5)
