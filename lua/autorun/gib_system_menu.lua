@@ -29,7 +29,6 @@ local ConVarsDefault = {
 	gibsystem_blood_time = "5",
 	gibsystem_blood_time_body = "15",
 	gibsystem_deathanimation = "0",
-	gibsystem_deathanimation_movement = "0",
 	gibsystem_deathanimation_name = "random",
 	gibsystem_pee = "0",
 	gibsystem_pee_time = "10",
@@ -226,7 +225,6 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			pnl:AddControl( "Slider", { Label = "#GS.PeeLength", Type = "Integer", Command = "gibsystem_pee_time", Min = "0", Max = "20" } )
 			
 			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation", Command = "gibsystem_deathanimation" } )
-			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation_Movement", Command = "gibsystem_deathanimation_movement" } )
 			pnl:AddControl( "textbox", { Label = "#GS.DeathAnimation_BodyHealth", Command = "gibsystem_deathanimation_body_health" } )
 			pnl:AddControl( "Button", { Label = "#GS.Cleanup_Gibs", Command = "GibSystem_CleanGibs" } )
 			pnl:AddControl( "Button", { Label = "#GS.Reload_Models", Command = "GibSystem_ReloadModels" } )

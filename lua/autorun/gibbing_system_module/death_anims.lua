@@ -118,9 +118,9 @@ function GibSystem_DeathAnimation_Think(ragdoll)
 	if !IsValid(ragdoll.DM) or !IsValid(ragdoll) then return end
 	local Phys = {}
 	local AnmPos = ragdoll.DM:GetPos()
-	local RagPos = ragdoll:GetBonePosition(0)
+	local RagPos = ragdoll.DM:GetBonePosition(0)
 
-	if (RagPos) and (GetConVar("gibsystem_deathanimation_movement"):GetBool()) then
+	if RagPos then
 		RagPos.z = AnmPos.z
 		ragdoll.DM:SetPos( RagPos )
 	end
