@@ -47,6 +47,12 @@ net.Receive("GibSystem_PlayerSpawn", function()
 	end
 end)
 
+net.Receive("GibSystem_CleanGibs_Notification", function()
+	local Count = net.ReadInt(32)
+	notification.AddLegacy( string.format(language.GetPhrase("GS.Notification_Removed_X_Gibs"), Count), NOTIFY_UNDO, 2 )
+	surface.PlaySound( "buttons/button15.wav" )
+end)
+
 ----------------------------------------------------------------------------------------
 --将头部以及其所有子骨骼缩放为0（用于隐藏头部模型）
 local function ScaleBone_0(parent)	

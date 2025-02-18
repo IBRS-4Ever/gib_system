@@ -10,6 +10,7 @@ include("autorun/gibbing_system_module/death_anims.lua")
 
 util.AddNetworkString("GibSystem_StartDeathCam")
 util.AddNetworkString("GibSystem_PlayerSpawn")
+util.AddNetworkString("GibSystem_CleanGibs_Notification")
 
 -- 全局列表
 Expressions_Table = {}
@@ -139,19 +140,16 @@ local function RemoveTimers()
     end
 end
 
-EntDamageForce = {}
-EntDamagePosition = {}
+EntDamageInfo = {}
 
 hook.Add( "ScaleNPCDamage", "GibSystem_DamageInfo_NPC", function( npc, hitgroup, dmginfo )
 	if (dmginfo:GetDamage() < npc:Health()) then return end
-	EntDamageForce[npc] = dmginfo:GetDamageForce()
-	EntDamagePosition[npc] = dmginfo:GetDamagePosition()
+	EntDamageInfo[npc] = { Force = dmginfo:GetDamageForce(), Position = dmginfo:GetDamagePosition(), Type = dmginfo:GetDamageType() }
 end )
 
 hook.Add( "ScalePlayerDamage", "GibSystem_DamageInfo_Player", function( plr, hitgroup, dmginfo )
 	if (dmginfo:GetDamage() < plr:Health()) then return end
-	EntDamageForce[plr] = dmginfo:GetDamageForce()
-	EntDamagePosition[plr] = dmginfo:GetDamagePosition()
+	EntDamageInfo[plr] = { Force = dmginfo:GetDamageForce(), Position = dmginfo:GetDamagePosition(), Type = dmginfo:GetDamageType() }
 end )
 
 hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
@@ -313,7 +311,6 @@ function GibConvulsion(ent)
 		timer.Simple(0, function()
 			if !IsValid(ent) then return end	
 			fedhoria.StartModule(ent, "stumble_legs", phys_bone, lpos)
-			EntDamagePosition[ent] = nil
 		end)
 	end
 end
@@ -392,9 +389,9 @@ function CreateGibs(ent)
 				if GetConVar("gibsystem_body_mass"):GetBool() then phys:SetMass( GetConVar("gibsystem_body_mass"):GetInt() / Gib:GetPhysicsObjectCount() ) end
 			end
 
-			if EntDamageForce[ent] then
-				if ent:IsPlayer() then phys:ApplyForceCenter( (EntDamageForce[ent] / Gib:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() ) end
-				if ent:IsNPC() then phys:ApplyForceCenter( (EntDamageForce[ent] / Gib:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )end
+			if EntDamageInfo[ent] then
+				if ent:IsPlayer() then phys:ApplyForceCenter( (EntDamageInfo[ent].Force / Gib:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() ) end
+				if ent:IsNPC() then phys:ApplyForceCenter( (EntDamageInfo[ent].Force / Gib:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )end
 			else
 				phys:ApplyForceCenter( (phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval()) )
 			end
@@ -423,14 +420,12 @@ function CreateGibs(ent)
 		if Gib.BodyPart == "head" then head = Entity(Gib:EntIndex()) end
 		if Gib.BodyPart == "body" then body = Entity(Gib:EntIndex()) end
 
-		local dmgpos = EntDamagePosition[ent]
-
-		if dmgpos then
-			phys_bone = Gib:GetClosestPhysBone(dmgpos)
+		if EntDamageInfo[ent] then
+			phys_bone = Gib:GetClosestPhysBone(EntDamageInfo[ent].Position)
 			if phys_bone then
 				local phys = Gib:GetPhysicsObjectNum(phys_bone)
 				
-				lpos = phys:WorldToLocal(dmgpos)
+				lpos = phys:WorldToLocal(EntDamageInfo[ent].Position)
 			end
 		end
 
@@ -703,7 +698,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..Model.." | 碎尸组合：左右半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..Model.." | Gib Group : "..ConditionGib)
 	end
-	EntDamageForce[ent] = nil
+	EntDamageInfo[ent] = nil 
 
 	if ent:IsPlayer() then
 		net.Start("GibSystem_StartDeathCam")
@@ -714,6 +709,11 @@ function CreateGibs(ent)
 end
 
 local function CleanGibs()
+	local Count = table.Count(GibsCreated) or 0
+	net.Start("GibSystem_CleanGibs_Notification")
+		net.WriteInt(Count, 32)
+	net.Broadcast()
+
 	for k,v in pairs(timers) do
 		timer.Remove(v)
 	end
@@ -723,5 +723,7 @@ local function CleanGibs()
 			GibsCreated[k] = nil
 		end
 	end
+	table.Empty(GibsCreated)
+	table.Empty(timers)
 end
 concommand.Add("GibSystem_CleanGibs", CleanGibs)
