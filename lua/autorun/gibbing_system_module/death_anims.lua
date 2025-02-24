@@ -120,7 +120,7 @@ function GibSystem_DeathAnimation_Think(ragdoll)
 	local AnmPos = ragdoll.DM:GetPos()
 	local RagPos = ragdoll.DM:GetBonePosition(0)
 
-	if RagPos then
+	if RagPos and ragdoll.DM:GetModel() != "models/enhanced_death_animation/model_anim_modify.mdl" then
 		RagPos.z = AnmPos.z
 		ragdoll.DM:SetPos( RagPos )
 	end
@@ -148,7 +148,7 @@ function GibSystem_DeathAnimation_Think(ragdoll)
 end
 
 function RagdollTimer(Ragdoll)
-	timer.Simple(Ragdoll.DM:SequenceDuration(Ragdoll.DM:LookupSequence( anim )), function()
+	timer.Simple(Ragdoll.DM:SequenceDuration(Ragdoll.DM:LookupSequence(Ragdoll.DM.Anim)), function()
 		if IsValid(Ragdoll.DM) then
 			SafeRemoveEntity(Ragdoll.DM)
 			if !Ragdoll.IsConvulsing then
@@ -160,12 +160,7 @@ function RagdollTimer(Ragdoll)
 end
 
 function CreateDeathAnimationGib(ent)
-	if GetConVar("gibsystem_deathanimation_name"):GetString() == "random" then
-		anim = anims_table[math.random(1,#anims_table)]
-	else
-		anim = GetConVar("gibsystem_deathanimation_name"):GetString()
-	end
-	
+
 	GibGetModel(ent)
 		
 	local head = nil
@@ -205,22 +200,42 @@ function CreateDeathAnimationGib(ent)
 	end
 		
 	local DM = ents.Create("prop_dynamic")
-	DM:SetModel( "models/gib_system/"..Model.."_headless.mdl" )
+	if GetConVar("gibsystem_deathanimation_name"):GetString() == "random" then
+		anim = anims_table[math.random(1,#anims_table)]
+	else
+		anim = GetConVar("gibsystem_deathanimation_name"):GetString()
+	end
+	if GetConVar("gibsystem_deathanimation_alt"):GetBool() then
+		DM:SetModel( "models/enhanced_death_animation/model_anim_modify.mdl" )
+		if GetConVar("gibsystem_deathanimation_name"):GetString() == "random" then
+			DM.Anim = DM:GetSequenceName(math.random(0,DM:GetSequenceCount()-1))
+		else
+			DM.Anim = anim
+		end
+	else
+		DM:SetModel( "models/gib_system/"..Model.."_headless.mdl" )
+		DM.Anim = anim
+		RandomBodyGroup(DM)
+		RandomSkin(DM)
+	end
 	DM:SetPos( ent:GetPos() )
 	DM:SetAngles( ent:GetAngles() )
 	DM:Spawn()
-	DM:Fire("SetAnimation", anim)
+	DM:Fire("SetAnimation", DM.Anim)
+	--DM:SetBodygroup(0,1)
 	DM:SetNoDraw( true )
 	DM:SetCollisionGroup(1)
-	LocalizedText("zh-cn","[碎尸系统] 角色："..Model.." 动作："..anim)
-	LocalizedText("en","[Gibbing System] Character: "..Model.." Sequence: "..anim)
-	RandomBodyGroup(DM)
-	RandomSkin(DM)
+	LocalizedText("zh-cn","[碎尸系统] 角色："..Model.." 动作："..DM.Anim)
+	LocalizedText("en","[Gibbing System] Character: "..Model.." Sequence: "..DM.Anim)
 	table.insert(GibsCreated,DM)
 	
 	local ragdoll = ents.Create( "prop_ragdoll" )
-	ragdoll:SetModel( DM:GetModel() )
-	-- ragdoll:SetModel( "models/gib_system/"..Model.."_legs.mdl" )
+	if GetConVar("gibsystem_deathanimation_alt"):GetBool() then
+		ragdoll:SetModel( "models/gib_system/"..Model.."_headless.mdl" )
+	else
+		ragdoll:SetModel( DM:GetModel() )
+	end
+	--ragdoll:SetModel( "models/gib_system/"..Model.."_legs.mdl" )
 	ragdoll:SetPos( DM:GetPos() )
 	ragdoll:SetAngles( DM:GetAngles() )
 	ragdoll:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
@@ -228,17 +243,33 @@ function CreateDeathAnimationGib(ent)
 	ragdoll.RagHealth = GetConVar("gibsystem_deathanimation_body_health"):GetInt()
 	ragdoll.Next = CurTime() + 0.1
 	ragdoll.DM = DM
-	for i = 0, DM:GetNumBodyGroups() - 1 do ragdoll:SetBodygroup( i, DM:GetBodygroup( i ) ) end
-	for i = 0, DM:GetFlexNum() - 1 do ragdoll:SetFlexWeight( i, DM:GetFlexWeight( i ) ) end
-	for i = 0, DM:GetBoneCount() do
-		ragdoll:ManipulateBoneScale( i, DM:GetManipulateBoneScale( i ) )
-		ragdoll:ManipulateBoneAngles( i, DM:GetManipulateBoneAngles( i ) )
-		ragdoll:ManipulateBonePosition( i, DM:GetManipulateBonePosition( i ) )
-	end
 	ragdoll:Spawn()
 	ragdoll:Activate()
 	ragdoll.Model = Model
 	
+	if GetConVar("gibsystem_deathanimation_alt"):GetBool() then
+		RandomBodyGroup(ragdoll)
+		RandomSkin(ragdoll) 
+	else
+		for i = 0, DM:GetNumBodyGroups() - 1 do ragdoll:SetBodygroup( i, DM:GetBodygroup( i ) ) end
+		for i = 0, DM:GetFlexNum() - 1 do ragdoll:SetFlexWeight( i, DM:GetFlexWeight( i ) ) end
+		for i = 0, DM:GetBoneCount() do
+			ragdoll:ManipulateBoneScale( i, DM:GetManipulateBoneScale( i ) )
+			ragdoll:ManipulateBoneAngles( i, DM:GetManipulateBoneAngles( i ) )
+			ragdoll:ManipulateBonePosition( i, DM:GetManipulateBonePosition( i ) )
+		end
+	end
+
+	if ent:LookupAttachment('eyes') > 0 then
+		local eye_height = ent:GetAttachment(ent:LookupAttachment('eyes')).Pos.z
+		local npc_origin = ent:GetPos().z
+		ragdoll.BodyHeight = math.abs(eye_height-npc_origin)
+		if ragdoll.BodyHeight then
+			local scale = ragdoll.BodyHeight/67.01953125
+			ragdoll.DM:SetModelScale(scale, 0)
+		end
+	end
+
 	BloodEffect(ragdoll,2,"forward")
 	FingerRotation(ragdoll)
 	table.insert(GibsCreated,ragdoll)
@@ -290,11 +321,11 @@ function CreateDeathAnimationGib(ent)
 			end
 		end
 	end)
-
-	hook.Add( "Tick", "GibSystem_DeathAnimation_Think", function() 
-		if not Ragdolls then return end
-		for k, Rag in pairs(Ragdolls) do
-			GibSystem_DeathAnimation_Think(Rag)
-		end
-	end)
 end
+
+hook.Add( "Tick", "GibSystem_DeathAnimation_Think", function() 
+	if not Ragdolls then return end
+	for k, Rag in pairs(Ragdolls) do
+		GibSystem_DeathAnimation_Think(Rag)
+	end
+end)

@@ -225,6 +225,8 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			pnl:AddControl( "Slider", { Label = "#GS.PeeLength", Type = "Integer", Command = "gibsystem_pee_time", Min = "0", Max = "20" } )
 			
 			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation", Command = "gibsystem_deathanimation" } )
+			pnl:AddControl( "CheckBox", { Label = "#GS.DeathAnimation_Alt", Command = "gibsystem_deathanimation_alt" } )
+			pnl:AddControl( "label", { Text = "#GS.DeathAnimation_Alt.Desc" } )
 			pnl:AddControl( "textbox", { Label = "#GS.DeathAnimation_BodyHealth", Command = "gibsystem_deathanimation_body_health" } )
 			pnl:AddControl( "Button", { Label = "#GS.Cleanup_Gibs", Command = "GibSystem_CleanGibs" } )
 			pnl:AddControl( "Button", { Label = "#GS.Reload_Models", Command = "GibSystem_ReloadModels" } )
