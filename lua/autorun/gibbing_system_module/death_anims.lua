@@ -299,29 +299,29 @@ function CreateDeathAnimationGib(ent)
 			if IsValid( DM ) then DM:Remove() end
 		end)
 	end
+end
 
-	hook.Add( "EntityTakeDamage", "GibSystem_DeathAnimation_Ragdoll_DMG_Check", function( target, dmginfo )
-		for k, Rag in pairs(Ragdolls) do
-			--if dmginfo:IsDamageType(DMG_CRUSH) then return end
-			if target == Rag and dmginfo:GetAttacker() != head and dmginfo:GetAttacker() != Rag then
+hook.Add( "EntityTakeDamage", "GibSystem_DeathAnimation_Ragdoll_DMG_Check", function( target, dmginfo )
+	for k, Rag in pairs(Ragdolls) do
+		--if dmginfo:IsDamageType(DMG_CRUSH) then return end
+		if target == Rag and dmginfo:GetAttacker() != head and dmginfo:GetAttacker() != Rag then
 
-				local effect = EffectData() -- Create effect data
-				effect:SetOrigin( dmginfo:GetDamagePosition() ) -- Set origin where collision point is
-				util.Effect( "BloodImpact", effect ) -- Spawn small sparky effect
-	
-				Rag.RagHealth = Rag.RagHealth - dmginfo:GetDamage()
-				if dmginfo:GetDamage() > Rag.RagHealth then
-					SafeRemoveEntity(Rag.DM)
-					if !Rag.IsConvulsing then
-						GibConvulsion(Rag)
-						Rag.IsConvulsing = true
-					end
-					return
+			local effect = EffectData() -- Create effect data
+			effect:SetOrigin( dmginfo:GetDamagePosition() ) -- Set origin where collision point is
+			util.Effect( "BloodImpact", effect ) -- Spawn small sparky effect
+
+			Rag.RagHealth = Rag.RagHealth - dmginfo:GetDamage()
+			if dmginfo:GetDamage() > Rag.RagHealth then
+				SafeRemoveEntity(Rag.DM)
+				if !Rag.IsConvulsing then
+					GibConvulsion(Rag)
+					Rag.IsConvulsing = true
 				end
+				return
 			end
 		end
-	end)
-end
+	end
+end)
 
 hook.Add( "Tick", "GibSystem_DeathAnimation_Think", function() 
 	if not Ragdolls then return end
