@@ -166,21 +166,21 @@ function CreateDeathAnimationGib(ent)
 	local head = nil
 	local HeadPos = ent:LookupBone("ValveBiped.Bip01_Head1") or ent:LookupBone("ValveBiped.HC_Body_Bone") or ent:LookupBone("ValveBiped.Headcrab_Cube1") or 0
 		
-	if (util.IsValidRagdoll( "models/gib_system/"..Model.."_head.mdl" )) then
+	if (util.IsValidRagdoll( "models/gib_system/"..GibCharacter.."_head.mdl" )) then
 		head = ents.Create("prop_ragdoll")
 		head:SetPos( ent:GetPos() ) 
-	elseif (util.IsValidProp( "models/gib_system/"..Model.."_head.mdl" )) then
+	elseif (util.IsValidProp( "models/gib_system/"..GibCharacter.."_head.mdl" )) then
 		head = ents.Create("prop_physics")
 		head:SetPos( ent:GetBonePosition(HeadPos) ) 
 	end
 
 	head:SetAngles( ent:GetAngles() )
 	head:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
-	head:SetModel("models/gib_system/"..Model.."_head.mdl")
+	head:SetModel("models/gib_system/"..GibCharacter.."_head.mdl")
 	head:Spawn()
 	head:SetName("headIndex"..head:EntIndex())
 	head:Activate()
-	head.Model = Model
+	head.Model = GibCharacter
 	BloodEffect(head,1,"ValveBiped.Bip01_Head1")
 	GibFacePose(head)
 	RandomBodyGroup(head)
@@ -208,12 +208,16 @@ function CreateDeathAnimationGib(ent)
 	if GetConVar("gibsystem_deathanimation_alt"):GetBool() then
 		DM:SetModel( "models/enhanced_death_animation/model_anim_modify.mdl" )
 		if GetConVar("gibsystem_deathanimation_name"):GetString() == "random" then
-			DM.Anim = DM:GetSequenceName(math.random(0,DM:GetSequenceCount()-1))
+			if EntDamageInfo[ent] and (bit.band(EntDamageInfo[ent].Type, bit.bor(DMG_BLAST)) ~= 0) then
+				DM.Anim = "deathexplosion_0"..math.random(1,8)
+			else
+				DM.Anim = DM:GetSequenceName(math.random(0,DM:GetSequenceCount()-1))
+			end
 		else
 			DM.Anim = anim
 		end
 	else
-		DM:SetModel( "models/gib_system/"..Model.."_headless.mdl" )
+		DM:SetModel( "models/gib_system/"..GibCharacter.."_headless.mdl" )
 		DM.Anim = anim
 		RandomBodyGroup(DM)
 		RandomSkin(DM)
@@ -225,17 +229,17 @@ function CreateDeathAnimationGib(ent)
 	--DM:SetBodygroup(0,1)
 	DM:SetNoDraw( true )
 	DM:SetCollisionGroup(1)
-	LocalizedText("zh-cn","[碎尸系统] 角色："..Model.." 动作："..DM.Anim)
-	LocalizedText("en","[Gibbing System] Character: "..Model.." Sequence: "..DM.Anim)
+	LocalizedText("zh-cn","[碎尸系统] 角色："..GibCharacter.." 动作："..DM.Anim)
+	LocalizedText("en","[Gibbing System] Character: "..GibCharacter.." Sequence: "..DM.Anim)
 	table.insert(GibsCreated,DM)
 	
 	local ragdoll = ents.Create( "prop_ragdoll" )
 	if GetConVar("gibsystem_deathanimation_alt"):GetBool() then
-		ragdoll:SetModel( "models/gib_system/"..Model.."_headless.mdl" )
+		ragdoll:SetModel( "models/gib_system/"..GibCharacter.."_headless.mdl" )
 	else
 		ragdoll:SetModel( DM:GetModel() )
 	end
-	--ragdoll:SetModel( "models/gib_system/"..Model.."_legs.mdl" )
+	--ragdoll:SetModel( "models/gib_system/"..GibCharacter.."_legs.mdl" )
 	ragdoll:SetPos( DM:GetPos() )
 	ragdoll:SetAngles( DM:GetAngles() )
 	ragdoll:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
@@ -245,7 +249,7 @@ function CreateDeathAnimationGib(ent)
 	ragdoll.DM = DM
 	ragdoll:Spawn()
 	ragdoll:Activate()
-	ragdoll.Model = Model
+	ragdoll.Model = GibCharacter
 	
 	if GetConVar("gibsystem_deathanimation_alt"):GetBool() then
 		RandomBodyGroup(ragdoll)
@@ -308,7 +312,10 @@ hook.Add( "EntityTakeDamage", "GibSystem_DeathAnimation_Ragdoll_DMG_Check", func
 
 			local effect = EffectData() -- Create effect data
 			effect:SetOrigin( dmginfo:GetDamagePosition() ) -- Set origin where collision point is
-			util.Effect( "BloodImpact", effect ) -- Spawn small sparky effect
+			effect:SetFlags(3)
+			effect:SetColor(0)
+			effect:SetScale(6)
+			util.Effect( "bloodspray", effect ) -- Spawn small sparky effect
 
 			Rag.RagHealth = Rag.RagHealth - dmginfo:GetDamage()
 			if dmginfo:GetDamage() > Rag.RagHealth then
