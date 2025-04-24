@@ -30,6 +30,8 @@ local Characters = {}
 local timers = {}
 GibsCreated = {}
 
+local GibModels
+
 file.CreateDir("gib_system")
 
 function LocalizedText(lang,text)
@@ -39,7 +41,7 @@ function LocalizedText(lang,text)
 end
 
 local function GibSystem_Initialize()
-	GibSystem_LoadModels()
+	GibModels = GibSystem_LoadModels()
 	local Model_Path = "autorun/gibbing_system/"
 	local files, folders = file.Find(Model_Path.."*","LUA")
 	for k, v in pairs(files) do
@@ -440,6 +442,7 @@ function CreateGibs(ent)
 			end)
 		end
 		table.insert(GibsCreated,Gib)
+		return Gib
 	end
 	
 	local Conditions = { "headless", "limbs", "no_legs", "no_arms", "no_right_leg_left_arm", "no_left_leg_right_arm", "no_left_leg", "no_right_leg", "no_left_arm", "no_right_arm", "no_right", "no_left", "no_right_no_arm", "no_left_no_arm", "no_right_no_leg", "no_left_no_leg", "upper_and_lower", "left_and_right" }
@@ -454,11 +457,11 @@ function CreateGibs(ent)
 
 	if ConditionGib == "headless" then
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/"..GibCharacter.."_headless.mdl", 2, "forward", "body", true)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Body = SpawnGib("models/gib_system/"..GibCharacter.."_headless.mdl", 2, "forward", "body", true)
 		
-		CreateRope(head, body)
-		BodyPee(body)
+		CreateRope(Head, Body)
+		BodyPee(Body)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无头")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
@@ -469,12 +472,14 @@ function CreateGibs(ent)
 			GibCharacter = Limbs[math.random( #Limbs )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/torso.mdl", 2, "forward", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/torso.mdl", 2, "forward", "body", true)
+
+		CreateRope(Head, Body)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：碎块")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
@@ -485,11 +490,13 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_legs.mdl", 2, "forward", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_legs.mdl", 2, "forward", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无双腿")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -499,11 +506,13 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_arms.mdl", 2, "forward", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_arms.mdl", 2, "forward", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无双手")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -513,11 +522,13 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_leg_left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_leg_left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无右腿左手")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -527,11 +538,13 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_leg_right_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_leg_right_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无左腿右手")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -541,10 +554,12 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无左腿")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -554,10 +569,12 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无右腿")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -567,10 +584,12 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无左手")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -580,10 +599,12 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无右手")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -593,11 +614,13 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无右半")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -607,11 +630,13 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无左半")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -621,12 +646,14 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_no_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_no_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无右半无手臂")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -636,12 +663,14 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_no_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_no_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无左半无手臂")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -651,12 +680,14 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_no_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_no_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无右半无腿")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -666,12 +697,14 @@ function CreateGibs(ent)
 			GibCharacter = CompletedModels[math.random( #CompletedModels )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
-		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_no_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_no_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
+		CreateRope(Head, Body)
+		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无左半无腿")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
@@ -681,9 +714,12 @@ function CreateGibs(ent)
 			GibCharacter = UpperAndLower[math.random( #UpperAndLower )]
 		end
 
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/"..GibCharacter.."_legs.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
-		SpawnGib("models/gib_system/"..GibCharacter.."_torso.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Lower = SpawnGib("models/gib_system/"..GibCharacter.."_legs.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
+		local Upper = SpawnGib("models/gib_system/"..GibCharacter.."_torso.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
+		
+		CreateRope(Head, Upper)
+		--CreateRope(Lower, Upper)
 		
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：上/下半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
@@ -694,9 +730,9 @@ function CreateGibs(ent)
 			GibCharacter = LeftAndRight[math.random( #LeftAndRight )]
 		end
 		
-		SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		SpawnGib("models/gib_system/"..GibCharacter.."_half_left.mdl", 2, "forward", "body", true)
-		SpawnGib("models/gib_system/"..GibCharacter.."_half_right.mdl", 2, "forward", "body", true)
+		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		local Left = SpawnGib("models/gib_system/"..GibCharacter.."_half_left.mdl", 2, "forward", "body", true)
+		local Right = SpawnGib("models/gib_system/"..GibCharacter.."_half_right.mdl", 2, "forward", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：左右半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
