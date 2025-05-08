@@ -128,9 +128,7 @@ local function GibSystem_Initialize()
 	LocalizedText("en","[Gibbing System] Loading Complete.\n")
 end
 
-hook.Add( "InitPostEntity", "GibSystem_Initialize", function() 
-	GibSystem_Initialize()
-end)
+GibSystem_Initialize()
 
 concommand.Add( "GibSystem_ReloadModels", function() 
 	GibSystem_Initialize()
