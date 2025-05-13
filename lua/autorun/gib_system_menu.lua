@@ -111,7 +111,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 				local GibModels = GibSystem_LoadModels()
 				local frame = vgui.Create( "DFrame" )
 				frame:SetSize( ScrW() / 1.2, ScrH() / 1.1 )
-				frame:SetTitle( string.format( language.GetPhrase("#gs.choose_character"), language.GetPhrase("#gs.model."..GetConVar("gibsystem_gib_name"):GetString()) ) )
+				frame:SetTitle( language.GetPhrase("#gs.choose_character"):format( language.GetPhrase( "#gs.model."..GetConVar("gibsystem_gib_name"):GetString() ) ) )
 				frame:Center()
 
 				frame:MakePopup()
@@ -161,7 +161,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 					for CategoryName, v in SortedPairs(Categories) do
 					
 						local Header = vgui.Create( "ContentHeader", PropPanel )
-						Header:SetText( CategoryName )
+						Header:SetText( string.format(language.GetPhrase("gs.category.count"),language.GetPhrase(CategoryName), #CategoryName) )
 						PropPanel:Add( Header )
 							
 						for name, ent in SortedPairs(v) do
@@ -271,7 +271,8 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			["#gs.addon.extension.extra_gibs"] = 3277262546,
 			["#gs.addon.extension.honkai_star_rail"] = 3343204403,
 			["#gs.addon.extension.vrc"] = 3343971543,
-			["#gs.addon.extension.punishing_gray_raven"] = 3366315415
+			["#gs.addon.extension.punishing_gray_raven"] = 3366315415,
+			["#gs.addon.extension.vrc_iris"] = 3480783810,
 		}
 		
 		local AppListExt = vgui.Create( "DListView", pnl )
