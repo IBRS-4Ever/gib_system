@@ -161,7 +161,8 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 					for CategoryName, v in SortedPairs(Categories) do
 					
 						local Header = vgui.Create( "ContentHeader", PropPanel )
-						Header:SetText( string.format(language.GetPhrase("gs.category.count"),language.GetPhrase(CategoryName), #CategoryName) )
+						--Header:SetText( string.format(language.GetPhrase("gs.category.count"),language.GetPhrase(CategoryName), #CategoryName) )
+						Header:SetText( CategoryName )
 						PropPanel:Add( Header )
 							
 						for name, ent in SortedPairs(v) do
