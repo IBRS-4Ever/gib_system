@@ -241,8 +241,8 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		local WorkshopLink = "https://steamcommunity.com/sharedfiles/filedetails/?id="
 		
 		pnl:ClearControls()
-		pnl:AddControl( "label", { Text = "#gs.addon.hint" } )
-		pnl:AddControl( "label", { Text = "#gs.addon.required" } )
+		pnl:Help("#gs.addon.hint")
+		pnl:Help("#gs.addon.required")
 		
 		local AppList = vgui.Create( "DListView", pnl )
 		AppList:Dock( FILL )
@@ -259,8 +259,8 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		
 		pnl:AddItem(AppList)
 		
-		pnl:AddControl( "label", { Text = "" } )
-		pnl:AddControl( "label", { Text = "#gs.addon.extension" } )
+		pnl:Help("")
+		pnl:Help("#gs.addon.extension")
 		
 		local ExtAddons = {
 			["#gs.addon.extension.gf2_combat"] = 3220684563,
@@ -293,7 +293,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		
 		pnl:AddItem(AppListExt)
 		
-		pnl:AddControl( "label", { Text = "#gs.OpenURL_GitHub.Title" } )
+		pnl:Help("#gs.OpenURL_GitHub.Title")
 		local GitHub = vgui.Create( "DButton", pnl ) 			// 创建按钮，附加到面板上
 		GitHub:SetText( "#GS.OpenURL_GitHub" )					// 设置按钮文本		
 		GitHub:SetSize( 100, 25 )								// 设置按钮大小
