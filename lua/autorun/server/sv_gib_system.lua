@@ -157,7 +157,10 @@ hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
 		npc:EmitSound( "Gib_System.Headshot_Fleshy" )
 		SafeRemoveEntity(npc)
 		if npc.IsGF2SNPC then
-			function npc:CreateDeathCorpse() end
+			function npc:CreateDeathCorpse()
+				timer.Remove("GF2_HealTimer_"..npc:EntIndex())
+				timer.Remove("VJ_GF2_SWEP_Acid_Timer"..npc:EntIndex())
+			end
 		end
 		if GetConVar( "gibsystem_deathanimation" ):GetBool() then
 			CreateDeathAnimationGib(npc)
