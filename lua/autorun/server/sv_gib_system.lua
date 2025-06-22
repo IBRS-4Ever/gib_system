@@ -135,16 +135,16 @@ concommand.Add( "GibSystem_ReloadModels", function()
 end)
 
 local function RemoveTimers()
-    for _, timerid in ipairs(timers) do
-        timer.Remove(timerid)
-    end
+	for _, timerid in ipairs(timers) do
+		timer.Remove(timerid)
+	end
 end
 
 EntDamageInfo = {}
 
 hook.Add( "ScaleNPCDamage", "GibSystem_DamageInfo_NPC", function( npc, hitgroup, dmginfo )
 	if (dmginfo:GetDamage() < npc:Health()) then return end
-	EntDamageInfo[npc] = { Force = dmginfo:GetDamageForce(), Position = dmginfo:GetDamagePosition(), Type = dmginfo:GetDamageType(), HitGroup = hitgroup }
+	EntDamageInfo[npc] = { Force = dmginfo:GetDamageForce(), Position = dmginfo:GetDamagePosition(), Type = dmginfo:GetDamageType(), DmgInfoTbl = dmginfo, HitGroup = hitgroup }
 end )
 
 hook.Add( "ScalePlayerDamage", "GibSystem_DamageInfo_Player", function( plr, hitgroup, dmginfo )
@@ -155,6 +155,7 @@ end )
 hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and (DefaultNPCs[npc:GetClass()] or npc.IsGF2SNPC) then
 		npc:EmitSound( "Gib_System.Headshot_Fleshy" )
+		npc.GibSystem_ShouldSpawnGib = true
 		SafeRemoveEntity(npc)
 		if npc.IsGF2SNPC then
 			function npc:CreateDeathCorpse()
@@ -193,6 +194,112 @@ hook.Add("PlayerSpawn", "GibSystem_PlayerSpawn_D", function(ply)
 	net.Start("GibSystem_PlayerSpawn")
 		net.WriteBool(true)
 	net.Broadcast()
+end)
+
+hook.Add("CreateEntityRagdoll", "GibSystem_RemoveServerSideRagdoll", function(owner, ragdoll)
+	if !GetConVar( "gibsystem_enabled" ):GetBool() then return end
+	if owner.GibSystem_ShouldSpawnGib then
+		SafeRemoveEntity(ragdoll)
+	end
+end)
+
+function GibSystem_CreateGibParts(ent,mdl,force)
+	local gib
+	if util.IsValidRagdoll(mdl) then
+		gib = ents.Create("prop_ragdoll")
+	else
+		gib = ents.Create("prop_physics")
+	end
+	
+	gib:SetModel(mdl)
+	gib:SetPos(ent:GetPos())
+	gib:SetAngles(ent:GetAngles())
+	gib:Spawn()
+	gib:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
+	FingerRotation(gib)
+
+	for i = 0, ent:GetNumBodyGroups() - 1 do
+		gib:SetBodygroup(gib:FindBodygroupByName(ent:GetBodygroupName(i)),ent:GetBodygroup(i))
+	end
+
+	if util.IsValidRagdoll(mdl) then
+		for i = 0, gib:GetPhysicsObjectCount() - 1 do
+			local phys = gib:GetPhysicsObjectNum( i )
+			local Bone_name = gib:GetBoneName(gib:TranslatePhysBoneToBone( i ))
+			if ( IsValid( phys ) && ent:LookupBone(Bone_name) != null ) then
+				local pos, ang = ent:GetBonePosition( ent:LookupBone(Bone_name) )
+				if ( pos ) then phys:SetPos( pos ) end
+				if ( ang ) then phys:SetAngles( ang ) end
+			end
+			phys:ApplyForceCenter( ((force / gib:GetPhysicsObjectCount()) or Vector(0,0,0)) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() )
+		end
+	else
+		local phys = gib:GetPhysicsObject()
+		if phys:IsValid() then
+			phys:ApplyForceCenter( force or Vector(0,0,0) )
+			phys:Wake()
+		end
+	end
+	gib.isgib = true
+	table.insert(GibsCreated,gib)
+
+	timer.Simple(GetConVar("gibsystem_gib_removetimer"):GetInt(),function()
+		if IsValid(gib) then SafeRemoveEntity(gib) end
+		table.RemoveByValue(GibsCreated,gib)
+	end)
+
+end
+
+hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
+	if target.isgib then
+		local effect = EffectData() -- Create effect data
+		effect:SetOrigin( dmg:GetDamagePosition() ) -- Set origin where collision point is
+		effect:SetFlags(3)
+		effect:SetColor(0)
+		effect:SetScale(6)
+		util.Effect( "bloodspray", effect ) -- Spawn small sparky effect
+		if !GetConVar("gibsystem_gib_headless"):GetBool() then return end
+		if target.GibHealth == nil then return end
+		if target.IsGibbed then return end
+		if dmg:IsDamageType(DMG_CRUSH) and dmg:GetDamage() < 50 then return end
+		target.GibHealth = math.Clamp(target.GibHealth - dmg:GetDamage(), 0, target.GibHealth)
+		if target.GibHealth <= 0 then
+			if target.BodyPart == "head" then
+				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/brain.mdl",dmg:GetDamageForce())
+				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/eye.mdl",dmg:GetDamageForce())
+				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/eye.mdl",dmg:GetDamageForce())
+				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib_small1.mdl",dmg:GetDamageForce())
+				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib_small2.mdl",dmg:GetDamageForce())
+				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib_small3.mdl",dmg:GetDamageForce())
+			else
+				if string.find(target:GetModel(),"headless") then
+					if table.HasValue(Limbs,target.Model) then
+						GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..target.Model.."/left_leg.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..target.Model.."/right_leg.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..target.Model.."/left_arm.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..target.Model.."/right_arm.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..target.Model.."/torso.mdl",dmg:GetDamageForce())
+					else
+						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/heart.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/liver.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/lung.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib1.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib2.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib3.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib4.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib5.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib6.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib7.mdl",dmg:GetDamageForce())
+					end
+				else
+					return
+				end
+			end
+			target:EmitSound("Watermelon.BulletImpact")
+			target.IsGibbed = true
+			SafeRemoveEntity(target)
+		end
+	end
 end)
 
 function CreateRope(gib1,gib2,gib1phys,gib2phys,vec1,vec2)
@@ -268,6 +375,33 @@ function BloodEffect(ent,Type,AttachmentPoint)
 			end
 		end
 	end
+	--[[ local Attachment = ent:GetAttachment(ent:LookupAttachment( "forward" ))
+	local pos = Attachment.Pos
+	local normal = pos:GetNormalized()
+	print(pos,normal)
+	
+	-- Generic bleed effect:
+	ent:RealisticBlood_DropletEffect( pos, normal, true )
+
+	-- Exit wound:
+	ent:RealisticBlood_ExitWound( pos, -normal, 10 )
+
+	-- Wound that scaled with damage and stuff:
+	local effectdata = EffectData()
+	effectdata:SetStart( pos )
+	effectdata:SetNormal( normal )
+	effectdata:SetRadius( 2 )
+	effectdata:SetMagnitude( 10 )
+	effectdata:SetFlags( 1 )
+	RealisticBlood_DoEffect("realisticblood_dynamicwound", effectdata, ent)
+
+	-- Blood stream:
+	ent:RealisticBlood_BloodStream( pos, normal )
+
+	ent:RealisticBlood_Soak( pos, normal )
+
+	-- Blood pool (only works for ragdolls):d
+	ent:RealisticBlood_BloodPool( pos, 10 ) ]]
 end
 
 function BodyPee(ent)
@@ -352,7 +486,7 @@ function CreateGibs(ent)
 			LocalizedText("en","[Gibbing System] Model "..mdl.." does not exist.")
 			return
 		end
-		
+		Gib.isgib = true
 		Gib:SetModel( mdl )
 		Gib.BodyPart = Bodypart
 		Gib.Model = GibCharacter
@@ -371,6 +505,7 @@ function CreateGibs(ent)
 		Gib:SetAngles( ent:GetAngles() )
 		Gib:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
 		Gib:Spawn()
+		Gib.Owner = ent
 		Gib:SetName("Gib"..Gib.BodyPart.."Index"..Gib:EntIndex())
 		Gib:Activate()
 
@@ -426,8 +561,8 @@ function CreateGibs(ent)
 		end
 		Gib:AddCallback( "PhysicsCollide", PhysCallback ) -- Add Callback
 
-		if Gib.BodyPart == "head" then head = Entity(Gib:EntIndex()) end
-		if Gib.BodyPart == "body" then body = Entity(Gib:EntIndex()) end
+		if Gib.BodyPart == "head" then head = Entity(Gib:EntIndex()) Gib.GibHealth = GetConVar("gibsystem_head_health"):GetInt() end
+		if Gib.BodyPart == "body" then body = Entity(Gib:EntIndex()) Gib.GibHealth = GetConVar("gibsystem_body_health"):GetInt() end
 
 		if EntDamageInfo[ent] then
 			phys_bone = Gib:GetClosestPhysBone(EntDamageInfo[ent].Position)
@@ -443,6 +578,7 @@ function CreateGibs(ent)
 		if GetConVar( "gibsystem_ragdoll_removetimer" ):GetBool() then
 			timer.Simple( GetConVar( "gibsystem_ragdoll_removetimer" ):GetInt(), function()
 				if IsValid( Gib ) then Gib:Remove() end
+				table.RemoveByValue(GibsCreated,Gib)
 			end)
 		end
 		table.insert(GibsCreated,Gib)

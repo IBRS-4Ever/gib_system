@@ -156,6 +156,7 @@ function RagdollTimer(Ragdoll)
 				Ragdoll.IsConvulsing = true
 			end
 		end
+		table.RemoveByValue(GibsCreated,Ragdoll.DM)
 	end)
 end
 
@@ -180,6 +181,9 @@ function CreateDeathAnimationGib(ent)
 	head:Spawn()
 	head:SetName("headIndex"..head:EntIndex())
 	head:Activate()
+	head.BodyPart = "head"
+	head.isgib = true
+	head.GibHealth = GetConVar("gibsystem_head_health"):GetInt()
 	head.Model = GibCharacter
 	BloodEffect(head,1,"ValveBiped.Bip01_Head1")
 	GibFacePose(head)
@@ -244,7 +248,9 @@ function CreateDeathAnimationGib(ent)
 	ragdoll:SetAngles( DM:GetAngles() )
 	ragdoll:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
 	ragdoll:SetSkin( DM:GetSkin() )
-	ragdoll.RagHealth = GetConVar("gibsystem_deathanimation_body_health"):GetInt()
+	ragdoll.isgib = true
+	ragdoll.GibHealth = GetConVar("gibsystem_body_health"):GetInt()
+	ragdoll.RagHealth = ragdoll.GibHealth / 2
 	ragdoll.Next = CurTime() + 0.1
 	ragdoll.DM = DM
 	ragdoll:Spawn()
@@ -301,25 +307,20 @@ function CreateDeathAnimationGib(ent)
 			if IsValid( head ) then head:Remove() end
 			if IsValid( ragdoll ) then ragdoll:Remove() end
 			if IsValid( DM ) then DM:Remove() end
+			table.RemoveByValue(GibsCreated,head)
+			table.RemoveByValue(GibsCreated,ragdoll)
+			table.RemoveByValue(GibsCreated,DM)
 		end)
 	end
 end
 
 hook.Add( "EntityTakeDamage", "GibSystem_DeathAnimation_Ragdoll_DMG_Check", function( target, dmginfo )
 	for k, Rag in pairs(Ragdolls) do
-		--if dmginfo:IsDamageType(DMG_CRUSH) then return end
 		if target == Rag and dmginfo:GetAttacker() != head and dmginfo:GetAttacker() != Rag then
-
-			local effect = EffectData() -- Create effect data
-			effect:SetOrigin( dmginfo:GetDamagePosition() ) -- Set origin where collision point is
-			effect:SetFlags(3)
-			effect:SetColor(0)
-			effect:SetScale(6)
-			util.Effect( "bloodspray", effect ) -- Spawn small sparky effect
-
-			Rag.RagHealth = Rag.RagHealth - dmginfo:GetDamage()
-			if dmginfo:GetDamage() > Rag.RagHealth then
+			Rag.RagHealth = math.Clamp(Rag.RagHealth - dmginfo:GetDamage(), 0, Rag.RagHealth)
+			if Rag.RagHealth <= 0 then
 				SafeRemoveEntity(Rag.DM)
+				table.RemoveByValue(GibsCreated,Rag.DM)
 				if !Rag.IsConvulsing then
 					GibConvulsion(Rag)
 					Rag.IsConvulsing = true
