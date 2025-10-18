@@ -131,6 +131,7 @@ end
 GibSystem_Initialize()
 
 concommand.Add( "GibSystem_ReloadModels", function() 
+	table.Empty(Model_Link_Materials)
 	GibSystem_Initialize()
 end)
 
@@ -298,6 +299,98 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 			target:EmitSound("Watermelon.BulletImpact")
 			target.IsGibbed = true
 			SafeRemoveEntity(target)
+		end
+	elseif target:IsPlayer() then
+		print("is player")
+		if GetConVar("gibsystem_experimental_features"):GetBool() then
+			if dmg:IsExplosionDamage() then
+				print("is explode")
+				print(GibGetModel(target))
+				if table.HasValue( Limbs, GibGetModel(target) ) then
+					print("has arm")
+					local RightArm = ents.Create("prop_ragdoll")
+					RightArm:SetModel("models/gib_system/limbs/"..GibGetModel(target).."/right_arm.mdl")
+					RightArm:SetPos(target:GetPos())
+					RightArm:SetAngles(target:GetAngles())
+					RightArm:Spawn()
+					RightArm:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
+					RightArm:Input( "StartRagdollBoogie", RightArm, RightArm, "9999" )
+					//RightArm:SetOwner(target)
+					FingerRotation(RightArm)
+
+					for i = 0, target:GetNumBodyGroups() - 1 do
+						RightArm:SetBodygroup(RightArm:FindBodygroupByName(target:GetBodygroupName(i)),target:GetBodygroup(i))
+					end
+
+					for i = 0, RightArm:GetPhysicsObjectCount() - 1 do
+						local phys = RightArm:GetPhysicsObjectNum( i )
+						local Bone_name = RightArm:GetBoneName(RightArm:TranslatePhysBoneToBone( i ))
+						if ( IsValid( phys ) && target:LookupBone(Bone_name) != null ) then
+							local pos, ang = target:GetBonePosition( target:LookupBone(Bone_name) )
+							if ( pos ) then phys:SetPos( pos ) end
+							if ( ang ) then phys:SetAngles( ang ) end
+						end
+						phys:ApplyForceCenter( ((dmg:GetDamageForce() / RightArm:GetPhysicsObjectCount()) or Vector(0,0,0)) + phys:GetMass() * target:GetVelocity() * 39.37 * engine.TickInterval() )
+					end
+
+					RightArm.isgib = true
+					table.insert(GibsCreated,RightArm)
+
+					local Weapon = target:GetActiveWeapon()
+					local WeaponModel
+					print(Weapon)
+					if IsValid(Weapon) then
+						WeaponModel = Weapon:GetWeaponWorldModel()
+						local RHand = RightArm:LookupBone("ValveBiped.Bip01_R_Hand")
+						print(WeaponModel)
+						local Wep = ents.Create("prop_physics")
+						Wep:SetModel(WeaponModel)
+						Wep:SetPos(RightArm:GetPos())
+						Wep:SetAngles(RightArm:GetAngles())
+						Wep:FollowBone(RightArm,RightArm:LookupBone("ValveBiped.Bip01_R_Hand"))
+						Wep:PhysicsInit(SOLID_VPHYSICS)
+						Wep:SetMoveType(MOVETYPE_VPHYSICS)
+						Wep:SetSolid(SOLID_VPHYSICS)
+						Wep:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+						Wep:SetOwner(RightArm)
+						Wep:Spawn()
+						Wep:Activate()
+						print(Wep)
+						timer.Create( "Wep"..Wep:EntIndex().."Timer", 0.1, 0, function()
+							if IsValid(Wep) then
+								local Muzzle = Wep:GetAttachment(Wep:LookupAttachment("muzzle"))
+								Wep:FireBullets({
+									Attacker = Wep.Owner,
+									Inflictor = self,
+									Num = 1,
+									Src = Muzzle.Pos,
+									Dir = Muzzle.Ang:Forward(),
+									Spread = 0.1,
+									Tracer = 1,
+									Force = 1,
+									Damage = 8,
+									AmmoType = "AR2"
+								})
+								local phys = RightArm:GetPhysicsObjectNum( RightArm:TranslateBoneToPhysBone( RightArm:LookupBone("ValveBiped.Bip01_R_Hand")) )
+								phys:ApplyForceCenter( Muzzle.Ang:Forward() * 100 + phys:GetMass() * Vector( 0, 0, -9.80665 ) * 39.37 * engine.TickInterval() )
+							end
+						end)
+					end
+
+					if GetConVar( "gibsystem_ragdoll_removetimer" ):GetBool() then
+						timer.Simple(GetConVar("gibsystem_ragdoll_removetimer"):GetInt(),function()
+							if IsValid(RightArm) then SafeRemoveEntity(RightArm) end
+							table.RemoveByValue(GibsCreated,RightArm)
+						end)
+					end
+				end
+			elseif dmg:IsFallDamage() then
+				if table.HasValue(Limbs,GibGetModel(target)) then
+					GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..GibGetModel(target).."/left_leg.mdl",dmg:GetDamageForce())
+					GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..GibGetModel(target).."/right_leg.mdl",dmg:GetDamageForce())
+					target:AddFlags(FL_DUCKING)
+				end
+			end
 		end
 	end
 end)
@@ -471,6 +564,7 @@ function GibGetModel(ent)
 	else
 		GibCharacter = Characters[math.random( #Characters )]
 	end
+	return GibCharacter
 end
 
 function CreateGibs(ent)

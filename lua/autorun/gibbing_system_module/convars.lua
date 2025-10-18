@@ -35,4 +35,4 @@ CreateClientConVar( "gibsystem_model_category", 1 , true, false )
 CreateConVar( "gibsystem_gib_base_on_model", 1 , FCVAR, "[Gib System] Choose Model Base on materials.")
 CreateConVar( "gibsystem_pee", 0 , FCVAR, "[Gib System] Enable Pee.")
 CreateConVar( "gibsystem_pee_time", 10 , FCVAR, "[Gib System] Set Pee's Time.")
-
+CreateConVar( "gibsystem_experimental_features", 0 , FCVAR, "[Gib System] Enable Experimental Features.")
