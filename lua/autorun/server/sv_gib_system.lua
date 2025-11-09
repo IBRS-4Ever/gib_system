@@ -164,7 +164,7 @@ hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
 				timer.Remove("VJ_GF2_SWEP_Acid_Timer"..npc:EntIndex())
 			end
 		end
-		if GetConVar( "gibsystem_deathanimation" ):GetBool() then
+		if ( GetConVar("gibsystem_deathanimation"):GetBool() and math.random(1,100) <= GetConVar("gibsystem_deathanimation"):GetInt() ) then
 			CreateDeathAnimationGib(npc)
 		else
 			CreateGibs(npc)

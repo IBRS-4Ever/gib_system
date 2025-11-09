@@ -232,7 +232,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			pnl:CheckBox("#GS.Pee", "gibsystem_pee")
 			pnl:NumSlider("#GS.PeeLength", "gibsystem_pee_time", 0, 20, 0)
 			
-			pnl:CheckBox("#GS.DeathAnimation", "gibsystem_deathanimation")
+			pnl:NumSlider("#GS.DeathAnimation", "gibsystem_deathanimation", 0, 100, 0)
 			pnl:CheckBox("#GS.DeathAnimation_Alt", "gibsystem_deathanimation_alt")
 			pnl:ControlHelp("#GS.DeathAnimation_Alt.Desc")
 			pnl:Button("#GS.Cleanup_Gibs", "GibSystem_CleanGibs")
