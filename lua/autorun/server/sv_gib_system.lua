@@ -157,7 +157,6 @@ hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and (DefaultNPCs[npc:GetClass()] or npc.IsGF2SNPC) then
 		npc:EmitSound( "Gib_System.Headshot_Fleshy" )
 		npc.GibSystem_ShouldSpawnGib = true
-		SafeRemoveEntity(npc)
 		if npc.IsGF2SNPC then
 			function npc:CreateDeathCorpse()
 				timer.Remove("GF2_HealTimer_"..npc:EntIndex())
@@ -169,6 +168,7 @@ hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
 		else
 			CreateGibs(npc)
 		end
+		SafeRemoveEntity(npc)
 	end
 end)
 
