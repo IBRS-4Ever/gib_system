@@ -1,10 +1,8 @@
 
 AddCSLuaFile()
-include("autorun/gibbing_system_module/models.lua")
-GibSystem_LoadModels()
 
-local GibModels = GibSystem_LoadModels()
 local Category = "#GS.Title"
+local GibModels = GibSystem_LoadModels()
 
 hook.Add( "OnEntityCreated", "GibSystem_NPCRandomModel", function()
 	local RndModel = GibModels[math.random( #GibModels )]

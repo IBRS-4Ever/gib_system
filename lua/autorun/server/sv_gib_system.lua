@@ -655,10 +655,10 @@ function CreateGibs(ent)
 		end
 		Gib:AddCallback( "PhysicsCollide", PhysCallback ) -- Add Callback
 
-		if Gib.BodyPart == "head" then head = Entity(Gib:EntIndex()) Gib.GibHealth = GetConVar("gibsystem_head_health"):GetInt() end
-		if Gib.BodyPart == "body" then body = Entity(Gib:EntIndex()) Gib.GibHealth = GetConVar("gibsystem_body_health"):GetInt() end
+		if Gib.BodyPart == "head" then Gib.GibHealth = GetConVar("gibsystem_head_health"):GetInt() end
+		if Gib.BodyPart == "body" then Gib.GibHealth = GetConVar("gibsystem_body_health"):GetInt() end
 
-		if EntDamageInfo[ent] then
+		if EntDamageInfo[ent] and CheckFedhoria() then
 			phys_bone = Gib:GetClosestPhysBone(EntDamageInfo[ent].Position)
 			if phys_bone then
 				local phys = Gib:GetPhysicsObjectNum(phys_bone)
