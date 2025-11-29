@@ -688,11 +688,13 @@ function CreateGibs(ent)
 	end
 	
 	GibGetModel(ent)
+	local Head
+	local Body
 
 	if ConditionGib == "headless" then
 
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		local Body = SpawnGib("models/gib_system/"..GibCharacter.."_headless.mdl", 2, "forward", "body", true)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Body = SpawnGib("models/gib_system/"..GibCharacter.."_headless.mdl", 2, "forward", "body", true)
 		
 		CreateRope(Head, Body)
 		BodyPee(Body)
@@ -702,12 +704,12 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "limbs" and table.HasValue( Limbs, GibCharacter ) then
 		
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/torso.mdl", 2, "forward", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/torso.mdl", 2, "forward", "body", true)
 
 		CreateRope(Head, Body)
 
@@ -716,10 +718,10 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_legs" and table.HasValue( CompletedModels, GibCharacter ) then
 		
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_legs.mdl", 2, "forward", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_legs.mdl", 2, "forward", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -728,10 +730,10 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_arms" and table.HasValue( CompletedModels, GibCharacter ) then
 		
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_arms.mdl", 2, "forward", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_arms.mdl", 2, "forward", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -740,10 +742,10 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_right_leg_left_arm" and table.HasValue( CompletedModels, GibCharacter ) then
 		
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_leg_left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_leg_left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -752,10 +754,10 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_left_leg_right_arm" and table.HasValue( CompletedModels, GibCharacter ) then
 	
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_leg_right_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_leg_right_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -764,9 +766,9 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_left_leg" and table.HasValue( CompletedModels, GibCharacter ) then
 		
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -775,9 +777,9 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_right_leg" and table.HasValue( CompletedModels, GibCharacter ) then
 		
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -786,9 +788,9 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_left_arm" and table.HasValue( CompletedModels, GibCharacter ) then
 	
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -797,9 +799,9 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_right_arm" and table.HasValue( CompletedModels, GibCharacter ) then
 	
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -808,10 +810,10 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_right" and table.HasValue( CompletedModels, GibCharacter ) then
 	
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -820,10 +822,10 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_left" and table.HasValue( CompletedModels, GibCharacter ) then
 	
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -832,11 +834,11 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_right_no_arm" and table.HasValue( CompletedModels, GibCharacter ) then
 	
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_no_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_no_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -845,11 +847,11 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_left_no_arm" and table.HasValue( CompletedModels, GibCharacter ) then
 	
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_no_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_no_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -858,11 +860,11 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_right_no_leg" and table.HasValue( CompletedModels, GibCharacter ) then
 	
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_no_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_right_no_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -871,11 +873,11 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "no_left_no_leg" and table.HasValue( CompletedModels, GibCharacter ) then
 	
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
-		local Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_no_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
+		Body = SpawnGib("models/gib_system/limbs/"..GibCharacter.."/no_limb/no_left_no_leg.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", true)
 
 		CreateRope(Head, Body)
 		
@@ -884,7 +886,7 @@ function CreateGibs(ent)
 	
 	elseif ConditionGib == "upper_and_lower" and table.HasValue( UpperAndLower, GibCharacter ) then
 		
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		local Lower = SpawnGib("models/gib_system/"..GibCharacter.."_legs.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
 		local Upper = SpawnGib("models/gib_system/"..GibCharacter.."_torso.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
 		
@@ -896,7 +898,7 @@ function CreateGibs(ent)
 		
 	elseif ConditionGib == "left_and_right" and table.HasValue( LeftAndRight, GibCharacter ) then
 		
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		local Left = SpawnGib("models/gib_system/"..GibCharacter.."_half_left.mdl", 2, "forward", "body", true)
 		local Right = SpawnGib("models/gib_system/"..GibCharacter.."_half_right.mdl", 2, "forward", "body", true)
 
@@ -904,8 +906,8 @@ function CreateGibs(ent)
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	else
 		
-		local Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		local Body = SpawnGib("models/gib_system/"..GibCharacter.."_headless.mdl", 2, "forward", "body", true)
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
+		Body = SpawnGib("models/gib_system/"..GibCharacter.."_headless.mdl", 2, "forward", "body", true)
 		
 		CreateRope(Head, Body)
 		BodyPee(Body)
@@ -918,8 +920,8 @@ function CreateGibs(ent)
 
 	if ent:IsPlayer() then
 		net.Start("GibSystem_StartDeathCam")
-			net.WriteInt(head:EntIndex(), 32)
-			net.WriteInt(body:EntIndex(), 32)
+			net.WriteInt(Head:EntIndex(), 32)
+			net.WriteInt(Body:EntIndex(), 32)
 		net.Broadcast()
 	end
 end
