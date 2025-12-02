@@ -124,7 +124,16 @@ function GibSystem_DeathAnimation_Think(ragdoll)
 		RagPos.z = AnmPos.z
 		ragdoll.DM:SetPos( RagPos )
 	end
-
+--[[ 
+	if IsValid(ragdoll.Bullseye) then ragdoll.Bullseye:SetPos(ragdoll:GetBonePosition(ragdoll:LookupBone("ValveBiped.Bip01_Spine2"))) end
+	for id, ent in pairs( ents.FindInSphere( AnmPos, 256 ) ) do
+		if !IsValid(ragdoll.Bullseye) then return end
+		if !IsValid(ent) or !ent:IsNPC() then continue end
+		ragdoll.Bullseye:AddEntityRelationship(ent,D_HT,99)
+		ent:AddEntityRelationship(ragdoll.Bullseye,D_HT,99)
+		print(ragdoll.Bullseye:Health())
+	end
+ ]]
 	for i = 0, ragdoll.DM:GetBoneCount() - 1 do
 		local Bone_name = ragdoll.DM:GetBoneName(i)
 		local pos, ang = ragdoll.DM:GetBonePosition(i)
@@ -150,6 +159,7 @@ end
 function RagdollTimer(Ragdoll)
 	timer.Simple(Ragdoll.DM:SequenceDuration(Ragdoll.DM:LookupSequence(Ragdoll.DM.Anim)), function()
 		if IsValid(Ragdoll.DM) then
+			if IsValid(Ragdoll.Bullseye) then SafeRemoveEntity(Ragdoll.Bullseye) end
 			SafeRemoveEntity(Ragdoll.DM)
 			if !Ragdoll.IsConvulsing then
 				GibConvulsion(Ragdoll)
@@ -170,6 +180,7 @@ function CreateDeathAnimationGib(ent)
 	if (util.IsValidRagdoll( "models/gib_system/"..GibCharacter.."_head.mdl" )) then
 		head = ents.Create("prop_ragdoll")
 		head:SetPos( ent:GetPos() ) 
+		head.UsesRealisticBlood = true
 	elseif (util.IsValidProp( "models/gib_system/"..GibCharacter.."_head.mdl" )) then
 		head = ents.Create("prop_physics")
 		head:SetPos( ent:GetBonePosition(HeadPos) ) 
@@ -256,7 +267,21 @@ function CreateDeathAnimationGib(ent)
 	ragdoll:Spawn()
 	ragdoll:Activate()
 	ragdoll.Model = GibCharacter
-	
+	ragdoll.UsesRealisticBlood = true
+	--[[ 
+	local Bullseye = ents.Create( "npc_bullseye" )
+	Bullseye:SetModel( "models/editor/cube_small.mdl" )
+	Bullseye:SetModelScale(2.2)
+	Bullseye:SetHullType ( HULL_HUMAN )
+	--Bullseye:SetHullSizeNormal()
+	Bullseye:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
+	--Bullseye:SetNoDraw(true)
+	Bullseye:SetHealth(ragdoll.RagHealth)
+	Bullseye:SetPos(ragdoll:GetBonePosition(ragdoll:LookupBone("ValveBiped.Bip01_Spine2")))
+	Bullseye:Spawn()
+	Bullseye:Activate()
+	ragdoll.Bullseye = Bullseye
+ ]]
 	if GetConVar("gibsystem_deathanimation_alt"):GetBool() then
 		RandomBodyGroup(ragdoll)
 		RandomSkin(ragdoll) 
@@ -289,13 +314,6 @@ function CreateDeathAnimationGib(ent)
 	BodyPee(ragdoll)
 
 	if ent:IsPlayer() then
-		ent:Spectate(5)
-		ent:SetObserverMode(OBS_MODE_CHASE)
-		if GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 0 then
-			ent:SpectateEntity(head)
-		elseif GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 1 then
-			ent:SpectateEntity(ragdoll)
-		end
 		net.Start("GibSystem_StartDeathCam")
 			net.WriteInt(head:EntIndex(), 32)
 			net.WriteInt(ragdoll:EntIndex(), 32)
@@ -307,6 +325,7 @@ function CreateDeathAnimationGib(ent)
 			if IsValid( head ) then head:Remove() end
 			if IsValid( ragdoll ) then ragdoll:Remove() end
 			if IsValid( DM ) then DM:Remove() end
+			--if IsValid( Bullseye ) then Bullseye:Remove() end
 			table.RemoveByValue(GibsCreated,head)
 			table.RemoveByValue(GibsCreated,ragdoll)
 			table.RemoveByValue(GibsCreated,DM)

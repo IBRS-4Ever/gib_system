@@ -16,10 +16,6 @@ util.AddNetworkString("GibSystem_CleanGibs_Notification")
 Expressions_Table = {}
 Model_Link_Materials = {}
 GIRLS_FRONTLINE_2_MODELS = {}
-local UpperAndLower = {}
-local Limbs = {}
-local LeftAndRight = {}
-local CompletedModels = {}
 local BlackListedModels = {}
 if !file.Exists("gib_system/blacklist.txt", "DATA") then
 	file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
@@ -37,6 +33,13 @@ file.CreateDir("gib_system")
 function LocalizedText(lang,text)
 	if string.lower(GetConVar("gmod_language"):GetString()) == lang then
 		MsgN(text)
+	end
+end
+
+local function CheckFile(path)
+	if (file.Exists( path, "GAME" )) then
+		util.PrecacheModel( path )
+		return true
 	end
 end
 
@@ -65,10 +68,6 @@ local function GibSystem_Initialize()
 		LocalizedText("en","[Gibbing System] Can't find Fedhoria.")
 	end
 
-	table.Empty(UpperAndLower)
-	table.Empty(Limbs)
-	table.Empty(CompletedModels)
-	table.Empty(LeftAndRight)
 	Characters = table.Copy(GibModels)
 	for k, black in pairs(table.GetKeys(BlackListedModels)) do
 		for i = #Characters, 1, -1 do
@@ -79,47 +78,63 @@ local function GibSystem_Initialize()
 		end
 	end
 	for _, Model in ipairs(GibModels) do
+		Characters[Model] = {}
+		Characters[Model][#Characters[Model] + 1] = "headless"
 		LocalizedText("zh-cn","[碎尸系统] 已加载文件 "..Model)
 		LocalizedText("en","[Gibbing System] Loaded file "..Model)
 		util.PrecacheModel("models/gib_system/"..Model.."_headless.mdl")
 		util.PrecacheModel("models/gib_system/"..Model.."_head.mdl")
-		if file.Exists( "models/gib_system/"..Model.."_legs.mdl", "GAME" ) and file.Exists( "models/gib_system/"..Model.."_torso.mdl", "GAME" ) then
-			table.insert(UpperAndLower, Model)
-			util.PrecacheModel("models/gib_system/"..Model.."_legs.mdl")
-			util.PrecacheModel("models/gib_system/"..Model.."_torso.mdl")
+		if CheckFile( "models/gib_system/"..Model.."_legs.mdl" ) and CheckFile( "models/gib_system/"..Model.."_torso.mdl" ) then
+			Characters[Model][#Characters[Model] + 1] = "upper_and_lower"
 		end
-		if file.Exists( "models/gib_system/limbs/"..Model.."/left_leg.mdl", "GAME" ) and file.Exists( "models/gib_system/limbs/"..Model.."/right_leg.mdl", "GAME" ) and file.Exists( "models/gib_system/limbs/"..Model.."/left_arm.mdl", "GAME" ) and file.Exists( "models/gib_system/limbs/"..Model.."/right_arm.mdl", "GAME" ) and file.Exists( "models/gib_system/limbs/"..Model.."/torso.mdl", "GAME" ) then
-			table.insert(Limbs, Model)
-			util.PrecacheModel("models/gib_system/limbs/"..Model.."/left_leg.mdl")
-			util.PrecacheModel("models/gib_system/limbs/"..Model.."/right_leg.mdl")
-			util.PrecacheModel("models/gib_system/limbs/"..Model.."/left_arm.mdl")
-			util.PrecacheModel("models/gib_system/limbs/"..Model.."/right_arm.mdl")
-			util.PrecacheModel("models/gib_system/limbs/"..Model.."/torso.mdl")
-			if file.Exists( "models/gib_system/limbs/"..Model.."/no_limb/no_right_leg.mdl", "GAME" ) then
-				table.insert(CompletedModels, Model)
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_legs.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_arms.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_leg_left_arm.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_leg_right_arm.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_leg.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_leg.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_arm.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_arms.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_arm.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_no_arm.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_arm.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_right_no_leg.mdl")
-				util.PrecacheModel("models/gib_system/limbs/"..Model.."/no_limb/no_left_no_leg.mdl")
+		if CheckFile( "models/gib_system/limbs/"..Model.."/left_leg.mdl" ) and CheckFile( "models/gib_system/limbs/"..Model.."/right_leg.mdl" ) and CheckFile( "models/gib_system/limbs/"..Model.."/left_arm.mdl" ) and CheckFile( "models/gib_system/limbs/"..Model.."/right_arm.mdl" ) and CheckFile( "models/gib_system/limbs/"..Model.."/torso.mdl" ) then
+			Characters[Model][#Characters[Model] + 1] = "limbs"
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_legs.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_legs"
+			end
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_arms.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_arms"
+			end
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_right_leg_left_arm.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_right_leg_left_arm"
+			end
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_left_leg_right_arm.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_left_leg_right_arm"
+			end
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_left_leg.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_left_leg"
+			end
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_left_arm.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_left_arm"
+			end
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_right_no_arm.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_right_no_arm"
+			end
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_right_arm.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_right_arm"
+			end
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_right.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_right"
+			end
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_left.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_left"
+			end
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_left_no_arm.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_left_no_arm"
+			end
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_right_no_leg.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_right_no_leg"
+			end
+			if CheckFile( "models/gib_system/limbs/"..Model.."/no_limb/no_left_no_leg.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "no_left_no_leg"
 			end
 		end
-		if file.Exists( "models/gib_system/"..Model.."_half_left.mdl", "GAME" ) and file.Exists( "models/gib_system/"..Model.."_half_right.mdl", "GAME" ) then
-			table.insert(LeftAndRight, Model)
-			util.PrecacheModel("models/gib_system/"..Model.."_half_left.mdl")
-			util.PrecacheModel("models/gib_system/"..Model.."_half_right.mdl")
+
+		if CheckFile( "models/gib_system/"..Model.."_half_left.mdl" ) and CheckFile( "models/gib_system/"..Model.."_half_right.mdl" ) then
+			Characters[Model][#Characters[Model] + 1] = "left_and_right"
 		end
 	end
+	PrintTable(Characters)
 
 	LocalizedText("zh-cn","[碎尸系统] 已加载 "..table.Count(GibModels).." 个文件。"..table.Count(GibModels) - table.Count(Characters).." 个在黑名单中。")
 	LocalizedText("en","[Gibbing System] Loaded "..table.Count(GibModels).." File(s). "..table.Count(GibModels) - table.Count(Characters).." in blacklist.")
@@ -180,13 +195,6 @@ hook.Add("PlayerDeath", "GibSystem_SpawnGibs_Player", function(player, attacker,
 			CreateDeathAnimationGib(player)
 		else
 			CreateGibs(player)
-		end
-		player:Spectate(5)
-		player:SetObserverMode(OBS_MODE_CHASE)
-		if GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 0 then
-			player:SpectateEntity(head)
-		elseif GetConVar( "gibsystem_deathcam_mode" ):GetInt() == 1 then
-			player:SpectateEntity(body)
 		end
 	end
 end)
@@ -274,7 +282,7 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib_small3.mdl",dmg:GetDamageForce())
 			else
 				if string.find(target:GetModel(),"headless") then
-					if table.HasValue(Limbs,target.Model) then
+					if table.HasValue( Characters[GibGetModel(target)], "limbs" ) then
 						GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..target.Model.."/left_leg.mdl",dmg:GetDamageForce())
 						GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..target.Model.."/right_leg.mdl",dmg:GetDamageForce())
 						GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..target.Model.."/left_arm.mdl",dmg:GetDamageForce())
@@ -301,13 +309,13 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 			SafeRemoveEntity(target)
 		end
 	elseif target:IsPlayer() then
-		print("is player")
+		--print("is player")
 		if GetConVar("gibsystem_experimental_features"):GetBool() then
 			if dmg:IsExplosionDamage() then
-				print("is explode")
-				print(GibGetModel(target))
-				if table.HasValue( Limbs, GibGetModel(target) ) then
-					print("has arm")
+				--print("is explode")
+				--print(GibGetModel(target))
+				if table.HasValue( Characters[GibGetModel(target)], "limbs" ) then
+					--print("has arm")
 					local RightArm = ents.Create("prop_ragdoll")
 					RightArm:SetModel("models/gib_system/limbs/"..GibGetModel(target).."/right_arm.mdl")
 					RightArm:SetPos(target:GetPos())
@@ -338,11 +346,11 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 
 					local Weapon = target:GetActiveWeapon()
 					local WeaponModel
-					print(Weapon)
+					--print(Weapon)
 					if IsValid(Weapon) then
 						WeaponModel = Weapon:GetWeaponWorldModel()
 						local RHand = RightArm:LookupBone("ValveBiped.Bip01_R_Hand")
-						print(WeaponModel)
+						--print(WeaponModel)
 						local Wep = ents.Create("prop_physics")
 						Wep:SetModel(WeaponModel)
 						Wep:SetPos(RightArm:GetPos())
@@ -355,7 +363,7 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 						Wep:SetOwner(RightArm)
 						Wep:Spawn()
 						Wep:Activate()
-						print(Wep)
+						--print(Wep)
 						timer.Create( "Wep"..Wep:EntIndex().."Timer", 0.1, 0, function()
 							if IsValid(Wep) then
 								local Muzzle = Wep:GetAttachment(Wep:LookupAttachment("muzzle"))
@@ -385,7 +393,7 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 					end
 				end
 			elseif dmg:IsFallDamage() then
-				if table.HasValue(Limbs,GibGetModel(target)) then
+				if table.HasValue( Characters[GibGetModel(target)], "limbs" ) then
 					GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..GibGetModel(target).."/left_leg.mdl",dmg:GetDamageForce())
 					GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..GibGetModel(target).."/right_leg.mdl",dmg:GetDamageForce())
 					target:AddFlags(FL_DUCKING)
@@ -572,7 +580,7 @@ function CreateGibs(ent)
 	function SpawnGib(mdl, AttachmentType, AttachmentPoint, Bodypart, convulsion)
 		local Gib
 		
-		if (util.IsValidRagdoll( mdl )) then Gib = ents.Create("prop_ragdoll") end
+		if (util.IsValidRagdoll( mdl )) then Gib = ents.Create("prop_ragdoll") Gib.UsesRealisticBlood = true end
 		if (util.IsValidProp( mdl )) then Gib = ents.Create("prop_physics") end
 
 		if !file.Exists( mdl, "GAME" ) then
@@ -679,15 +687,13 @@ function CreateGibs(ent)
 		return Gib
 	end
 	
-	local Conditions = { "headless", "limbs", "no_legs", "no_arms", "no_right_leg_left_arm", "no_left_leg_right_arm", "no_left_leg", "no_right_leg", "no_left_arm", "no_right_arm", "no_right", "no_left", "no_right_no_arm", "no_left_no_arm", "no_right_no_leg", "no_left_no_leg", "upper_and_lower", "left_and_right" }
-	
-	if table.HasValue( Conditions, GetConVar("gibsystem_gib_group"):GetString() ) then
+	local Char = Characters[GibGetModel(ent)]
+	local ConditionGib = Char[math.random( #Char )]
+
+	if table.HasValue( Char, GetConVar("gibsystem_gib_group"):GetString() ) then
 		ConditionGib = GetConVar("gibsystem_gib_group"):GetString()
-	else
-		ConditionGib = Conditions[math.random( #Conditions )]
 	end
-	
-	GibGetModel(ent)
+
 	local Head
 	local Body
 
@@ -702,7 +708,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无头")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "limbs" and table.HasValue( Limbs, GibCharacter ) then
+	elseif ConditionGib == "limbs" then
 		
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
@@ -716,7 +722,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：碎块")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_legs" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_legs" then
 		
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
@@ -728,7 +734,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无双腿")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_arms" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_arms" then
 		
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
@@ -740,7 +746,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无双手")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_right_leg_left_arm" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_right_leg_left_arm" then
 		
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
@@ -752,7 +758,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无右腿左手")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_left_leg_right_arm" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_left_leg_right_arm" then
 	
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
@@ -764,7 +770,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无左腿右手")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_left_leg" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_left_leg" then
 		
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
@@ -775,7 +781,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无左腿")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_right_leg" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_right_leg" then
 		
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
@@ -786,7 +792,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无右腿")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_left_arm" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_left_arm" then
 	
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_arm.mdl", 1, "ValveBiped.Bip01_L_UpperArm", "body", false)
@@ -797,7 +803,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无左手")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_right_arm" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_right_arm" then
 	
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_arm.mdl", 1, "ValveBiped.Bip01_R_UpperArm", "body", false)
@@ -808,7 +814,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无右手")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_right" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_right" then
 	
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
@@ -820,7 +826,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无右半")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_left" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_left" then
 	
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
@@ -832,7 +838,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无左半")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_right_no_arm" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_right_no_arm" then
 	
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/right_leg.mdl", 1, "ValveBiped.Bip01_R_Thigh", "body", false)
@@ -845,7 +851,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无右半无手臂")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_left_no_arm" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_left_no_arm" then
 	
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
@@ -858,7 +864,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无左半无手臂")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_right_no_leg" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_right_no_leg" then
 	
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
@@ -871,7 +877,7 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无右半无腿")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "no_left_no_leg" and table.HasValue( CompletedModels, GibCharacter ) then
+	elseif ConditionGib == "no_left_no_leg" then
 	
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		SpawnGib("models/gib_system/limbs/"..GibCharacter.."/left_leg.mdl", 1, "ValveBiped.Bip01_L_Thigh", "body", false)
@@ -884,11 +890,11 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：无左半无腿")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	
-	elseif ConditionGib == "upper_and_lower" and table.HasValue( UpperAndLower, GibCharacter ) then
+	elseif ConditionGib == "upper_and_lower" then
 		
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		local Lower = SpawnGib("models/gib_system/"..GibCharacter.."_legs.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
-		local Upper = SpawnGib("models/gib_system/"..GibCharacter.."_torso.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
+		Body = SpawnGib("models/gib_system/"..GibCharacter.."_torso.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
 		
 		CreateRope(Head, Upper)
 		--CreateRope(Lower, Upper)
@@ -896,25 +902,14 @@ function CreateGibs(ent)
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：上/下半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 		
-	elseif ConditionGib == "left_and_right" and table.HasValue( LeftAndRight, GibCharacter ) then
+	elseif ConditionGib == "left_and_right" then
 		
 		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
 		local Left = SpawnGib("models/gib_system/"..GibCharacter.."_half_left.mdl", 2, "forward", "body", true)
-		local Right = SpawnGib("models/gib_system/"..GibCharacter.."_half_right.mdl", 2, "forward", "body", true)
+		Body = SpawnGib("models/gib_system/"..GibCharacter.."_half_right.mdl", 2, "forward", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：左右半身")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
-	else
-		
-		Head = SpawnGib("models/gib_system/"..GibCharacter.."_head.mdl", 1, "ValveBiped.Bip01_Head1", "head", false)
-		Body = SpawnGib("models/gib_system/"..GibCharacter.."_headless.mdl", 2, "forward", "body", true)
-		
-		CreateRope(Head, Body)
-		BodyPee(Body)
-
-		LocalizedText("zh-cn","[碎尸系统] 已选中的模型 "..GibCharacter.." 不支持 "..ConditionGib.." | 回退至无头")
-		LocalizedText("en","[Gibbing System] Selected Model "..GibCharacter.." does not support "..ConditionGib.." | Fall back to Headless")
-	
 	end
 	EntDamageInfo[ent] = nil 
 
