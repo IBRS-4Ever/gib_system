@@ -406,7 +406,7 @@ end)
 function CreateRope(gib1,gib2,gib1phys,gib2phys,vec1,vec2)
 	if GetConVar( "gibsystem_rope" ):GetBool() then
 		if IsValid(gib1) and IsValid(gib2) then
-			local constraint = constraint.Rope(gib1, gib2, gib1:TranslateBoneToPhysBone( gib1:LookupBone( gib2phys or "ValveBiped.Bip01_Head1" ) ), gib2:TranslateBoneToPhysBone( gib2:LookupBone( gib2phys or "ValveBiped.Bip01_Spine4" or "ValveBiped.Bip01_Spine2" or "ValveBiped.Bip01_Spine1" ) ), Vector(0,0,-3), Vector(5,0,0), 5, 0, GetConVar( "gibsystem_rope_strength" ):GetInt(), 1, "gibs/intestines_beam", false)
+			local constraint = constraint.Rope(gib1, gib2, gib1:TranslateBoneToPhysBone( gib1:LookupBone( gib2phys or "ValveBiped.Bip01_Head1" ) ), gib2:TranslateBoneToPhysBone( gib2:LookupBone( gib2phys or "ValveBiped.Bip01_Spine4" ) or gib2:LookupBone( "ValveBiped.Bip01_Spine2" ) or gib2:LookupBone( "ValveBiped.Bip01_Spine1" ) ), Vector(0,0,-3), Vector(5,0,0), 5, 0, GetConVar( "gibsystem_rope_strength" ):GetInt(), 1, "gibs/intestines_beam", false)
 		else
 			LocalizedText("zh-cn","[碎尸系统] 无效实体索引。无法创建绳索。")
 			LocalizedText("en","[Gibbing System] Invaild Entity Index. Can't create rope.")
