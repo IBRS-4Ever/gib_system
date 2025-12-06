@@ -162,12 +162,10 @@ end
 EntDamageInfo = {}
 
 hook.Add( "ScaleNPCDamage", "GibSystem_DamageInfo_NPC", function( npc, hitgroup, dmginfo )
-	if (dmginfo:GetDamage() < npc:Health()) then return end
-	EntDamageInfo[npc] = { Force = dmginfo:GetDamageForce(), Position = dmginfo:GetDamagePosition(), Type = dmginfo:GetDamageType(), DmgInfoTbl = dmginfo, HitGroup = hitgroup }
+	EntDamageInfo[npc] = { Force = dmginfo:GetDamageForce(), Position = dmginfo:GetDamagePosition(), Type = dmginfo:GetDamageType(), HitGroup = hitgroup }
 end )
 
 hook.Add( "ScalePlayerDamage", "GibSystem_DamageInfo_Player", function( plr, hitgroup, dmginfo )
-	if (dmginfo:GetDamage() < plr:Health()) then return end
 	EntDamageInfo[plr] = { Force = dmginfo:GetDamageForce(), Position = dmginfo:GetDamagePosition(), Type = dmginfo:GetDamageType(), HitGroup = hitgroup }
 end )
 
@@ -187,6 +185,7 @@ hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
 			CreateGibs(npc)
 		end
 		SafeRemoveEntity(npc)
+		EntDamageInfo[npc] = nil
 	end
 end)
 
@@ -199,6 +198,7 @@ hook.Add("PlayerDeath", "GibSystem_SpawnGibs_Player", function(player, attacker,
 		else
 			CreateGibs(player)
 		end
+		EntDamageInfo[player] = nil
 	end
 end)
 

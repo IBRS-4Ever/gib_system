@@ -223,7 +223,8 @@ function CreateDeathAnimationGib(ent)
 	if GetConVar("gibsystem_deathanimation_alt"):GetBool() then
 		DM:SetModel( "models/enhanced_death_animation/model_anim_modify.mdl" )
 		if GetConVar("gibsystem_deathanimation_name"):GetString() == "random" then
-			if EntDamageInfo[ent] and (bit.band(EntDamageInfo[ent].Type, bit.bor(DMG_BLAST)) ~= 0) then
+			if EntDamageInfo[ent] and (bit.band(EntDamageInfo[ent].Type, bit.bor(DMG_BLAST)) == DMG_BLAST) then
+				print("Is Explo")
 				DM.Anim = "deathexplosion_0"..math.random(1,8)
 			else
 				DM.Anim = DM:GetSequenceName(math.random(0,DM:GetSequenceCount()-1))
