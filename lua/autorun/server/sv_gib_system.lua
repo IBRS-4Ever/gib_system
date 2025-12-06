@@ -86,6 +86,9 @@ local function GibSystem_Initialize()
 		util.PrecacheModel("models/gib_system/"..Model.."_head.mdl")
 		if CheckFile( "models/gib_system/"..Model.."_legs.mdl" ) and CheckFile( "models/gib_system/"..Model.."_torso.mdl" ) then
 			Characters[Model][#Characters[Model] + 1] = "upper_and_lower"
+			if CheckFile( "models/gib_system/"..Model.."_torso_with_head.mdl" ) then
+				Characters[Model][#Characters[Model] + 1] = "upper_and_lower_with_head"
+			end
 		end
 		if CheckFile( "models/gib_system/limbs/"..Model.."/left_leg.mdl" ) and CheckFile( "models/gib_system/limbs/"..Model.."/right_leg.mdl" ) and CheckFile( "models/gib_system/limbs/"..Model.."/left_arm.mdl" ) and CheckFile( "models/gib_system/limbs/"..Model.."/right_arm.mdl" ) and CheckFile( "models/gib_system/limbs/"..Model.."/torso.mdl" ) then
 			Characters[Model][#Characters[Model] + 1] = "limbs"
@@ -909,6 +912,12 @@ function CreateGibs(ent)
 		Body = SpawnGib("models/gib_system/"..GibCharacter.."_half_right.mdl", 2, "forward", "body", true)
 
 		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：左右半身")
+		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
+	elseif ConditionGib == "upper_and_lower_with_head" then
+		Head = SpawnGib("models/gib_system/"..GibCharacter.."_torso_with_head.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
+		Body = SpawnGib("models/gib_system/"..GibCharacter.."_legs.mdl", 1, "ValveBiped.Bip01_Spine1", "body", true)
+
+		LocalizedText("zh-cn","[碎尸系统] 已选中模型："..GibCharacter.." | 碎尸组合：上/下半身（有头）")
 		LocalizedText("en","[Gibbing System] Selected Model: "..GibCharacter.." | Gib Group : "..ConditionGib)
 	end
 	EntDamageInfo[ent] = nil 
