@@ -137,10 +137,10 @@ local function GibSystem_Initialize()
 			Characters[Model][#Characters[Model] + 1] = "left_and_right"
 		end
 	end
-	PrintTable(Characters)
+	if GetConVar("developer"):GetBool() then PrintTable(Characters) end
 
-	LocalizedText("zh-cn","[碎尸系统] 已加载 "..table.Count(GibModels).." 个文件。"..table.Count(GibModels) - table.Count(Characters).." 个在黑名单中。")
-	LocalizedText("en","[Gibbing System] Loaded "..table.Count(GibModels).." File(s). "..table.Count(GibModels) - table.Count(Characters).." in blacklist.")
+	LocalizedText("zh-cn","[碎尸系统] 已加载 "..table.Count(GibModels).." 个文件。"..table.Count(GibModels) - #Characters.." 个在黑名单中。")
+	LocalizedText("en","[Gibbing System] Loaded "..table.Count(GibModels).." File(s). "..table.Count(GibModels) - #Characters.." in blacklist.")
 
 	LocalizedText("zh-cn","[碎尸系统] 加载完成。\n")
 	LocalizedText("en","[Gibbing System] Loading Complete.\n")
@@ -193,7 +193,7 @@ hook.Add("PlayerDeath", "GibSystem_SpawnGibs_Player", function(player, attacker,
 	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_player" ):GetBool() then
 		SafeRemoveEntity(player:GetRagdollEntity())
 		player:EmitSound( "Gib_System.Headshot_Fleshy" )
-		if GetConVar( "gibsystem_deathanimation" ):GetBool() then
+		if ( GetConVar("gibsystem_deathanimation"):GetBool() and math.random(1,100) <= GetConVar("gibsystem_deathanimation"):GetInt() ) then
 			CreateDeathAnimationGib(player)
 		else
 			CreateGibs(player)
@@ -304,7 +304,9 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib7.mdl",dmg:GetDamageForce())
 					end
 				else
-					return
+					GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib"..math.random(7)..".mdl",dmg:GetDamageForce())
+					GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib"..math.random(7)..".mdl",dmg:GetDamageForce())
+					GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib"..math.random(7)..".mdl",dmg:GetDamageForce())
 				end
 			end
 			target:EmitSound("Watermelon.BulletImpact")
@@ -312,13 +314,9 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 			SafeRemoveEntity(target)
 		end
 	elseif target:IsPlayer() then
-		--print("is player")
 		if GetConVar("gibsystem_experimental_features"):GetBool() then
 			if dmg:IsExplosionDamage() then
-				--print("is explode")
-				--print(GibGetModel(target))
 				if table.HasValue( Characters[GibGetModel(target)], "limbs" ) then
-					--print("has arm")
 					local RightArm = ents.Create("prop_ragdoll")
 					RightArm:SetModel("models/gib_system/limbs/"..GibGetModel(target).."/right_arm.mdl")
 					RightArm:SetPos(target:GetPos())
@@ -349,11 +347,9 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 
 					local Weapon = target:GetActiveWeapon()
 					local WeaponModel
-					--print(Weapon)
 					if IsValid(Weapon) then
 						WeaponModel = Weapon:GetWeaponWorldModel()
 						local RHand = RightArm:LookupBone("ValveBiped.Bip01_R_Hand")
-						--print(WeaponModel)
 						local Wep = ents.Create("prop_physics")
 						Wep:SetModel(WeaponModel)
 						Wep:SetPos(RightArm:GetPos())
@@ -366,7 +362,6 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 						Wep:SetOwner(RightArm)
 						Wep:Spawn()
 						Wep:Activate()
-						--print(Wep)
 						timer.Create( "Wep"..Wep:EntIndex().."Timer", 0.1, 0, function()
 							if IsValid(Wep) then
 								local Muzzle = Wep:GetAttachment(Wep:LookupAttachment("muzzle"))
@@ -620,6 +615,18 @@ function CreateGibs(ent)
 		RandomBodyGroup(Gib)
 		RandomSkin(Gib)
 
+		if ent:IsPlayer() then 
+			if !GetConVar("gibsystem_gib_headless"):GetBool() then
+				Gib.player = true 
+				Gib.hatelist = {}
+				for k, v in ipairs( ents.FindByClass("npc_*") ) do
+					if v:IsNPC() and v:Disposition(ent)==D_HT then
+						table.insert(Gib.hatelist, v)
+					end
+				end
+			end
+		end
+
 		for i = 0, Gib:GetPhysicsObjectCount() - 1 do
 			local phys = Gib:GetPhysicsObjectNum( i )
 			local Bone_name = Gib:GetBoneName(Gib:TranslatePhysBoneToBone( i ))
@@ -637,7 +644,7 @@ function CreateGibs(ent)
 
 			if EntDamageInfo[ent] then
 				if ent:IsPlayer() then phys:ApplyForceCenter( (EntDamageInfo[ent].Force / Gib:GetPhysicsObjectCount()) + phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval() ) end
-				if ent:IsNPC() then phys:ApplyForceCenter( (EntDamageInfo[ent].Force / Gib:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) )end
+				if ent:IsNPC() then phys:ApplyForceCenter( (EntDamageInfo[ent].Force / Gib:GetPhysicsObjectCount()) + (phys:GetMass() * ent:GetMoveVelocity() * 39.37 * engine.TickInterval()) ) end
 			else
 				phys:ApplyForceCenter( (phys:GetMass() * ent:GetVelocity() * 39.37 * engine.TickInterval()) )
 			end
