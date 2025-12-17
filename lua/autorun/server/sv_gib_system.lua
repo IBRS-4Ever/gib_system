@@ -615,9 +615,17 @@ function CreateGibs(ent)
 		RandomBodyGroup(Gib)
 		RandomSkin(Gib)
 
-		if ent:IsPlayer() then 
-			if !GetConVar("gibsystem_gib_headless"):GetBool() then
+		if !GetConVar("gibsystem_gib_headless"):GetBool() then
+			if ent:IsPlayer() then 
 				Gib.player = true 
+				Gib.hatelist = {}
+				for k, v in ipairs( ents.FindByClass("npc_*") ) do
+					if v:IsNPC() and v:Disposition(ent)==D_HT then
+						table.insert(Gib.hatelist, v)
+					end
+				end
+			elseif ent:IsNPC() and ent:GetClass() == "npc_citizen" then
+				Gib.citizen = true 
 				Gib.hatelist = {}
 				for k, v in ipairs( ents.FindByClass("npc_*") ) do
 					if v:IsNPC() and v:Disposition(ent)==D_HT then
