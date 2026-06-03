@@ -1,10 +1,12 @@
 
-TOOL.Category = "GS.Title"
+TOOL.Category = "GS.Tools.Title"
 TOOL.Name = "#tool.gs_ragdoll_attach.name"
+TOOL.ClientConVar[ "hide" ] = 1
 
 TOOL.Information = {
 	{ name = "left" },
-	{ name = "right" }
+	{ name = "right" },
+	{ name = "reload" }
 }
 
 local Ragdolls = {}
@@ -77,7 +79,7 @@ end
 
 function TOOL:LeftClick( tr )
 	
-	if ( IsValid( tr.Entity ) && tr.Entity:IsPlayer() ) then return false end
+	--if ( IsValid( tr.Entity ) && tr.Entity:IsPlayer() ) then return false end
 	ragdoll.target = tr.Entity
 	if ( CLIENT ) then return true end
 	
@@ -87,8 +89,26 @@ function TOOL:LeftClick( tr )
 		end
 	end)
 	
-	ragdoll.target:SetNoDraw(true)
+	ragdoll.target:SetNoDraw(GetConVar("gs_ragdoll_attach_hide"):GetBool())
+	ragdoll:SetOwner(ragdoll.target)
+	return true
 
+end
+
+function TOOL:Reload( tr )
+
+	--if ( CLIENT ) then return true end
+	
+	ragdoll.target = self:GetOwner()
+	
+	hook.Add( "Tick", "GibSystem_RagdollAttach_Think", function() 
+		for k, Rag in pairs(Ragdolls) do
+			RagdollThink(Rag)
+		end
+	end)
+
+	ragdoll.target:SetNoDraw(GetConVar("gs_ragdoll_attach_hide"):GetBool())
+	ragdoll:SetOwner(ragdoll.target)
 	return true
 
 end
@@ -102,11 +122,15 @@ function TOOL:RightClick( tr )
 	
 	table.Empty(Phys)
 
-	ragdoll:SetCollisionGroup(11)
+	ragdoll:SetCollisionGroup(1)
 	ragdoll.Next = CurTime() + 0.1
 
 	table.insert(Ragdolls,ragdoll)
 	
 	return true
 
+end
+
+function TOOL.BuildCPanel( CPanel )
+	CPanel:AddControl( "CheckBox", { Label = "#tool.gs_ragdoll_attach.hide", Command = "gs_ragdoll_attach_hide" } )
 end

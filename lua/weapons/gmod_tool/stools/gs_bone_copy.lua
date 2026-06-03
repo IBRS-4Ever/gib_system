@@ -1,5 +1,5 @@
 
-TOOL.Category = "GS.Title"
+TOOL.Category = "GS.Tools.Title"
 TOOL.Name = "#tool.gs_bone_copy.name"
 TOOL.ClientConVar[ "bones" ] = 1
 TOOL.ClientConVar[ "phys" ] = 0
@@ -8,7 +8,8 @@ TOOL.RequiresTraceHit = true
 
 TOOL.Information = {
 	{ name = "left" },
-	{ name = "right" }
+	{ name = "right" },
+	{ name = "reload" }
 }
 
 local Bones = {}
@@ -29,11 +30,19 @@ function TOOL:LeftClick( trace )
 	end
 
 	if GetConVar("gs_bone_copy_phys"):GetBool() then
+		if ent:GetPhysicsObjectCount() == 1 then
+			local phys = ent:GetPhysicsObject()
+			local Bone_name = ent:GetBoneName(ent:TranslatePhysBoneToBone( 1 ))
+			ent:SetPos( Phys[Bone_name].Position )
+			ent:SetAngles( Phys[Bone_name].Angle )
+			phys:EnableMotion(false)
+			phys:Wake()
+			return true
+		end
 		for i = 0, ent:GetPhysicsObjectCount() - 1 do
 			local phys = ent:GetPhysicsObjectNum( i )
 			local Bone_name = ent:GetBoneName(ent:TranslatePhysBoneToBone( i ))
 			if Phys[Bone_name] != nil then
-				local PhyInfo = Phys[Bone_name]
 				phys:SetPos( Phys[Bone_name].Position )
 				phys:SetAngles( Phys[Bone_name].Angle )
 				phys:EnableMotion(false)
@@ -62,7 +71,15 @@ function TOOL:RightClick( trace )
 		Bones[Bone] = Angle
 	end
 
-	if ent:GetPhysicsObjectCount() == 1 then return end
+	if ent:GetPhysicsObjectCount() == 1 then
+		local phys = ent:GetPhysicsObject()
+		local Bone_name = ent:GetBoneName(ent:TranslatePhysBoneToBone( 1 ))
+		if IsValid( phys ) then
+			local pos, ang = phys:GetPos(), phys:GetAngles()
+			Phys[Bone_name] = { Position = pos, Angle = ang }
+		end
+		return true
+	end
 	
 	for i = 0, ent:GetPhysicsObjectCount() - 1 do
 		local phys = ent:GetPhysicsObjectNum( i )
@@ -71,6 +88,26 @@ function TOOL:RightClick( trace )
 			local pos, ang = ent:GetBonePosition( ent:LookupBone(Bone_name) )
 			Phys[Bone_name] = { Position = pos, Angle = ang }
 		end
+	end
+
+	return true
+	
+end
+
+function TOOL:Reload( tr )
+
+	if ( CLIENT ) then return true end
+	local ent = self:GetOwner()
+
+	table.Empty(Bones)
+	table.Empty(Phys)
+	
+	for i = 0, ent:GetBoneCount() do
+		local Bone = ent:GetBoneName(i)
+		local Angle = ent:GetManipulateBoneAngles(i)
+		local pos, ang = ent:GetBonePosition( i )
+		Bones[Bone] = Angle
+		Phys[Bone] = { Position = pos, Angle = ang }
 	end
 
 	return true

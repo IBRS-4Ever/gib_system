@@ -371,7 +371,7 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 									Num = 1,
 									Src = Muzzle.Pos,
 									Dir = Muzzle.Ang:Forward(),
-									Spread = 0.1,
+									Spread = Vector(0.1,0.1,0),
 									Tracer = 1,
 									Force = 1,
 									Damage = 8,
@@ -615,7 +615,7 @@ function CreateGibs(ent)
 		RandomBodyGroup(Gib)
 		RandomSkin(Gib)
 
-		if !GetConVar("gibsystem_gib_headless"):GetBool() then
+		--if !GetConVar("gibsystem_overkill"):GetBool() then
 			if ent:IsPlayer() then 
 				Gib.player = true 
 				Gib.hatelist = {}
@@ -624,7 +624,7 @@ function CreateGibs(ent)
 						table.insert(Gib.hatelist, v)
 					end
 				end
-			elseif ent:IsNPC() and ent:GetClass() == "npc_citizen" then
+			elseif ent:IsNPC() --[[ and ent:GetClass() == "npc_citizen" ]] then
 				Gib.citizen = true 
 				Gib.hatelist = {}
 				for k, v in ipairs( ents.FindByClass("npc_*") ) do
@@ -633,7 +633,7 @@ function CreateGibs(ent)
 					end
 				end
 			end
-		end
+		--end
 
 		for i = 0, Gib:GetPhysicsObjectCount() - 1 do
 			local phys = Gib:GetPhysicsObjectNum( i )
@@ -681,7 +681,7 @@ function CreateGibs(ent)
 		end
 		Gib:AddCallback( "PhysicsCollide", PhysCallback ) -- Add Callback
 
-		if Gib.BodyPart == "head" then Gib.GibHealth = GetConVar("gibsystem_head_health"):GetInt() end
+		if Gib.BodyPart == "head" then Gib.GibHealth = GetConVar("gibsystem_head_health"):GetInt() --[[ local constraint = constraint.Keepupright( Gib, Gib:GetPhysicsObjectNum( 0 ):GetAngles(), 0, 99999 ) ]] end
 		if Gib.BodyPart == "body" then Gib.GibHealth = GetConVar("gibsystem_body_health"):GetInt() end
 
 		if EntDamageInfo[ent] and CheckFedhoria() then

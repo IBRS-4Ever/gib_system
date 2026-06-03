@@ -1,5 +1,5 @@
 
-TOOL.Category = "GS.Title"
+TOOL.Category = "GS.Tools.Title"
 TOOL.Name = "#tool.gs_convulsion_tool.name"
 TOOL.ClientConVar[ "fedhoria" ] = 0
 

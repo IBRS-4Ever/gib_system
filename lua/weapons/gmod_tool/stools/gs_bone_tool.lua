@@ -1,5 +1,5 @@
 
-TOOL.Category = "GS.Title"
+TOOL.Category = "GS.Tools.Title"
 TOOL.Name = "#tool.gs_bone_tool.name"
 TOOL.ClientConVar[ "fingers" ] = 1
 TOOL.ClientConVar[ "toes" ] = 1

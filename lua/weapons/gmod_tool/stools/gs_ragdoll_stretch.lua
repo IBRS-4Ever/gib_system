@@ -1,5 +1,5 @@
 
-TOOL.Category = "GS.Title"
+TOOL.Category = "GS.Tools.Title"
 TOOL.Name = "#tool.gs_ragdoll_stretch.name"
 
 TOOL.ClientConVar[ "head" ] = 1

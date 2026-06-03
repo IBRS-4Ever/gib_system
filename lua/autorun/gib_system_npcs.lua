@@ -3,6 +3,14 @@ AddCSLuaFile()
 
 local Category = "#GS.Title"
 local GibModels = GibSystem_LoadModels()
+local MdlTable = {}
+
+--[[
+for k,v in pairs(GibModels) do
+	SafeRemoveEntity(v)
+	MdlTable[k] = "models/gib_system/"..v.."_headless.mdl"
+end
+]]
 
 hook.Add( "OnEntityCreated", "GibSystem_NPCRandomModel", function()
 	local RndModel = GibModels[math.random( #GibModels )]

@@ -278,6 +278,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			["#gs.addon.extension.vrc"] = 3343971543,
 			["#gs.addon.extension.punishing_gray_raven"] = 3366315415,
 			["#gs.addon.extension.vrc_iris"] = 3480783810,
+			["#gs.addon.extension.gffc"] = 3683330782,
 		}
 		
 		local AppListExt = vgui.Create( "DListView", pnl )
