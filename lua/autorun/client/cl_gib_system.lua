@@ -63,7 +63,6 @@ net.Receive("GibSystem_PlayerSpawn", function()
 	------------------------------------
 	--复活时显示头发
 	if IsValid(Gib) and CVAR_GibSystem_cam_hair:GetBool() then
-		print("hair enabled")
 		if Gib:LookupBone("ValveBiped.Bip01_Head1") then
 			ScaleBone_1(Gib:LookupBone("ValveBiped.Bip01_Head1"))
 		end

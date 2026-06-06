@@ -13,6 +13,7 @@ util.AddNetworkString("GibSystem_PlayerSpawn")
 util.AddNetworkString("GibSystem_CleanGibs_Notification")
 
 -- 全局列表
+CharacterList = {}
 Expressions_Table = {}
 Model_Link_Materials = {}
 GIRLS_FRONTLINE_2_MODELS = {}
