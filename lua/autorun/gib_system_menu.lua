@@ -307,4 +307,63 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			gui.OpenURL( "https://github.com/IBRS-4Ever/gib_system" )
 		end
 	end)
+	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System GFL2 Skin Replacement", "#GS.GFL2SkinReplacer","","",function(pnl)
+		pnl:CheckBox("#GS.GFL2_SkinReplacement", "gibsystem_gfl2_skin_replacement")
+		local BodyA = Material("models/gfl2_shared/a_body")
+		local BodyB = Material("models/gfl2_shared/b_body")
+		local PhongSlider = vgui.Create("DNumSlider", pnl)
+		PhongSlider:SetText("#GS.GFL2_SkinReplacement.PhongBoost")
+		PhongSlider:SetMin(-10)       -- 最小值（无高光）
+		PhongSlider:SetMax(10)      -- 最大值（极强高光，可根据需要微调）
+		PhongSlider:SetDecimals(0)  -- 保留两位小数
+		PhongSlider:SetValue(BodyA:GetFloat("$phongboost"))
+		PhongSlider.OnValueChanged = function(self, value)
+			BodyA:SetFloat("$phongboost", value)
+			BodyB:SetFloat("$phongboost", value)
+		end
+		pnl:AddItem(PhongSlider)
+
+		local RimLightCheckBox = vgui.Create("DCheckBoxLabel", pnl)
+		RimLightCheckBox:SetText("#GS.GFL2_SkinReplacement.RimLight")
+		RimLightCheckBox:SetValue(BodyA:GetInt("$rimlight"))
+		RimLightCheckBox.OnChange = function(self, bVal)
+			if bVal then
+				BodyA:SetInt("$rimlight", 1)
+				BodyB:SetInt("$rimlight", 1)
+			else
+				BodyA:SetInt("$rimlight", 0)
+				BodyB:SetInt("$rimlight", 0)
+			end
+		end
+		pnl:AddItem(RimLightCheckBox)
+
+		local LightWarpCheckBox = vgui.Create("DCheckBoxLabel", pnl)
+		LightWarpCheckBox:SetText("#GS.GFL2_SkinReplacement.LightWarp")
+		LightWarpCheckBox:SetValue(BodyA:GetString("$lightwarptexture") == "models/gfl2_shared/toon_skin")
+		LightWarpCheckBox.OnChange = function(self, bVal)
+			if bVal then
+				BodyA:SetTexture("$lightwarptexture", "models/gfl2_shared/toon_skin")
+				BodyB:SetTexture("$lightwarptexture", "models/gfl2_shared/toon_skin")
+			else
+				BodyA:SetUndefined("$lightwarptexture")
+				BodyB:SetUndefined("$lightwarptexture")
+				BodyA:Recompute()
+				BodyB:Recompute()
+			end
+		end
+		pnl:AddItem(LightWarpCheckBox)
+
+		local BrightnessSlider = vgui.Create("DNumSlider", pnl)
+		BrightnessSlider:SetText("#GS.GFL2_SkinReplacement.Brightness")
+		BrightnessSlider:SetMin(0)
+		BrightnessSlider:SetMax(10)
+		BrightnessSlider:SetDecimals(2)
+		local Color = BodyA:GetVector("$color2")
+		BrightnessSlider:SetValue(Color.x)
+		BrightnessSlider.OnValueChanged = function(self, value)
+			BodyA:SetVector("$color2", Vector(value,value,value))
+			BodyB:SetVector("$color2", Vector(value,value,value))
+		end
+		pnl:AddItem(BrightnessSlider)
+	end)
 end)

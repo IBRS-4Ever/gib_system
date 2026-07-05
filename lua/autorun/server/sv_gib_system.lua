@@ -7,6 +7,7 @@ include("autorun/gibbing_system_module/models.lua")
 include("autorun/gibbing_system_module/expressions.lua")
 include("autorun/gibbing_system_module/finger_rotation.lua")
 include("autorun/gibbing_system_module/death_anims.lua")
+include("autorun/gibbing_system_module/skin_replacer.lua")
 
 util.AddNetworkString("GibSystem_StartDeathCam")
 util.AddNetworkString("GibSystem_PlayerSpawn")
@@ -17,6 +18,7 @@ CharacterList = {}
 Expressions_Table = {}
 Model_Link_Materials = {}
 GIRLS_FRONTLINE_2_MODELS = {}
+SkinReplace_Table = {}
 local BlackListedModels = {}
 if !file.Exists("gib_system/blacklist.txt", "DATA") then
 	file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
@@ -151,6 +153,7 @@ GibSystem_Initialize()
 
 concommand.Add( "GibSystem_ReloadModels", function() 
 	table.Empty(Model_Link_Materials)
+	table.Empty(SkinReplace_Table)
 	GibSystem_Initialize()
 end)
 

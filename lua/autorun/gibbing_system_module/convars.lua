@@ -36,3 +36,4 @@ CreateConVar( "gibsystem_gib_base_on_model", 1 , FCVAR, "[Gib System] Choose Mod
 CreateConVar( "gibsystem_pee", 0 , FCVAR, "[Gib System] Enable Pee.")
 CreateConVar( "gibsystem_pee_time", 10 , FCVAR, "[Gib System] Set Pee's Time.")
 CreateConVar( "gibsystem_experimental_features", 0 , FCVAR, "[Gib System] Enable Experimental Features.")
+CreateConVar( "gibsystem_gfl2_skin_replacement", 1 , FCVAR, "[Gib System] Replace GFL2 Skin textures.")
