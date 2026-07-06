@@ -311,6 +311,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		pnl:CheckBox("#GS.GFL2_SkinReplacement", "gibsystem_gfl2_skin_replacement")
 		local BodyA = Material("models/gfl2_shared/a_body")
 		local BodyB = Material("models/gfl2_shared/b_body")
+		local StockingBlack = Material("models/gfl2_shared/stocking_black")
 		local PhongSlider = vgui.Create("DNumSlider", pnl)
 		PhongSlider:SetText("#GS.GFL2_SkinReplacement.PhongBoost")
 		PhongSlider:SetMin(-10)       -- 最小值（无高光）
@@ -320,6 +321,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		PhongSlider.OnValueChanged = function(self, value)
 			BodyA:SetFloat("$phongboost", value)
 			BodyB:SetFloat("$phongboost", value)
+			StockingBlack:SetFloat("$phongboost", value)
 		end
 		pnl:AddItem(PhongSlider)
 
@@ -330,9 +332,11 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			if bVal then
 				BodyA:SetInt("$rimlight", 1)
 				BodyB:SetInt("$rimlight", 1)
+				StockingBlack:SetInt("$rimlight", 1)
 			else
 				BodyA:SetInt("$rimlight", 0)
 				BodyB:SetInt("$rimlight", 0)
+				StockingBlack:SetInt("$rimlight", 0)
 			end
 		end
 		pnl:AddItem(RimLightCheckBox)
@@ -344,11 +348,14 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			if bVal then
 				BodyA:SetTexture("$lightwarptexture", "models/gfl2_shared/toon_skin")
 				BodyB:SetTexture("$lightwarptexture", "models/gfl2_shared/toon_skin")
+				StockingBlack:SetTexture("$lightwarptexture", "models/gfl2_shared/toon_skin")
 			else
 				BodyA:SetUndefined("$lightwarptexture")
 				BodyB:SetUndefined("$lightwarptexture")
+				StockingBlack:SetUndefined("$lightwarptexture")
 				BodyA:Recompute()
 				BodyB:Recompute()
+				StockingBlack:Recompute()
 			end
 		end
 		pnl:AddItem(LightWarpCheckBox)
@@ -363,6 +370,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		BrightnessSlider.OnValueChanged = function(self, value)
 			BodyA:SetVector("$color2", Vector(value,value,value))
 			BodyB:SetVector("$color2", Vector(value,value,value))
+			StockingBlack:SetVector("$color2", Vector(value,value,value))
 		end
 		pnl:AddItem(BrightnessSlider)
 	end)
