@@ -308,70 +308,117 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 	end)
 	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System GFL2 Skin Replacement", "#GS.GFL2SkinReplacer","","",function(pnl)
+		local Textures = {
+			"models/gfl2_shared/a_body",
+			"models/gfl2_shared/b_body",
+			"models/gfl2_shared/b_body_peritya",
+			"models/gfl2_shared/stocking_black",
+		}
+
+		local function CheckBool(bool)
+			return bool and 1 or 0
+		end
+
+		local function ModifiyTextureFloat(parameter,value)
+			for k, texture in ipairs(Textures) do
+				Material(texture):SetFloat(parameter, value)
+			end
+		end
+		
+		local function ModifiyTextureInt(parameter,value)
+			for k, texture in ipairs(Textures) do
+				Material(texture):SetInt(parameter, value)
+			end
+		end
+		
+		local function ModifiyTextureLightwarp(LightwarpTexture)
+			for k, texture in ipairs(Textures) do
+				if !LightwarpTexture then
+					Material(texture):SetUndefined("$lightwarptexture")
+					Material(texture):Recompute()
+				else
+					Material(texture):SetTexture("$lightwarptexture", LightwarpTexture)
+				end
+			end
+		end
+		
+		local function ModifiyTextureVector(parameter,value)
+			for k, texture in ipairs(Textures) do
+				Material(texture):SetVector(parameter, value)
+			end
+		end
+		
+		local function ModifiyTextureWetness()
+			local Wetness = {
+				"models/gfl2_shared/b_body",
+				"models/gfl2_shared/b_body_peritya",
+			}
+			for k, texture in ipairs(Wetness) do
+				if GetConVar("gibsystem_gfl2_skin_wetness"):GetBool() then
+					Material(texture):SetTexture("$bumpmap", "models/gfl2_shared/b_body_wet_n")
+					Material(texture):SetTexture("$phongexponenttexture", "models/gfl2_shared/b_body_wet_e")
+				else
+					Material(texture):SetTexture("$bumpmap", "models/gfl2_shared/b_body_n")
+					Material(texture):SetTexture("$phongexponenttexture", "models/gfl2_shared/b_body_e")
+				end
+				Material(texture):Recompute()
+			end
+		end
+		
 		pnl:CheckBox("#GS.GFL2_SkinReplacement", "gibsystem_gfl2_skin_replacement")
-		local BodyA = Material("models/gfl2_shared/a_body")
-		local BodyB = Material("models/gfl2_shared/b_body")
-		local StockingBlack = Material("models/gfl2_shared/stocking_black")
 		local PhongSlider = vgui.Create("DNumSlider", pnl)
 		PhongSlider:SetText("#GS.GFL2_SkinReplacement.PhongBoost")
-		PhongSlider:SetMin(-10)       -- 最小值（无高光）
-		PhongSlider:SetMax(10)      -- 最大值（极强高光，可根据需要微调）
-		PhongSlider:SetDecimals(0)  -- 保留两位小数
-		PhongSlider:SetValue(BodyA:GetFloat("$phongboost"))
-		PhongSlider.OnValueChanged = function(self, value)
-			BodyA:SetFloat("$phongboost", value)
-			BodyB:SetFloat("$phongboost", value)
-			StockingBlack:SetFloat("$phongboost", value)
+		PhongSlider:SetMinMax(-10,10)
+		PhongSlider:SetDecimals(0)
+		PhongSlider:SetValue(GetConVar("gibsystem_gfl2_skin_phongboost"):GetFloat())
+		PhongSlider:SetConVar("gibsystem_gfl2_skin_phongboost")
+		PhongSlider.OnValueChanged = function(self,value)
+			ModifiyTextureFloat("$phongboost", value)
 		end
 		pnl:AddItem(PhongSlider)
 
 		local RimLightCheckBox = vgui.Create("DCheckBoxLabel", pnl)
 		RimLightCheckBox:SetText("#GS.GFL2_SkinReplacement.RimLight")
-		RimLightCheckBox:SetValue(BodyA:GetInt("$rimlight"))
+		RimLightCheckBox:SetValue(GetConVar("gibsystem_gfl2_skin_rimlight"):GetBool())
+		RimLightCheckBox:SetConVar("gibsystem_gfl2_skin_rimlight")
 		RimLightCheckBox.OnChange = function(self, bVal)
-			if bVal then
-				BodyA:SetInt("$rimlight", 1)
-				BodyB:SetInt("$rimlight", 1)
-				StockingBlack:SetInt("$rimlight", 1)
-			else
-				BodyA:SetInt("$rimlight", 0)
-				BodyB:SetInt("$rimlight", 0)
-				StockingBlack:SetInt("$rimlight", 0)
-			end
+			ModifiyTextureInt("$rimlight",CheckBool(bVal))
 		end
 		pnl:AddItem(RimLightCheckBox)
 
 		local LightWarpCheckBox = vgui.Create("DCheckBoxLabel", pnl)
 		LightWarpCheckBox:SetText("#GS.GFL2_SkinReplacement.LightWarp")
-		LightWarpCheckBox:SetValue(BodyA:GetString("$lightwarptexture") == "models/gfl2_shared/toon_skin")
+		LightWarpCheckBox:SetValue(GetConVar("gibsystem_gfl2_skin_lightwarp"):GetBool())
+		LightWarpCheckBox:SetConVar("gibsystem_gfl2_skin_lightwarp")
 		LightWarpCheckBox.OnChange = function(self, bVal)
 			if bVal then
-				BodyA:SetTexture("$lightwarptexture", "models/gfl2_shared/toon_skin")
-				BodyB:SetTexture("$lightwarptexture", "models/gfl2_shared/toon_skin")
-				StockingBlack:SetTexture("$lightwarptexture", "models/gfl2_shared/toon_skin")
+				ModifiyTextureLightwarp("models/gfl2_shared/toon_skin")
 			else
-				BodyA:SetUndefined("$lightwarptexture")
-				BodyB:SetUndefined("$lightwarptexture")
-				StockingBlack:SetUndefined("$lightwarptexture")
-				BodyA:Recompute()
-				BodyB:Recompute()
-				StockingBlack:Recompute()
+				ModifiyTextureLightwarp()
 			end
 		end
 		pnl:AddItem(LightWarpCheckBox)
 
 		local BrightnessSlider = vgui.Create("DNumSlider", pnl)
 		BrightnessSlider:SetText("#GS.GFL2_SkinReplacement.Brightness")
-		BrightnessSlider:SetMin(0)
-		BrightnessSlider:SetMax(10)
+		BrightnessSlider:SetMinMax(0,10)
 		BrightnessSlider:SetDecimals(2)
-		local Color = BodyA:GetVector("$color2")
-		BrightnessSlider:SetValue(Color.x)
-		BrightnessSlider.OnValueChanged = function(self, value)
-			BodyA:SetVector("$color2", Vector(value,value,value))
-			BodyB:SetVector("$color2", Vector(value,value,value))
-			StockingBlack:SetVector("$color2", Vector(value,value,value))
+		BrightnessSlider:SetValue(GetConVar("gibsystem_gfl2_skin_color"):GetFloat())
+		BrightnessSlider:SetConVar("gibsystem_gfl2_skin_color")
+		BrightnessSlider.OnValueChanged = function(self,value)
+			local Color = Vector(value,value,value)
+			ModifiyTextureVector("$color2", Color)
 		end
 		pnl:AddItem(BrightnessSlider)
+
+		local WetnessCheckBox = vgui.Create("DCheckBoxLabel", pnl)
+		WetnessCheckBox:SetText("#GS.GFL2_SkinReplacement.Wetness")
+		WetnessCheckBox:SetValue(GetConVar("gibsystem_gfl2_skin_wetness"):GetBool())
+		WetnessCheckBox:SetConVar("gibsystem_gfl2_skin_wetness")
+		WetnessCheckBox.OnChange = function(self, bVal)
+			ModifiyTextureWetness()
+		end
+		pnl:AddItem(WetnessCheckBox)
+
 	end)
 end)
