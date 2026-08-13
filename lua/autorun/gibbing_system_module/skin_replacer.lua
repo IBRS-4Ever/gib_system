@@ -2,6 +2,7 @@
 AddCSLuaFile()
 
 local function ReplaceSkin(ent,IsPlayer)
+	if !GetConVar("gibsystem_gfl2_skin_replacement"):GetBool() then return end
 	if not IsValid(ent) or ent:GetModel() == "" then return end
 	if (IsPlayer and !ent:IsPlayer()) then return end
 
@@ -21,14 +22,12 @@ local function ReplaceSkin(ent,IsPlayer)
 end
 
 hook.Add("OnEntityCreated", "GFL2_SkinReplacer", function(ent)
-	if !GetConVar("gibsystem_gfl2_skin_replacement"):GetBool() then return end
 	timer.Simple(0, function()
 		ReplaceSkin(ent)
 	end)
 end)
 
-hook.Add("PlayerSpawn", "GFL2_SkinReplacer_player", function(ent)
-	if !GetConVar("gibsystem_gfl2_skin_replacement"):GetBool() then return end
+hook.Add("PlayerSetModel", "GFL2_SkinReplacer_player", function(ent)
 	timer.Simple(0, function()
 		ReplaceSkin(ent,true)
 	end)

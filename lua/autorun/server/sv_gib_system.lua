@@ -174,10 +174,10 @@ hook.Add( "ScalePlayerDamage", "GibSystem_DamageInfo_Player", function( plr, hit
 end )
 
 hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
-	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and (DefaultNPCs[npc:GetClass()] or npc.IsGF2SNPC) then
+	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and (DefaultNPCs[npc:GetClass()] or npc.IsGFL2SNPC) then
 		npc:EmitSound( "Gib_System.Headshot_Fleshy" )
 		npc.GibSystem_ShouldSpawnGib = true
-		if npc.IsGF2SNPC then
+		if npc.IsGFL2SNPC then
 			function npc:CreateDeathCorpse()
 				timer.Remove("GF2_HealTimer_"..npc:EntIndex())
 				timer.Remove("VJ_GF2_SWEP_Acid_Timer"..npc:EntIndex())

@@ -14,6 +14,7 @@ TOOL.Information = {
 
 local Bones = {}
 local Phys = {}
+local SinglePhysInfo = {}
 
 function TOOL:LeftClick( trace )
 
@@ -31,10 +32,11 @@ function TOOL:LeftClick( trace )
 
 	if GetConVar("gs_bone_copy_phys"):GetBool() then
 		if ent:GetPhysicsObjectCount() == 1 then
+			if !SinglePhysInfo then return end
 			local phys = ent:GetPhysicsObject()
 			local Bone_name = ent:GetBoneName(ent:TranslatePhysBoneToBone( 1 ))
-			ent:SetPos( Phys[Bone_name].Position )
-			ent:SetAngles( Phys[Bone_name].Angle )
+			ent:SetPos( SinglePhysInfo.Pos )
+			ent:SetAngles( SinglePhysInfo.Ang )
 			phys:EnableMotion(false)
 			phys:Wake()
 			return true
@@ -73,10 +75,9 @@ function TOOL:RightClick( trace )
 
 	if ent:GetPhysicsObjectCount() == 1 then
 		local phys = ent:GetPhysicsObject()
-		local Bone_name = ent:GetBoneName(ent:TranslatePhysBoneToBone( 1 ))
 		if IsValid( phys ) then
-			local pos, ang = phys:GetPos(), phys:GetAngles()
-			Phys[Bone_name] = { Position = pos, Angle = ang }
+			SinglePhysInfo.Pos = phys:GetPos()
+			SinglePhysInfo.Ang = phys:GetAngles()
 		end
 		return true
 	end
