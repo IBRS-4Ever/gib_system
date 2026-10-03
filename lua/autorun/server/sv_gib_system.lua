@@ -439,6 +439,10 @@ concommand.Add("gibsystem_blacklist_clear", function(ply, cmd, arg)
 	RunConsoleCommand( "GibSystem_ReloadModels" )
 end)
 
+function GS_GetBlacklist()
+	return BlackListedModels
+end
+
 function BloodEffect(ent,Type,AttachmentPoint)
 	if !GetConVar( "gibsystem_blood_effect" ):GetBool() then return end
 	local AP = ent:LookupAttachment( AttachmentPoint )

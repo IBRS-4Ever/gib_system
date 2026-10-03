@@ -308,31 +308,30 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 	end)
 	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System GFL2 Skin Replacement", "#GS.GFL2SkinReplacer","","",function(pnl)
-		local Textures = {
-			"models/gfl2_shared/a_body",
-			"models/gfl2_shared/b_body",
-			"models/gfl2_shared/b_body_peritya",
-			"models/gfl2_shared/stocking_black",
-		}
+		GS_AddSkinList("models/gfl2_shared/a_body")
+		GS_AddSkinList("models/gfl2_shared/a_body_commander")
+		GS_AddSkinList("models/gfl2_shared/b_body")
+		GS_AddSkinList("models/gfl2_shared/b_body_peritya")
+		local Skins = GS_GetSkinList()
 
 		local function CheckBool(bool)
 			return bool and 1 or 0
 		end
 
 		local function ModifiyTextureFloat(parameter,value)
-			for k, texture in ipairs(Textures) do
+			for k, texture in ipairs(Skins) do
 				Material(texture):SetFloat(parameter, value)
 			end
 		end
 		
 		local function ModifiyTextureInt(parameter,value)
-			for k, texture in ipairs(Textures) do
+			for k, texture in ipairs(Skins) do
 				Material(texture):SetInt(parameter, value)
 			end
 		end
 		
 		local function ModifiyTextureLightwarp(LightwarpTexture)
-			for k, texture in ipairs(Textures) do
+			for k, texture in ipairs(Skins) do
 				if !LightwarpTexture then
 					Material(texture):SetUndefined("$lightwarptexture")
 					Material(texture):Recompute()
@@ -343,16 +342,13 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		
 		local function ModifiyTextureVector(parameter,value)
-			for k, texture in ipairs(Textures) do
+			for k, texture in ipairs(Skins) do
 				Material(texture):SetVector(parameter, value)
 			end
 		end
 		
 		local function ModifiyTextureWetness()
-			local Wetness = {
-				"models/gfl2_shared/b_body",
-				"models/gfl2_shared/b_body_peritya",
-			}
+			local Wetness = GS_GetWetSkinList()
 			for k, texture in ipairs(Wetness) do
 				if GetConVar("gibsystem_gfl2_skin_wetness"):GetBool() then
 					Material(texture):SetTexture("$bumpmap", "models/gfl2_shared/b_body_wet_n")

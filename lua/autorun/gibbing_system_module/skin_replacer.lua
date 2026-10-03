@@ -12,8 +12,15 @@ local function ReplaceSkin(ent,IsPlayer)
 	for k, matPath in ipairs(materials) do
 		local Texture = SkinReplace_Table[string.lower(string.GetFileFromFilename(matPath))]
 		if Texture then
-			local subMatIndex = k - 1
-			ent:SetSubMaterial(subMatIndex, "models/gfl2_shared/"..Texture)
+			if istable(Texture) then
+				if Texture["IsLua"] then
+					local subMatIndex = k - 1
+					ent:SetSubMaterial(subMatIndex, "!models/gfl2_shared/"..Texture["Texture"])
+				end
+			else
+				local subMatIndex = k - 1
+				ent:SetSubMaterial(subMatIndex, "models/gfl2_shared/"..Texture)
+			end
 		else
 			local subMatIndex = k - 1
 			ent:SetSubMaterial(subMatIndex, nil)
@@ -32,3 +39,4 @@ hook.Add("PlayerSetModel", "GFL2_SkinReplacer_player", function(ent)
 		ReplaceSkin(ent,true)
 	end)
 end)
+
