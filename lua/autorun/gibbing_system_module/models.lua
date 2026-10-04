@@ -1,6 +1,4 @@
 
-AddCSLuaFile()
-
 CharacterList = CharacterList or {}
 
 function GibSystem_LoadModels()

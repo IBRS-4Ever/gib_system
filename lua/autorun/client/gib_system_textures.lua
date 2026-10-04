@@ -1,6 +1,4 @@
 
-AddCSLuaFile()
-
 local Skins = {}
 local WetSkins = {}
 
@@ -31,15 +29,15 @@ local function GFL2CreateSkinTexture(name,texture,normal,exponent,wet)
 	end
 end
 
-function GS_GetSkinList()
+function GibSystem_GetSkinList()
 	return Skins
 end
 
-function GS_GetWetSkinList()
+function GibSystem_GetWetSkinList()
 	return WetSkins
 end
 
-function GS_AddSkinList(Texture)
+function GibSystem_AddSkinList(Texture)
 	Skins[#Skins + 1] = Texture
 end
 

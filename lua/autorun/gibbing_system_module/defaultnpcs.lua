@@ -1,6 +1,4 @@
 
-AddCSLuaFile()
-
 DefaultNPCs = { 
 	["npc_alyx"] = true,
 	["npc_barney"] = true,

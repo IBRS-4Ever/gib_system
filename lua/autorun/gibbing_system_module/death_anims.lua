@@ -1,6 +1,4 @@
 
-AddCSLuaFile()
-
 local anims_table = {
 	"DIE_Simple_01",
 	"DIE_Simple_02",
@@ -197,7 +195,7 @@ function CreateDeathAnimationGib(ent)
 	head.GibHealth = GetConVar("gibsystem_head_health"):GetInt()
 	head.Model = GibCharacter
 	BloodEffect(head,1,"ValveBiped.Bip01_Head1")
-	GibFacePose(head)
+	GibSystem_FacePose(head)
 	RandomBodyGroup(head)
 	RandomSkin(head)
 	table.insert(GibsCreated,head)
@@ -307,7 +305,7 @@ function CreateDeathAnimationGib(ent)
 	end
 
 	BloodEffect(ragdoll,2,"forward")
-	FingerRotation(ragdoll)
+	GibSystem_FingerRotation(ragdoll)
 	table.insert(GibsCreated,ragdoll)
 	CreateRope(head, ragdoll)
 	table.insert(Ragdolls, ragdoll)

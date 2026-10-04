@@ -1,7 +1,33 @@
 
-AddCSLuaFile()
+-- 全局列表
+CharacterList = {}
+Expressions_Table = {}
+Model_Link_Materials = {}
+GIRLS_FRONTLINE_2_MODELS = {}
+SkinReplace_Table = {}
+BlackListedModels = {}
+if !file.Exists("gib_system/blacklist.txt", "DATA") then
+	file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
+else
+	BlackListedModels = util.JSONToTable( file.Read("gib_system/blacklist.txt", "DATA") )
+end
 
-function GibFacePose(ent)
+function GibSystem_GetBlacklist()
+	return BlackListedModels
+end
+
+function GibSystem_AddBlacklist(character)
+	if BlackListedModels[character] then
+		print(language.FormatPhrase("GS.ConsoleMSG.RemoveFromBlacklist", language.GetPhrase("gs.model."..character) ) )
+		BlackListedModels[character] = nil
+	else
+		print(language.FormatPhrase("GS.ConsoleMSG.AddedToBlacklist", language.GetPhrase("gs.model."..character) ) )
+		BlackListedModels[character] = true
+	end
+	file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
+end
+
+function GibSystem_FacePose(ent)
 	if GetConVar( "gibsystem_death_express" ):GetBool() then
 		local num_expressions = ent:GetFlexNum() 												// 获取模型的表情数量
 		local ModelExpressions = Expressions_Table[ent.Model] 									// 获取表情列表中该模型的表情值。
@@ -20,12 +46,12 @@ function GibFacePose(ent)
 				["mouth_teeth_angry"] = {0.25,0.5},
 				["mouth_wide_open"] = {0.1,0.3}
 			}
-		else 																					// 如果以上都不满足，则只调整 blink 的值。
+		else
 			Expressions = { ["blink"] = math.Rand(0.5,1) }
 		end
 		
 		for i = 0, num_expressions - 1 do
-			local name = string.lower(ent:GetFlexName(i)) 										// 将表情名称的字符串变为小写。
+			local name = string.lower(ent:GetFlexName(i))
 			if Expressions[name] != nil then
 				if !istable(Expressions[name]) then
 					ent:SetFlexWeight(i, Expressions[name])

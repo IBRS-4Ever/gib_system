@@ -1,9 +1,4 @@
 
-AddCSLuaFile()
-
-include("autorun/gibbing_system_module/defaultnpcs.lua")
-include("autorun/gibbing_system_module/convars.lua")
-
 local CVAR_GibSystem_cam_enable		= CreateClientConVar("GibSystem_cam", "0", 0, 1)				--（0/1）是否启用第一人称死亡视角
 local CVAR_GibSystem_cam_hair		= CreateClientConVar("GibSystem_hair", "0", 0, 1)			--（0/1）是否在第一人称死亡时隐藏头部
 local CVAR_GibSystem_cam_z_axis		= CreateClientConVar("GibSystem_camz", "75", 0, 200)			--（NUM）第三人称死亡视角的高度

@@ -1,7 +1,5 @@
 
-AddCSLuaFile()
-
-function FingerRotation(ent)
+function GibSystem_FingerRotation(ent)
 	if GetConVar( "gibsystem_random_finger_rotating" ):GetBool() then
 		local Fingers = {
 			["ValveBiped.Bip01_L_Finger1"] = Angle(math.Rand(-5,5),-25-math.Rand(0,4),0),

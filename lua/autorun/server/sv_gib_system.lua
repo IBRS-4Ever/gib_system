@@ -1,30 +1,10 @@
 
 AddCSLuaFile()
 
-include("autorun/gibbing_system_module/convars.lua")
-include("autorun/gibbing_system_module/defaultnpcs.lua")
-include("autorun/gibbing_system_module/models.lua")
-include("autorun/gibbing_system_module/expressions.lua")
-include("autorun/gibbing_system_module/finger_rotation.lua")
-include("autorun/gibbing_system_module/death_anims.lua")
-include("autorun/gibbing_system_module/skin_replacer.lua")
-
 util.AddNetworkString("GibSystem_StartDeathCam")
 util.AddNetworkString("GibSystem_PlayerSpawn")
 util.AddNetworkString("GibSystem_CleanGibs_Notification")
 
--- 全局列表
-CharacterList = {}
-Expressions_Table = {}
-Model_Link_Materials = {}
-GIRLS_FRONTLINE_2_MODELS = {}
-SkinReplace_Table = {}
-local BlackListedModels = {}
-if !file.Exists("gib_system/blacklist.txt", "DATA") then
-	file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
-else
-	BlackListedModels = util.JSONToTable( file.Read("gib_system/blacklist.txt", "DATA") )
-end
 local Characters = {}
 local timers = {}
 GibsCreated = {}
@@ -72,7 +52,7 @@ local function GibSystem_Initialize()
 	end
 
 	Characters = table.Copy(GibModels)
-	for k, black in pairs(table.GetKeys(BlackListedModels)) do
+	for k, black in pairs(table.GetKeys(GibSystem_GetBlacklist())) do
 		for i = #Characters, 1, -1 do
 			if Characters[i] == black then
 				table.remove(Characters, i)
@@ -232,7 +212,7 @@ function GibSystem_CreateGibParts(ent,mdl,force)
 	gib:SetAngles(ent:GetAngles())
 	gib:Spawn()
 	gib:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
-	FingerRotation(gib)
+	GibSystem_FingerRotation(gib)
 
 	for i = 0, ent:GetNumBodyGroups() - 1 do
 		gib:SetBodygroup(gib:FindBodygroupByName(ent:GetBodygroupName(i)),ent:GetBodygroup(i))
@@ -329,7 +309,7 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 					RightArm:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
 					RightArm:Input( "StartRagdollBoogie", RightArm, RightArm, "9999" )
 					//RightArm:SetOwner(target)
-					FingerRotation(RightArm)
+					GibSystem_FingerRotation(RightArm)
 
 					for i = 0, target:GetNumBodyGroups() - 1 do
 						RightArm:SetBodygroup(RightArm:FindBodygroupByName(target:GetBodygroupName(i)),target:GetBodygroup(i))
@@ -416,32 +396,14 @@ function CreateRope(gib1,gib2,gib1phys,gib2phys,vec1,vec2)
 	end
 end
 
-concommand.Add("gibsystem_blacklist_add", function(ply, cmd, arg)
-	local Character = tostring(table.concat(arg, " "))
-	if !BlackListedModels[Character] then
-		BlackListedModels[Character] = true
-		file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
-		LocalizedText("zh-cn","[碎尸系统] 将 "..Character.." 加入黑名单。")
-		LocalizedText("en","[Gibbing System] Added "..Character.." to blacklist.")
-	else
-		BlackListedModels[Character] = nil
-		file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
-		LocalizedText("zh-cn","[碎尸系统] 将 "..Character.." 移出黑名单。")
-		LocalizedText("en","[Gibbing System] Removed "..Character.." from blacklist.")
-	end
-end)
-
 concommand.Add("gibsystem_blacklist_clear", function(ply, cmd, arg)
-	BlackListedModels = {}
-	file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
+	local Blacklist = GibSystem_GetBlacklist()
+	Blacklist = {}
+	file.Write("gib_system/blacklist.txt", util.TableToJSON(Blacklist) )
 	LocalizedText("zh-cn","[碎尸系统] 已清除黑名单。")
 	LocalizedText("en","[Gibbing System] Cleared blacklist.")
 	RunConsoleCommand( "GibSystem_ReloadModels" )
 end)
-
-function GS_GetBlacklist()
-	return BlackListedModels
-end
 
 function BloodEffect(ent,Type,AttachmentPoint)
 	if !GetConVar( "gibsystem_blood_effect" ):GetBool() then return end
@@ -618,8 +580,8 @@ function CreateGibs(ent)
 		Gib:Activate()
 
 		BloodEffect(Gib,AttachmentType,AttachmentPoint)
-		GibFacePose(Gib)
-		FingerRotation(Gib)
+		GibSystem_FacePose(Gib)
+		GibSystem_FingerRotation(Gib)
 		RandomBodyGroup(Gib)
 		RandomSkin(Gib)
 

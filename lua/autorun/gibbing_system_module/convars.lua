@@ -1,5 +1,4 @@
 
-AddCSLuaFile()
 local FCVAR = bit.bor(FCVAR_ARCHIVE, FCVAR_SERVER_CAN_EXECUTE, FCVAR_REPLICATED)
 CreateConVar( "gibsystem_enabled", 1 , FCVAR, "[Gib System] Enable Gib System.")
 CreateConVar( "gibsystem_gibbing_player", 1 , FCVAR, "[Gib System] Enable Gib System for Players.")

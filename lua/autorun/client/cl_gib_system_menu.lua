@@ -1,6 +1,4 @@
 
-include("autorun/gibbing_system_module/models.lua")
-
 local ConVarsDefault = {
 	gibsystem_enabled = "1",
 	gibsystem_gibbing_player = "1",
@@ -175,7 +173,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 								frame:Close()
 							end
 							icon.DoRightClick = function()
-								RunConsoleCommand( "gibsystem_blacklist_add", name )
+								GibSystem_AddBlacklist(name)
 							end
 
 							PropPanel:Add( icon )
@@ -193,7 +191,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 							frame:Close()
 						end
 						icon.DoRightClick = function()
-							RunConsoleCommand( "gibsystem_blacklist_add", Character )
+							GibSystem_AddBlacklist(Character)
 						end
 						PropPanel:Add( icon )
 					end
@@ -308,11 +306,11 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 	end)
 	spawnmenu.AddToolMenuOption("Options", "GIBBING SYSTEM Settings", "Gibbing System GFL2 Skin Replacement", "#GS.GFL2SkinReplacer","","",function(pnl)
-		GS_AddSkinList("models/gfl2_shared/a_body")
-		GS_AddSkinList("models/gfl2_shared/a_body_commander")
-		GS_AddSkinList("models/gfl2_shared/b_body")
-		GS_AddSkinList("models/gfl2_shared/b_body_peritya")
-		local Skins = GS_GetSkinList()
+		GibSystem_AddSkinList("models/gfl2_shared/a_body")
+		GibSystem_AddSkinList("models/gfl2_shared/a_body_commander")
+		GibSystem_AddSkinList("models/gfl2_shared/b_body")
+		GibSystem_AddSkinList("models/gfl2_shared/b_body_peritya")
+		local Skins = GibSystem_GetSkinList()
 
 		local function CheckBool(bool)
 			return bool and 1 or 0
@@ -348,7 +346,7 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 		end
 		
 		local function ModifiyTextureWetness()
-			local Wetness = GS_GetWetSkinList()
+			local Wetness = GibSystem_GetWetSkinList()
 			for k, texture in ipairs(Wetness) do
 				if GetConVar("gibsystem_gfl2_skin_wetness"):GetBool() then
 					Material(texture):SetTexture("$bumpmap", "models/gfl2_shared/b_body_wet_n")
