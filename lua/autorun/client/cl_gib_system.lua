@@ -9,7 +9,8 @@ local set0 = 0 	--这俩存在的意义是为了让ScaleBone只需运行一次�
 local set1 = 0 	--这俩存在的意义是为了让ScaleBone只需运行一次，而不是每时每刻都运行
 
 hook.Add( "CreateClientsideRagdoll", "GibSystem_FadeOutCorpses", function( entity, ragdoll )
-	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and !(entity:IsPlayer()) and DefaultNPCs[entity:GetClass()] then
+	local NPCList = GibSystem_GetDefaultNPCs()
+	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and !(entity:IsPlayer()) and NPCList[entity:GetClass()] then
 		if IsValid(ragdoll) then ragdoll:Remove() end // 设置内部变量来让布娃娃立即消失
 	end
 end)

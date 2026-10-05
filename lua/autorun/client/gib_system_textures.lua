@@ -46,3 +46,6 @@ GFL2CreateSkinTexture( "a_body_nemesis", "gfl2_nemesis_gnosis/nemesis_gnosis_dor
 GFL2CreateSkinTexture( "b_body_sabrina", "gfl2_sabrina/sabrina_berry_zabaione_body_d", "gfl2_shared/b_body_n", "gfl2_shared/b_body_e", true )
 GFL2CreateSkinTexture( "a_body_agent", "gfl2_agent/agent_body_skin_d", "gfl2_shared/a_body_n", "gfl2_shared/a_body_e" )
 GFL2CreateSkinTexture( "b_body_zhaohui", "gfl2_zhaohui/zhaohui_dorm_body2_d", "gfl2_shared/b_body_n", "gfl2_shared/b_body_e", true )
+GFL2CreateSkinTexture( "b_body_harpsy", "gfl2_harpsy/harpsy_dorm_body2_d", "gfl2_shared/b_body_n", "gfl2_shared/b_body_e", true )
+GFL2CreateSkinTexture( "b_body_lainie", "gfl2_lainie/lainie_dorm_body2_d", "gfl2_shared/b_body_n", "gfl2_shared/b_body_e", true )
+GFL2CreateSkinTexture( "b_body_sextans", "gfl2_sextans/sextans_dorm_body2_d", "gfl2_shared/b_body_n", "gfl2_shared/b_body_e", true )

@@ -1,10 +1,6 @@
 
 AddCSLuaFile()
 
-util.AddNetworkString("GibSystem_StartDeathCam")
-util.AddNetworkString("GibSystem_PlayerSpawn")
-util.AddNetworkString("GibSystem_CleanGibs_Notification")
-
 local Characters = {}
 local timers = {}
 GibsCreated = {}
@@ -154,7 +150,8 @@ hook.Add( "ScalePlayerDamage", "GibSystem_DamageInfo_Player", function( plr, hit
 end )
 
 hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
-	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and (DefaultNPCs[npc:GetClass()] or npc.IsGFL2SNPC) then
+	local NPCList = GibSystem_GetDefaultNPCs()
+	if GetConVar( "gibsystem_enabled" ):GetBool() and GetConVar( "gibsystem_gibbing_npc" ):GetBool() and (NPCList[npc:GetClass()] or npc.IsGFL2SNPC) then
 		npc:EmitSound( "Gib_System.Headshot_Fleshy" )
 		npc.GibSystem_ShouldSpawnGib = true
 		if npc.IsGFL2SNPC then
