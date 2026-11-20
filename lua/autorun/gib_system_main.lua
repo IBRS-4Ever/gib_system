@@ -7,8 +7,6 @@ GibsCreated = {}
 
 local GibModels
 
-file.CreateDir("gib_system")
-
 function LocalizedText(lang,text)
 	if string.lower(GetConVar("gmod_language"):GetString()) == lang then
 		MsgN(text)
@@ -116,6 +114,31 @@ local function GibSystem_Initialize()
 			Characters[Model][#Characters[Model] + 1] = "left_and_right"
 		end
 	end
+		
+	local Category = "#GS.Title"
+	local ModelTable = {}
+	for k, v in ipairs(Characters) do
+		ModelTable[k] = "models/gib_system/"..v.."_headless.mdl"
+	end
+
+	local NPC = { 	Name = "#GS.HeadlessCitizen", 
+				Class = "npc_citizen",
+				KeyValues = { citizentype = 4 },
+				Model = ModelTable,
+				Weapons = { "weapon_ar2" , "weapon_smg1", "weapon_shotgun" },
+				Category = Category	}
+
+	list.Set( "NPC", "gibsystem_headless_npc", NPC )
+
+	local NPC = { 	Name = "#GS.HeadlessCitizen_Hostile", 
+				Class = "npc_citizen",
+				KeyValues = { citizentype = 4, Hostile = 1 },
+				Model = ModelTable,
+				Weapons = { "weapon_ar2" , "weapon_smg1", "weapon_shotgun" },
+				Category = Category	}
+
+	list.Set( "NPC", "gibsystem_headless_npc_hostile", NPC )
+
 	if GetConVar("developer"):GetBool() then PrintTable(Characters) end
 
 	LocalizedText("zh-cn","[碎尸系统] 已加载 "..table.Count(GibModels).." 个文件。"..table.Count(GibModels) - #Characters.." 个在黑名单中。")
@@ -208,7 +231,7 @@ function GibSystem_CreateGibParts(ent,mdl,force)
 	gib:SetPos(ent:GetPos())
 	gib:SetAngles(ent:GetAngles())
 	gib:Spawn()
-	gib:SetCollisionGroup(GetConVar( "gibsystem_ragdoll_collisiongroup" ):GetInt())
+	gib:SetCollisionGroup( COLLISION_GROUP_DEBRIS )
 	GibSystem_FingerRotation(gib)
 
 	for i = 0, ent:GetNumBodyGroups() - 1 do

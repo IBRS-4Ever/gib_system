@@ -7,6 +7,8 @@ GIRLS_FRONTLINE_2_MODELS = {}
 SkinReplace_Table = {}
 BlackListedModels = {}
 
+file.CreateDir("gib_system")
+
 if !file.Exists("gib_system/blacklist.txt", "DATA") then
 	file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
 else
@@ -20,11 +22,14 @@ end
 function GibSystem_AddBlacklist(character)
 	if BlackListedModels[character] then
 		print(language.FormatPhrase("GS.ConsoleMSG.RemoveFromBlacklist", language.GetPhrase("gs.model."..character) ) )
+		notification.AddLegacy( language.FormatPhrase("GS.ConsoleMSG.RemoveFromBlacklist", language.GetPhrase("gs.model."..character) ), NOTIFY_UNDO, 5 )
 		BlackListedModels[character] = nil
 	else
 		print(language.FormatPhrase("GS.ConsoleMSG.AddedToBlacklist", language.GetPhrase("gs.model."..character) ) )
+		notification.AddLegacy( language.FormatPhrase("GS.ConsoleMSG.AddedToBlacklist", language.GetPhrase("gs.model."..character) ), NOTIFY_UNDO, 5 )
 		BlackListedModels[character] = true
 	end
+	surface.PlaySound( "buttons/button15.wav" )
 	file.Write("gib_system/blacklist.txt", util.TableToJSON(BlackListedModels) )
 end
 

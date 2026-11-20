@@ -49,3 +49,4 @@ GFL2CreateSkinTexture( "b_body_zhaohui", "gfl2_zhaohui/zhaohui_dorm_body2_d", "g
 GFL2CreateSkinTexture( "b_body_harpsy", "gfl2_harpsy/harpsy_dorm_body2_d", "gfl2_shared/b_body_n", "gfl2_shared/b_body_e", true )
 GFL2CreateSkinTexture( "b_body_lainie", "gfl2_lainie/lainie_dorm_body2_d", "gfl2_shared/b_body_n", "gfl2_shared/b_body_e", true )
 GFL2CreateSkinTexture( "b_body_sextans", "gfl2_sextans/sextans_dorm_body2_d", "gfl2_shared/b_body_n", "gfl2_shared/b_body_e", true )
+GFL2CreateSkinTexture( "a_body_florence", "gfl2_florence/florence_marvelous_yp_body_skin_d", "gfl2_florence/florence_marvelous_yp_body_skin_n", "gfl2_florence/florence_marvelous_yp_body_skin_e" )

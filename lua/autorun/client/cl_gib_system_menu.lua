@@ -111,10 +111,10 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 				frame:SetSize( ScrW() / 1.2, ScrH() / 1.1 )
 				frame:SetTitle( language.GetPhrase("#gs.choose_character"):format( language.GetPhrase( "#gs.model."..GetConVar("gibsystem_gib_name"):GetString() ) ) )
 				frame:Center()
+				
+				frame:SetDraggable( false )
 
 				frame:MakePopup()
-
-				frame:SetDraggable( false )
 
 				function frame:Paint( w, h )
 					Derma_DrawBackgroundBlur( self, self.m_fCreateTime )

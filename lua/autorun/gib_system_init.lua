@@ -1,4 +1,6 @@
 
+AddCSLuaFile()
+
 local files = file.Find("autorun/gibbing_system_module/*", "LUA")
 
 if SERVER then
