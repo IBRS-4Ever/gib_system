@@ -41,6 +41,11 @@ else
 	convulsionmode["#gs.convulsionmode.fedhoria_not_installed"] = {gibsystem_ragdoll_convulsion = "2"}
 end
 
+local GibModelSet = {}
+GibModelSet["Classic"] = {gibsystem_gib_model_set = 0}
+GibModelSet["Black Mesa"] = {gibsystem_gib_model_set = 1}
+GibModelSet["VJ Base"] = {gibsystem_gib_model_set = 2}
+
 local collisiongroup = {}
 collisiongroup["#gs.collisiongroup.only_world"] = {gibsystem_ragdoll_collisiongroup = "1"}
 collisiongroup["#gs.collisiongroup.other_gibs"] = {gibsystem_ragdoll_collisiongroup = "11"}
@@ -223,6 +228,8 @@ hook.Add("PopulateToolMenu","GIBBING_SYSTEM_MENU",function()
 			pnl:NumSlider("#GS.BloodEffectLength", "gibsystem_blood_time", 0, 100, 0)
 			pnl:NumSlider("#GS.BodyBloodEffectLength", "gibsystem_blood_time_body", 0, 100, 0)
 			pnl:CheckBox("#GS.Gib_Headless", "gibsystem_gib_headless")
+			pnl:CheckBox("#GS.Gib_Head", "gibsystem_gib_head")
+			pnl:AddControl( "ComboBox", { Label = "#GS.Gib_Model_Set", Options = GibModelSet } )
 			pnl:ControlHelp("#GS.Gib_Headless.Desc")
 			pnl:NumSlider("#GS.SmallGibsRemoveTimer", "gibsystem_gib_removetimer", 0, 60, 0)
 			pnl:TextEntry("#GS.HeadHealth", "gibsystem_head_health")

@@ -7,6 +7,36 @@ GibsCreated = {}
 
 local GibModels
 
+local SmallGibModels = {}
+
+function GibSystem_UpdateGibModels()
+	if IsMounted("bms") and GetConVar("gibsystem_gib_model_set"):GetInt() == 1 then
+		SmallGibModels.brain = {"models/gibs/humans/brain_gib.mdl"}
+		SmallGibModels.eye = {"models/gibs/humans/eye_gib.mdl"}
+		SmallGibModels.sgib = {"models/gibs/humans/sgib_01.mdl","models/gibs/humans/sgib_02.mdl","models/gibs/humans/sgib_03.mdl"}
+		SmallGibModels.heart = {"models/gibs/humans/heart_gib.mdl"}
+		SmallGibModels.liver = {"models/gibs/humans/liver_gib.mdl"}
+		SmallGibModels.lung = {"models/gibs/humans/lung_gib.mdl"}
+		SmallGibModels.mgib = {"models/gibs/humans/mgib_01.mdl","models/gibs/humans/mgib_02.mdl","models/gibs/humans/mgib_03.mdl","models/gibs/humans/mgib_04.mdl","models/gibs/humans/mgib_05.mdl","models/gibs/humans/mgib_06.mdl","models/gibs/humans/mgib_07.mdl"}
+	elseif GetConVar("gibsystem_gib_model_set"):GetInt() == 2 then
+		SmallGibModels.brain = {"models/vj_base/gibs/human/brain.mdl"}
+		SmallGibModels.eye = {"models/vj_base/gibs/human/eye.mdl"}
+		SmallGibModels.sgib = {"models/vj_base/gibs/human/gib_small1.mdl","models/vj_base/gibs/human/gib_small2.mdl","models/vj_base/gibs/human/gib_small3.mdl"}
+		SmallGibModels.heart = {"models/vj_base/gibs/human/heart.mdl"}
+		SmallGibModels.liver = {"models/vj_base/gibs/human/liver.mdl"}
+		SmallGibModels.lung = {"models/vj_base/gibs/human/lung.mdl"}
+		SmallGibModels.mgib = {"models/vj_base/gibs/human/gib1.mdl","models/vj_base/gibs/human/gib2.mdl","models/vj_base/gibs/human/gib3.mdl","models/vj_base/gibs/human/gib4.mdl","models/vj_base/gibs/human/gib5.mdl","models/vj_base/gibs/human/gib6.mdl","models/vj_base/gibs/human/gib7.mdl",}
+	else
+		SmallGibModels.brain = {"models/gibs/hgibs.mdl"}
+		SmallGibModels.eye = {"models/gibs/hgibs_scapula.mdl"}
+		SmallGibModels.sgib = {"models/gibs/hgibs_scapula.mdl","models/gibs/hgibs_rib.mdl"}
+		SmallGibModels.heart = {"models/gibs/hgibs_scapula.mdl","models/gibs/hgibs_rib.mdl"}
+		SmallGibModels.liver = {"models/gibs/hgibs_spine.mdl"}
+		SmallGibModels.lung = {"models/gibs/hgibs_scapula.mdl","models/gibs/hgibs_rib.mdl"}
+		SmallGibModels.mgib = {"models/gibs/hgibs_scapula.mdl","models/gibs/hgibs_rib.mdl"}
+	end	
+end
+
 function LocalizedText(lang,text)
 	if string.lower(GetConVar("gmod_language"):GetString()) == lang then
 		MsgN(text)
@@ -22,6 +52,7 @@ end
 
 local function GibSystem_Initialize()
 	GibModels = GibSystem_LoadModels()
+	GibSystem_UpdateGibModels()
 	local Model_Path = "autorun/gibbing_system/"
 	local files, folders = file.Find(Model_Path.."*","LUA")
 	for k, v in pairs(files) do
@@ -165,11 +196,11 @@ end
 EntDamageInfo = {}
 
 hook.Add( "ScaleNPCDamage", "GibSystem_DamageInfo_NPC", function( npc, hitgroup, dmginfo )
-	EntDamageInfo[npc] = { Force = dmginfo:GetDamageForce(), Position = dmginfo:GetDamagePosition(), Type = dmginfo:GetDamageType(), HitGroup = hitgroup }
+	EntDamageInfo[npc] = { Force = dmginfo:GetDamageForce(), Position = dmginfo:GetDamagePosition(), Type = dmginfo:GetDamageType(), HitGroup = hitgroup, Damage = dmginfo:GetDamage() }
 end )
 
 hook.Add( "ScalePlayerDamage", "GibSystem_DamageInfo_Player", function( plr, hitgroup, dmginfo )
-	EntDamageInfo[plr] = { Force = dmginfo:GetDamageForce(), Position = dmginfo:GetDamagePosition(), Type = dmginfo:GetDamageType(), HitGroup = hitgroup }
+	EntDamageInfo[plr] = { Force = dmginfo:GetDamageForce(), Position = dmginfo:GetDamagePosition(), Type = dmginfo:GetDamageType(), HitGroup = hitgroup, Damage = dmginfo:GetDamage() }
 end )
 
 hook.Add("OnNPCKilled", "GibSystem_SpawnGibs_NPC", function(npc, attacker, dmg)
@@ -266,6 +297,8 @@ function GibSystem_CreateGibParts(ent,mdl,force)
 
 end
 
+cvars.AddChangeCallback("gibsystem_gib_gmod_models",GibSystem_UpdateGibModels())
+
 hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 	if target.isgib then
 		local effect = EffectData() -- Create effect data
@@ -274,20 +307,37 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 		effect:SetColor(0)
 		effect:SetScale(6)
 		util.Effect( "bloodspray", effect ) -- Spawn small sparky effect
-		if !GetConVar("gibsystem_gib_headless"):GetBool() then return end
+		local effectData = EffectData()
+		
+		effectData:SetOrigin(dmg:GetDamagePosition())
+		effectData:SetMagnitude(1)
+		effectData:SetScale(1)
+		effectData:SetRadius(1)
+		util.Effect("BloodImpact", effectData)
+
 		if target.GibHealth == nil then return end
 		if target.IsGibbed then return end
 		if dmg:IsDamageType(DMG_CRUSH) and dmg:GetDamage() < 50 then return end
 		target.GibHealth = math.Clamp(target.GibHealth - dmg:GetDamage(), 0, target.GibHealth)
 		if target.GibHealth <= 0 then
-			if target.BodyPart == "head" then
-				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/brain.mdl",dmg:GetDamageForce())
-				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/eye.mdl",dmg:GetDamageForce())
-				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/eye.mdl",dmg:GetDamageForce())
-				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib_small1.mdl",dmg:GetDamageForce())
-				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib_small2.mdl",dmg:GetDamageForce())
-				GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib_small3.mdl",dmg:GetDamageForce())
-			else
+			if target.BodyPart == "head" and GetConVar("gibsystem_gib_head"):GetBool() then
+				GibSystem_CreateGibParts(target,SmallGibModels.brain[math.random(#SmallGibModels.brain)],dmg:GetDamageForce())
+				GibSystem_CreateGibParts(target,SmallGibModels.eye[math.random(#SmallGibModels.eye)],dmg:GetDamageForce())
+				GibSystem_CreateGibParts(target,SmallGibModels.eye[math.random(#SmallGibModels.eye)],dmg:GetDamageForce())
+				GibSystem_CreateGibParts(target,SmallGibModels.sgib[math.random(#SmallGibModels.sgib)],dmg:GetDamageForce())
+				GibSystem_CreateGibParts(target,SmallGibModels.sgib[math.random(#SmallGibModels.sgib)],dmg:GetDamageForce())
+				GibSystem_CreateGibParts(target,SmallGibModels.sgib[math.random(#SmallGibModels.sgib)],dmg:GetDamageForce())
+				target:EmitSound("Breakable.MatFlesh")
+				target.IsGibbed = true
+				local effectData = EffectData()
+						
+				effectData:SetOrigin(target:GetPos())
+				effectData:SetMagnitude(1)
+				effectData:SetScale(1)
+				effectData:SetRadius(1)
+				util.Effect("BloodImpact", effectData)
+				SafeRemoveEntity(target)
+			elseif GetConVar("gibsystem_gib_headless"):GetBool() then
 				if string.find(target:GetModel(),"headless") then
 					if table.HasValue( Characters[GibGetModel(target)], "limbs" ) then
 						GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..target.Model.."/left_leg.mdl",dmg:GetDamageForce())
@@ -296,26 +346,26 @@ hook.Add("EntityTakeDamage", "GibSystem_GibTakeDamage", function(target, dmg)
 						GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..target.Model.."/right_arm.mdl",dmg:GetDamageForce())
 						GibSystem_CreateGibParts(target,"models/gib_system/limbs/"..target.Model.."/torso.mdl",dmg:GetDamageForce())
 					else
-						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/heart.mdl",dmg:GetDamageForce())
-						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/liver.mdl",dmg:GetDamageForce())
-						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/lung.mdl",dmg:GetDamageForce())
-						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib1.mdl",dmg:GetDamageForce())
-						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib2.mdl",dmg:GetDamageForce())
-						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib3.mdl",dmg:GetDamageForce())
-						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib4.mdl",dmg:GetDamageForce())
-						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib5.mdl",dmg:GetDamageForce())
-						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib6.mdl",dmg:GetDamageForce())
-						GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib7.mdl",dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,SmallGibModels.heart[math.random(#SmallGibModels.heart)],dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,SmallGibModels.liver[math.random(#SmallGibModels.liver)],dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,SmallGibModels.lung[math.random(#SmallGibModels.lung)],dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,SmallGibModels.mgib[math.random(#SmallGibModels.mgib)],dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,SmallGibModels.mgib[math.random(#SmallGibModels.mgib)],dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,SmallGibModels.mgib[math.random(#SmallGibModels.mgib)],dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,SmallGibModels.mgib[math.random(#SmallGibModels.mgib)],dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,SmallGibModels.mgib[math.random(#SmallGibModels.mgib)],dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,SmallGibModels.mgib[math.random(#SmallGibModels.mgib)],dmg:GetDamageForce())
+						GibSystem_CreateGibParts(target,SmallGibModels.mgib[math.random(#SmallGibModels.mgib)],dmg:GetDamageForce())
 					end
 				else
-					GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib"..math.random(7)..".mdl",dmg:GetDamageForce())
-					GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib"..math.random(7)..".mdl",dmg:GetDamageForce())
-					GibSystem_CreateGibParts(target,"models/vj_base/gibs/human/gib"..math.random(7)..".mdl",dmg:GetDamageForce())
+					GibSystem_CreateGibParts(target,SmallGibModels.mgib[math.random(#SmallGibModels.mgib)],dmg:GetDamageForce())
+					GibSystem_CreateGibParts(target,SmallGibModels.mgib[math.random(#SmallGibModels.mgib)],dmg:GetDamageForce())
+					GibSystem_CreateGibParts(target,SmallGibModels.mgib[math.random(#SmallGibModels.mgib)],dmg:GetDamageForce())
 				end
+				target:EmitSound("Watermelon.BulletImpact")
+				target.IsGibbed = true
+				SafeRemoveEntity(target)
 			end
-			target:EmitSound("Watermelon.BulletImpact")
-			target.IsGibbed = true
-			SafeRemoveEntity(target)
 		end
 	elseif target:IsPlayer() then
 		if GetConVar("gibsystem_experimental_features"):GetBool() then
@@ -671,7 +721,15 @@ function CreateGibs(ent)
 		end
 		Gib:AddCallback( "PhysicsCollide", PhysCallback ) -- Add Callback
 
-		if Gib.BodyPart == "head" then Gib.GibHealth = GetConVar("gibsystem_head_health"):GetInt() --[[ local constraint = constraint.Keepupright( Gib, Gib:GetPhysicsObjectNum( 0 ):GetAngles(), 0, 99999 ) ]] end
+		if Gib.BodyPart == "head" then Gib.GibHealth = GetConVar("gibsystem_head_health"):GetInt()
+			if EntDamageInfo[ent] and EntDamageInfo[ent].HitGroup == 1 then
+			 	local DMG = DamageInfo()
+				DMG:SetDamage(EntDamageInfo[ent].Damage)
+				DMG:SetDamagePosition(EntDamageInfo[ent].Position)
+				DMG:SetDamageForce(EntDamageInfo[ent].Force)
+				Gib:TakeDamageInfo(DMG)
+			end
+		end
 		if Gib.BodyPart == "body" then Gib.GibHealth = GetConVar("gibsystem_body_health"):GetInt() end
 
 		if EntDamageInfo[ent] and CheckFedhoria() then

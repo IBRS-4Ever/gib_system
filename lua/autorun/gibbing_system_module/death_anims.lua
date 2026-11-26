@@ -112,6 +112,33 @@ local CSC = {
 	teleportdistance = 0
 }
 
+local function AbortDeathAnimation( ragdoll )
+	if not IsValid( ragdoll ) or not IsValid( ragdoll.DM ) then return end
+
+	if IsValid( ragdoll.Bullseye ) then SafeRemoveEntity( ragdoll.Bullseye ) end
+	SafeRemoveEntity( ragdoll.DM )
+	table.RemoveByValue( GibsCreated, ragdoll.DM )
+
+	if not ragdoll.IsConvulsing then
+		GibConvulsion( ragdoll )
+		ragdoll.IsConvulsing = true
+	end
+end
+
+-- 检测布娃娃是否完全浮空
+local function IsRagdollAirborne( ragdoll )
+	local origin = ragdoll:GetBonePosition(ragdoll:LookupBone("ValveBiped.Bip01_Pelvis"))
+	local tr = util.TraceHull( {
+		start = origin + Vector( 0, 0, 0 ),
+		endpos = origin - Vector( 0, 0, 54 ), -- 向下检测约 28 单位（略低于脚底）
+		mins = Vector( -12, -12, 0 ),
+		maxs = Vector( 12, 12, 4 ),
+		filter = { ragdoll, ragdoll.DM },
+		mask = MASK_SOLID_BRUSHONLY -- 仅检测地形与墙壁，忽略其他小物件
+	} )
+	return not tr.Hit
+end
+
 function GibSystem_DeathAnimation_Think(ragdoll)
 	if !IsValid(ragdoll.DM) or !IsValid(ragdoll) then return end
 	local Phys = {}
@@ -140,6 +167,8 @@ function GibSystem_DeathAnimation_Think(ragdoll)
 		end
 	end
 
+	local blockedLimbsCount = 0
+
 	for i = 0, ragdoll:GetPhysicsObjectCount() - 1 do
 		local phys = ragdoll:GetPhysicsObjectNum( i )
 		local Bone_name = ragdoll:GetBoneName(ragdoll:TranslatePhysBoneToBone( i ))
@@ -150,6 +179,30 @@ function GibSystem_DeathAnimation_Think(ragdoll)
 
 			phys:Wake()
 			phys:ComputeShadowControl(CSC)
+			if ragdoll.Next and CurTime() > ragdoll.Next + 0.05 then
+				if phys:GetPos():DistToSqr( CSC.pos ) > ( 14 * 14 ) then
+					blockedLimbsCount = blockedLimbsCount + 1
+				end
+			end
+		end
+	end
+	if not ragdoll.AbortScheduled and ragdoll.Next and CurTime() > ragdoll.Next + 0.05 then
+		local isAirborne = IsRagdollAirborne( ragdoll )
+		local isHittingWall = ( blockedLimbsCount >= 5 )
+
+		if isAirborne or isHittingWall then
+			ragdoll.AbortScheduled = true
+			timer.Simple( 0.01, function()
+				if IsValid( ragdoll ) and IsValid( ragdoll.DM ) then
+					-- 0.5秒后二次确认：如果依然浮空，或累计触墙时间达标，则执行打断
+					-- （如果你想一旦触发就必定在0.5秒后打断，可直接去掉外层的 if 判断）
+					if IsRagdollAirborne( ragdoll ) or isHittingWall then
+						AbortDeathAnimation( ragdoll )
+					else
+						ragdoll.AbortScheduled = false
+					end
+				end
+			end )
 		end
 	end
 end
@@ -194,6 +247,13 @@ function CreateDeathAnimationGib(ent)
 	head.isgib = true
 	head.GibHealth = GetConVar("gibsystem_head_health"):GetInt()
 	head.Model = GibCharacter
+	if EntDamageInfo[ent] and EntDamageInfo[ent].HitGroup == 1 then
+		local DMG = DamageInfo()
+		DMG:SetDamage(EntDamageInfo[ent].Damage)
+		DMG:SetDamagePosition(EntDamageInfo[ent].Position)
+		DMG:SetDamageForce(EntDamageInfo[ent].Force)
+		head:TakeDamageInfo(DMG)
+	end
 	BloodEffect(head,1,"ValveBiped.Bip01_Head1")
 	GibSystem_FacePose(head)
 	RandomBodyGroup(head)
